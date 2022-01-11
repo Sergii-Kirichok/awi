@@ -12,7 +12,9 @@ import (
 
 func main() {
 	info := version.GetInfo()
-	//cfg := config.LoadConfiguratiy
+	//rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	//cfg := config.New().Load(rootDir)
+
 	//on("./")
 	//u := rest.UserGetFromRESTByAddress(&cfg, "U3")
 	//fmt.Println(u)

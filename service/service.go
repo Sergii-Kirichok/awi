@@ -1,6 +1,7 @@
 package service
 
 import (
+	"awi/config"
 	"fmt"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
@@ -8,15 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"suv02-server/config"
-	"suv02-server/db"
-	"suv02-server/sync"
 	"suv02-server/webserver"
 	"time"
 )
 
 var (
-	cfg  config.Config
+	cfg  *config.Config
 	elog debug.Log
 )
 
@@ -27,12 +25,13 @@ type Myservice struct {
 
 func startServer(s Myservice) {
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	cfg = config.LoadConfiguration(rootDir)
+	cfg = config.New()
+	cfg.Load(rootDir)
 	// проверка базы данных
-	_ = db.DBCheck(&cfg)
+	//_ = db.DBCheck(&cfg)
 
 	msg := fmt.Sprintf("Запуск сервера %s [%s]", s.Name, s.Version)
-	db.LogCreate(&cfg, db.System, "", "", msg)
+	//db.LogCreate(&cfg, db.System, "", "", msg)
 	elog.Info(1, msg)
 
 	//Тестовый пользователь. Создавался и удалялся во время написания и отладки программы
@@ -43,7 +42,8 @@ func startServer(s Myservice) {
 	//}
 
 	//Запускаем сервисы синхронизации
-	go sync.Syncer(&cfg)
+	//go sync.Syncer(&cfg)
+
 	//Пдоготавливаем конфиг для веба
 
 	certificatePath := fmt.Sprintf("%v/%s", rootDir, cfg.WWWCertificate)
@@ -61,14 +61,14 @@ func startServer(s Myservice) {
 	srv.Bind = cfg.WWWAddr
 	srv.Certificate = certificatePath
 	srv.CertificateKey = certificateKeyPath
-	srv.Conf = &cfg
+	//srv.Conf = &cfg
 
 	//Запуск веб сервера http
-	if cfg.WWWHTTPRedirect {
-		go srv.ListenAndServeHTTP()
-	}
+	//if cfg.WWWHTTPRedirect {
+	//	go srv.ListenAndServeHTTP()
+	//}
 	//Запуск веб сервера https
-	srv.ListenAndServeHTTPS()
+	//srv.ListenAndServeHTTPS()
 }
 
 func (m *Myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
