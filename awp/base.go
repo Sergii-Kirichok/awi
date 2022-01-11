@@ -3,10 +3,32 @@ package awp
 import (
 	"awi/config"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"reflect"
 )
+
+type ResponseError struct {
+	Status     string `json:"status"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Meta       struct {
+		Code int    `json:"code"`
+		Name string `json:"name"`
+	} `json:"meta"`
+}
+
+func ErrorParse(answer []byte) (*ResponseError, error) {
+	re := &ResponseError{}
+	if err := json.Unmarshal(answer, re); err != nil {
+		return nil, fmt.Errorf("ErrorParse: %s", err)
+	}
+	log.Printf("Response Error: [%d]%s, %s. [code: %d, name: %s]\n", re.StatusCode, re.Status, re.Message, re.Meta.Code, re.Meta.Name)
+	return re, nil
+}
 
 type Methods string
 
@@ -15,6 +37,14 @@ const (
 	POST   Methods = "POST"
 	DELETE Methods = "DELETE"
 	PUT    Methods = "PUT"
+)
+
+type verbosity string
+
+const (
+	LOW    verbosity = "LOW"
+	MEDIUM verbosity = "MEDIUM"
+	HIGH   verbosity = "HIGH"
 )
 
 type HttpType string
@@ -64,6 +94,9 @@ func (r *Request) MakeRequest() ([]byte, error) {
 		return nil, fmt.Errorf("MakeRequest Err: %s", err)
 	}
 
+	//fmt.Printf("rData: %s\n", r.Data)
+	//fmt.Printf("fullPath: %s\n", fullPath)
+
 	// Если необходимо - заполняем Header значениями
 	for k, v := range r.Header {
 		req.Header.Set(k, v)
@@ -86,6 +119,32 @@ func (r *Request) MakeRequest() ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("MakeRequest Err: Response code [%d]%s", resp.StatusCode, resp.Status)
 	}
-	//fmt.Printf("header: %s\n", resp.Header)
+
 	return answer, nil
+}
+
+func GenGetter(data map[string]interface{}) string {
+	var path string
+	var i bool
+	for k, v := range data {
+		//обработка массива
+		if kind, ok := v.(reflect.Kind); ok && kind == reflect.Array {
+			for _, arg := range v.([]string) {
+				if !i {
+					path = fmt.Sprintf("%s=%s", k, arg)
+					i = true
+				} else {
+					fmt.Sprintf("%s&%s=%s", path, k, arg)
+				}
+			}
+			continue
+		}
+		if !i {
+			path = fmt.Sprintf("%s=%s", k, v)
+			i = true
+		} else {
+			path = fmt.Sprintf("%s&%s=%s", path, k, v)
+		}
+	}
+	return path
 }

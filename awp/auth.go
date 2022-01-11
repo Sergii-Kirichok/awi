@@ -19,22 +19,20 @@ type loginRequest struct {
 	ClientName string `json:"clientName"` //Не совсем понял - зачем и где это будет использоваться?
 }
 
-type loginResponse struct {
+type authResponse struct {
 	Status string `json:"status"`
-	Result result `json:"result"`
-}
-
-type result struct {
-	Session        string `json:"session"`
-	ExternalUserId string `json:"externalUserId"`
-	DomainId       string `json:"domainId"`
+	Result struct {
+		Session        string `json:"session"`
+		ExternalUserId string `json:"externalUserId"`
+		DomainId       string `json:"domainId"`
+	} `json:"result"`
 }
 
 type Auth struct {
 	Config   *config.Config
 	AuthTime time.Time     // Временная метка последней удачной авторизации
 	Request  *loginRequest // Данные для запроса
-	Response loginResponse // Ответ от сервера
+	Response authResponse  // Ответ от сервера
 }
 
 func NewAuth(c *config.Config) *Auth {
@@ -49,6 +47,7 @@ func NewAuth(c *config.Config) *Auth {
 	}
 }
 
+//Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
 func (a *Auth) Login() error {
 	//Проверяем, может ещё не стоит авторизоваться снова.
 	if time.Since(a.AuthTime).Minutes() < 50 {
@@ -64,9 +63,10 @@ func (a *Auth) Login() error {
 	r.Data = b.Bytes()
 	r.Method = POST
 	r.Path = "mt/api/rest/v1/login"
+
 	answer, err := r.MakeRequest()
 	if err != nil {
-		return fmt.Errorf("Login Err: %s", err)
+		return fmt.Errorf("Login: %s", err)
 	}
 
 	if err := json.Unmarshal(answer, &a.Response); err != nil {
