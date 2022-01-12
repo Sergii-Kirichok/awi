@@ -45,7 +45,7 @@ func main() {
 			fmt.Printf("[Will be deleted] WebHook ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
 			ids = append(ids, hook.Id)
 		}
-		awp.DeleteWebhook(auth, &awp.RequestWebhooksGet{Ids: ids})
+		// awp.DeleteWebhook(auth, &awp.RequestWebhooksGet{Ids: ids})
 	}
 
 	//Создаём вебхук
@@ -76,8 +76,6 @@ func main() {
 	}
 
 	//start WebServer
-	web := webserver.NewServer()
-	web.Conf = cfg
-	web.Name = "Avigilon Weight Integration Server"
+	web := webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg)
 	web.ListenAndServeHTTPS()
 }

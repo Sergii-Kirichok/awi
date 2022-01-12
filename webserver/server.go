@@ -6,7 +6,7 @@ package webserver
 //"www_certificate_key": "certificates/private.key",
 import (
 	"awi/config"
-	"awi/handlers/favIcon"
+	"awi/handlers/home"
 	"awi/handlers/webhooks"
 	"fmt"
 	"log"
@@ -16,30 +16,40 @@ import (
 )
 
 type Server struct {
-	Name    string
-	Version string
+	name    string
+	version string
 
-	Index int
-	Delay int
-	Conf  *config.Config
+	Index  int
+	Delay  int
+	config *config.Config
 }
 
 // NewServer returns new Server.
-func NewServer() *Server {
-	return &Server{}
+func New(name, version string, config *config.Config) *Server {
+	return &Server{
+		name:    name,
+		version: version,
+		config:  config,
+	}
 }
 
 // ListenAndServe listens on the TCP address and serves requests.
 //func (s *Server) ListenAndServe() error {
 func (s *Server) ListenAndServeHTTPS() {
-	bind := fmt.Sprintf("%s:%s", s.Conf.WWWAddr, s.Conf.WWWPort)
-	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.Name, s.Version, bind)
-	http.HandleFunc("/favicon.ico", favIcon.Icon)
+	bind := fmt.Sprintf("%s:%s", s.config.WWWAddr, s.config.WWWPort)
+	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
+
+	http.HandleFunc("/", home.Handler())
+	http.HandleFunc("/index.js", home.Scripts())
+	http.HandleFunc("/style.css", home.Styles())
+	http.HandleFunc("/favicon.ico", home.Favicon())
 	http.HandleFunc("/webhooks", webhooks.WebHooksHandler)
 
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err := http.ListenAndServeTLS(bind, fmt.Sprintf("%s/%s", rootDir, s.Conf.WWWCertificate), fmt.Sprintf("%s/%s", rootDir, s.Conf.WWWCertificateKey), nil); err != nil {
+	certFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificate)
+	keyFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificateKey)
+	if err := http.ListenAndServeTLS(bind, certFile, keyFile, nil); err != nil {
 		//if err := http.ListenAndServeTLS(s.Bind, s.Certificate, s.CertificateKey, nil); err != nil {
 		log.Fatal("HTTPS-Err: ", err)
 	}
