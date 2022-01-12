@@ -3,6 +3,7 @@ package main
 import (
 	"awi/awp"
 	"awi/config"
+	"awi/webserver"
 	"fmt"
 	"log"
 	"math/rand"
@@ -67,10 +68,16 @@ func main() {
 	fmt.Printf("MyWebHooks: %v, data: %#v\n", wh, wh.Webhooks)
 	for k, v := range wh.Webhooks {
 		fmt.Printf("Webgooks Key %v, Value: %#v\n", k, v)
-		v.Heartbeat.FrequencyMs = 100000
+		v.Heartbeat.FrequencyMs = 30000
 
 		if err := wh.PostPutWebhook(auth, v, awp.PUT); err != nil {
 			fmt.Printf("POST Error: %s\n", err)
 		}
 	}
+
+	//start WebServer
+	web := webserver.NewServer()
+	web.Conf = cfg
+	web.Name = "Avigilon Weight Integration Server"
+	web.ListenAndServeHTTPS()
 }

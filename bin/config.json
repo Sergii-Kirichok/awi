@@ -1,8 +1,8 @@
 {
-	"www_addr": "127.0.0.1",
-	"www_Port": "8080",
-	"www_certificate": "certificates/src_certs_server.pem",
-	"www_certificate_key": "certificates/src_certs_server.key",
+	"www_addr": "192.168.0.10",
+	"www_Port": "443",
+	"www_certificate": "certificates/public.crt",
+	"www_certificate_key": "certificates/private.key",
 	"wp_server": "avigilon",
 	"wp_port": "8443",
 	"wp_user": "administrator",
