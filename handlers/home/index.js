@@ -1,5 +1,7 @@
-const green = "#13a017";
-const red   = "#ff0000";
+const green       = "rgb(19, 154, 19)";
+const greenBorder = "rgb(10, 78, 10)";
+const red         = "rgb(178, 49, 49)";
+const rebBorder   = "rgb(94, 14, 14)";
 
 const h = 0;
 const m = 0;
@@ -15,18 +17,19 @@ statusBtnEl.addEventListener("click", () => { if (!time) recover() })
 function recover() {
     statusBtnEl.disabled = true;
     statusBtnEl.style.backgroundColor = red;
+    statusBtnEl.style.borderColor = rebBorder;
     time = (h * 60 + m) * 60 + s;
     countdown();
 }
 
-recover();
+window.onload = () => recover();
 
 function countdown() {
     setTimeout(function again() {
         updateCountdown()
         if (!time) {
             statusBtnEl.style.backgroundColor = green;
-            statusBtnEl.innerText = "Взвешивание разрешено";
+            statusBtnEl.style.borderColor = greenBorder;
             statusBtnEl.disabled = false;
             return
         }

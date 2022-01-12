@@ -53,7 +53,7 @@ func main() {
 	rnd := rand.Intn(100)
 	wh := awp.NewWebhooksMy()
 	webhook := &awp.Webhook{
-		Url: "https://192.168.0.10/webhooks",
+		Url: "https://sanya.avigilon/webhooks",
 		Heartbeat: awp.Heartbeat{
 			Enable:      true,
 			FrequencyMs: 300000, //300000ms = 5 min

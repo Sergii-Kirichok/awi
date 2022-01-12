@@ -39,61 +39,81 @@ img {vertical-align: top;}
 
 h1, h2, h3, h4, h5, h6 {font-size:inherit; font-weight: 400;}
 
+@font-face {
+    font-family: "DSEG7";
+    src: url("dseg7.woff2") format("woff2")
+}
+
 body {
-    font-family: "Roboto", sans-serif;
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+    background-color: rgb(4, 21, 38);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    max-width: 1440px;
-    min-width: 970px;
-    margin: 0 auto;
-    background-color: cornsilk;
 }
 
 #countdown {
-    background-color: white;
+    /*font-family: "Fira Code", serif;*/
+    font-family: "DSEG7", serif;
+    font-size: 5em;
+    color: rgb(190, 37, 37);
     display: inline-flex;
     justify-content: center;
     align-items  : center;
-    height: 70px;
-    width: 400px;
-    font-size: 80px;
-}
-
-#status-button-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 200px;
-    height: 100px;
+    margin-bottom: 50px;
 }
 
 #status-button {
-    background-color: red;
-    width: 200px;
-    height: 80px;
+    font-family: "Georgia", serif;
+    font-size: 3em;
+    letter-spacing: 10px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(178, 49, 49);
+    width: 50%;
+    min-width: 250px;
+    height: 15%;
+    min-height: 4em;
+    border: 2px solid rgb(94, 14, 14);
     border-radius: 10px;
+    margin-bottom: 50px;
 }
 
 #cams {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-evenly;
-    width: 700px;
+}
+
+legend {
+    font-size: 1rem;
+    padding: 0 0.25em;
+    color: rgb(35, 93, 164);
 }
 
 .cam {
     display: flex;
-    justify-content: space-evenly;
     align-items: center;
-    background-color: bisque;
-    color: #c20110;
-    border: 1px solid black;
+    justify-content: space-between;
+    padding: 0 15px;
+    margin-bottom: 20px;
+    color: rgb(190, 37, 37);
+    background-color: rgba(35, 93, 196, 0.15);
+    border: 2px solid rgb(35, 93, 164);
+    border-radius: 10px;
     width: 250px;
     height: 100px;
     font-size: 3em;
 }
 
-legend {
-    font-size: 1rem;
+.cam + .cam {
+    margin-left: 20px;
+}
+
+i.normal {
+    color: rgb(19, 154, 19);
+}
+
+i.alarm {
+    color: rgb(190, 37, 37);
 }

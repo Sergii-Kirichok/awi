@@ -1,5 +1,5 @@
 {
-	"www_addr": "192.168.0.15",
+	"www_addr": "sanya.avigilon",
 	"www_Port": "443",
 	"www_certificate": "certificates/public.crt",
 	"www_certificate_key": "certificates/private.key",

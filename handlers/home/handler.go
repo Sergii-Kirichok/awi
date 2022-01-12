@@ -35,6 +35,13 @@ func Favicon() http.HandlerFunc {
 	return getStatic(favicon, "image/x-icon")
 }
 
+//go:embed dseg7.woff2
+var dseg7 []byte
+
+func DSEG7() http.HandlerFunc {
+	return getStatic(dseg7, "font/woff2")
+}
+
 func getStatic(data []byte, mimeType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("From %s %s %s", r.RemoteAddr, r.Method, r.URL.Path)
