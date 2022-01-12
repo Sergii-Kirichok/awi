@@ -1,0 +1,66 @@
+В файле C:\GoPath\src\Avigilon Control Center Web Endpoint\modules\eagle\lib\StaticConfigDefault.js
+нахдится стурктура описывающая имена файлов ключей и пароль по-умолчанию
+Если сгенерированные файлы положить в папку с сертификатами и пароль при генерации указать как в файле по-умолчанию - obfuscation,
+то необходимо будет только добавить данные в файл hosts (windows\system32\ и т.д.)
+
+ tls: {
+    certFileName: 'public.crt',
+    privateKeyFileName: 'private.key',
+    customCaFileName: 'ca-crt.pem',
+    passphrase: 'obfuscation',
+    folderName: 'certificates',
+  }
+
+//Создаём два текстовых файлика
+
+//Файлик newSert.conf
+[dn]
+C=US
+ST=RandomState
+L=RandomCity
+O=RandomOrganization
+OU=RandomOrganizationUnit
+emailAddress=hello@example.com
+CN=avigilon
+
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+
+//Файлик v3.ext
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = avigilon
+DNS.2 = sergey.avigilon
+DNS.3 = sanya.avigilon
+
+
+
+//Создаем свой центр авторизации и ключик (CA)
+openssl genrsa -des3 -out rootCA.key -passout pass:obfuscation 2048
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1825 -out ca-crt.pem -passin pass:obfuscation
+
+//Создаем свой сертификат
+openssl req -new -sha256 -nodes -out public.csr -newkey rsa:2048 -keyout private.key -config newSert.conf
+openssl x509 -req -in public.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out public.crt -days 2560 -sha256 -extfile v3.ext -passin pass:obfuscation
+
+Дальше копируем ca-crt.pem в ca-crt.crt, мышкой тыц>установить сертификат>локальный компьютер>поместить все сертификаты в выбранное хранилище>обзор>доверенные корневые ценры сертификации>ok>далее>готово
+тоже самое проделываем с public.crt.
+
+Три файла (public.crt,privat.key,ca-crt.pem) копируем в папку с сертификатами, перезапускаем сервис Avigilon weboint
+
+В файлике hosts 
+192.168.0.11 avigilon
+192.168.0.10 sergey.avigilon
+192.168.0.15 sanya.avigilon
+
+проверям https://avigilon:8443/mt/playground должно иметь доверенный сертификат.
+
+Дальще запускаем сервис awi.
+
