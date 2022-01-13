@@ -8,13 +8,7 @@ import (
 	"net/http"
 )
 
-//go:embed styles.css
-var stylesCSS []byte
-
-var exampleUpload []byte
-
 func WebHooksHandler(w http.ResponseWriter, r *http.Request) {
-
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Fatalln(err)

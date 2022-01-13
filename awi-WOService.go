@@ -45,7 +45,7 @@ func main() {
 			fmt.Printf("[Will be deleted] WebHook ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
 			ids = append(ids, hook.Id)
 		}
-		awp.DeleteWebhook(auth, &awp.RequestWebhooksGet{Ids: ids})
+		//awp.DeleteWebhook(auth, &awp.RequestWebhooksGet{Ids: ids})
 	}
 
 	//Создаём вебхук
@@ -53,7 +53,7 @@ func main() {
 	rnd := rand.Intn(100)
 	wh := awp.NewWebhooksMy()
 	webhook := &awp.Webhook{
-		Url: "https://sergey.avigilon/webhooks",
+		Url: "https://sanya.avigilon/webhooks",
 		Heartbeat: awp.Heartbeat{
 			Enable:      true,
 			FrequencyMs: 300000, //300000ms = 5 min
