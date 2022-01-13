@@ -45,7 +45,9 @@ func main() {
 			fmt.Printf("[Will be deleted] WebHook ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
 			ids = append(ids, hook.Id)
 		}
-		//awp.DeleteWebhook(auth, &awp.RequestWebhooksGet{Ids: ids})
+		if err := awp.DeleteWebhooks(auth, &awp.RequestWebhooksGet{Ids: ids}); err != nil {
+			fmt.Printf("DELETE WEBHOOK ERR: %s\n", err)
+		}
 	}
 
 	//Создаём вебхук
@@ -53,21 +55,27 @@ func main() {
 	rnd := rand.Intn(100)
 	wh := awp.NewWebhooksMy()
 	webhook := &awp.Webhook{
-		Url: "https://sanya.avigilon/webhooks",
+		Url: "https://sergey.avigilon/webhooks",
 		Heartbeat: awp.Heartbeat{
 			Enable:      true,
 			FrequencyMs: 300000, //300000ms = 5 min
 		},
 		AuthenticationToken: fmt.Sprintf("%x", fmt.Sprintf("%dtoken%dString%d", rnd, rnd)),
 		EventTopics: awp.EventTopics{
-			WhiteList: []string{"ALL"},
+			WhiteList: []string{
+				//"ALL",
+				"DEVICE_ANALYTICS_START",
+				"DEVICE_ANALYTICS_STOP",
+				"DEVICE_DIGITAL_INPUT_ON",
+				"DEVICE_DIGITAL_INPUT_OFF",
+			},
 		},
 	}
 	wh.PostPutWebhook(auth, webhook, awp.POST)
 
 	fmt.Printf("MyWebHooks: %v, data: %#v\n", wh, wh.Webhooks)
 	for k, v := range wh.Webhooks {
-		fmt.Printf("Webgooks Key %v, Value: %#v\n", k, v)
+		fmt.Printf("Webhooks Key %v, Value: %#v\n", k, v)
 		v.Heartbeat.FrequencyMs = 30000
 
 		if err := wh.PostPutWebhook(auth, v, awp.PUT); err != nil {

@@ -1,21 +1,27 @@
 package webhooks
 
-import "time"
+import (
+	"time"
+)
 
+// Всё сообщение
 type WebhookMessage struct {
-	SiteId              string         `json:"siteId"` // IN2ir_lQRli_PuW2Un48ZQ
-	Type                string         `json:"type"`   // HELLO, NOTIFICATION, HEARTBEAT
-	Time                time.Time      `json:"time"`   // 2022-01-12T19:07:38.725Z
+	Core
 	Notifications       []Notification `json:"notifications"`
 	AuthenticationToken string         `json:"authenticationToken"` // 3131746f6b656e3131537472696e67252164284d495353494e4729
 }
 
-type Notification struct {
+// Основная часть. HELLO и HEARTBEAT состоят только из неё
+type Core struct {
 	SiteId string    `json:"siteId"` // IN2ir_lQRli_PuW2Un48ZQ
-	Type   string    `json:"type"`   // EVENT
-	Time   time.Time `json:"time"`   // 2022-01-12T19:11:51.366Z
-	Id     string    `json:"id"`     // H8Ay08LvRM2Ie5hiWrSYRA
-	Event  Event     `json:"event"`
+	Type   string    `json:"type"`   // HELLO, NOTIFICATION, HEARTBEAT
+	Time   time.Time `json:"time"`   // 2022-01-12T19:07:38.725Z
+}
+
+type Notification struct {
+	Core
+	Id    string `json:"id"` // H8Ay08LvRM2Ie5hiWrSYRA
+	Event *Event `json:"event"`
 }
 
 type Event struct {
@@ -31,6 +37,7 @@ type Event struct {
 	OriginatingServerId   string              `json:"originatingServerId"`   // UMooFPEhRpayellyz_q3iA
 	CameraIds             []string            `json:"cameraIds"`             //
 	EntityIds             []string            `json:"entityIds"`             //
+	EntityId              string              `json:"entityId"`              // Для событий входов так точно нужен
 	TargetIdsDeprecated   []interface{}       `json:"targetIdsDeprecated"`
 	AnalyticEventName     string              `json:"analyticEventName"` // [Automation Analytic Event]
 	Area                  string              `json:"area"`              // ""
@@ -91,4 +98,13 @@ const (
 	VEHICLE_CAR       ClassifiedObject = "VEHICLE_CAR"
 	VEHICLE_TRUCK     ClassifiedObject = "VEHICLE_TRUCK"
 	VEHICLE_BUS       ClassifiedObject = "VEHICLE_BUS"
+)
+
+type EventTypes string
+
+const (
+	DEVICE_DIGITAL_INPUT_ON  EventTypes = "DEVICE_DIGITAL_INPUT_ON"
+	DEVICE_DIGITAL_INPUT_OFF EventTypes = "DEVICE_DIGITAL_INPUT_OFF"
+	DEVICE_ANALYTICS_START   EventTypes = "DEVICE_ANALYTICS_START"
+	DEVICE_ANALYTICS_STOP    EventTypes = "DEVICE_ANALYTICS_STOP"
 )

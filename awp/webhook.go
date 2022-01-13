@@ -153,13 +153,35 @@ func (w *myWebhooks) PostPutWebhook(a *Auth, wh *Webhook, method Methods) error 
 	return nil
 }
 
+func DeleteWebhooks(a *Auth, query *RequestWebhooksGet) error {
+	const step = 16
+	ids := query.Ids
+	l := len(query.Ids)
+	for i := 0; ; i += step {
+		if i > l {
+			break
+		}
+		border := i + step
+		if l < step || border > l {
+			border = l
+		}
+
+		query.Ids = ids[i:border]
+		err := DeleteWebhook(a, query)
+		if err != nil {
+			return fmt.Errorf("DeleteWebhooks: %s", err)
+		}
+	}
+	return nil
+}
+
 func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
 	//Всегда проверяем логин перед любым запросом.
 	if err := a.Login(); err != nil {
 		return fmt.Errorf("DeleteWebhook: %s", err)
 	}
-	query.Session = a.Response.Result.Session
 
+	query.Session = a.Response.Result.Session
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(query)
 	if err != nil {
@@ -176,7 +198,7 @@ func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
 	if err != nil {
 		return fmt.Errorf("DeleteWebhooks: %s", err)
 	}
-	//fmt.Printf("DELETE WEBHOOK ANSWER: %s\n", method, string(answer))
+	//fmt.Printf("DELETE WEBHOOK ANSWER: %s\n", string(answer))
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {

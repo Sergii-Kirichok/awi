@@ -96,7 +96,9 @@ func (s *Server) ListenAndServeHTTPS() {
 	http.HandleFunc("/style.css", home.Styles())
 	http.HandleFunc("/favicon.ico", home.Favicon())
 	http.HandleFunc("/dseg7.woff2", home.DSEG7())
-	http.HandleFunc("/webhooks", webhooks.WebHooksHandler)
+
+	wh := webhooks.NewHandler(s.config)
+	http.HandleFunc("/webhooks", wh.WebHooksHandler)
 
 	http.HandleFunc("/get/countdown", getCountdown)
 	http.HandleFunc("/post/reset-timer", resetTimer)
