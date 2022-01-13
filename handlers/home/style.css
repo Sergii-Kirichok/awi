@@ -111,10 +111,10 @@ legend {
     margin-left: 20px;
 }
 
-i.normal {
-    color: rgb(19, 154, 19);
+i {
+    color: rgb(190, 37, 37);
 }
 
-i.alarm {
-    color: rgb(190, 37, 37);
+i.ready {
+    color: rgb(19, 154, 19);
 }
