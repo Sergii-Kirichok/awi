@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func New() *Config {
@@ -13,7 +14,9 @@ func New() *Config {
 }
 
 //Load configuration data from the encrypted file
-func (c *Config) Load(dir string) {
+func (c *Config) Load() *Config {
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+
 	file := fmt.Sprintf("%s/config.json", dir)
 	if _, err := os.Stat(file); err == nil {
 		data, _ := ioutil.ReadFile(file)
@@ -26,6 +29,7 @@ func (c *Config) Load(dir string) {
 	} else {
 		log.Fatalf("Error reading config: %s", err)
 	}
+	return c
 }
 
 //Encrypt configuration and Save it

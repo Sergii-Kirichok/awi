@@ -7,7 +7,6 @@ import (
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
 	"os"
-	"path/filepath"
 	"strings"
 	"suv02-server/webserver"
 	"time"
@@ -24,13 +23,9 @@ type Myservice struct {
 }
 
 func startServer(s Myservice) {
-	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	cfg = config.New()
-	cfg.Load(rootDir)
-	// проверка базы данных
-	//_ = db.DBCheck(&cfg)
-
+	cfg = config.New().Load()
 	msg := fmt.Sprintf("Запуск сервера %s [%s]", s.Name, s.Version)
+
 	//db.LogCreate(&cfg, db.System, "", "", msg)
 	elog.Info(1, msg)
 
