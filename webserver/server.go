@@ -7,6 +7,7 @@ package webserver
 import (
 	"awi/config"
 	"awi/handlers/home"
+	"awi/handlers/webhooks"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -170,7 +171,7 @@ func (s *Server) ListenAndServeHTTPS() {
 	s.router.HandleFunc("/dseg7.woff2", home.DSEG7()).Methods(http.MethodGet)
 
 	wh := webhooks.NewHandler(s.config)
-	http.HandleFunc("/webhooks", wh.WebHooksHandler)
+	s.router.HandleFunc("/webhooks", wh.WebHooksHandler).Methods(http.MethodPost)
 
 	s.router.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
 	s.router.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
