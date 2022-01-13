@@ -1,5 +1,6 @@
 const countdownEl = document.getElementById("countdown");
 const statusBtnEl = document.getElementById("status-button");
+const camerasDivEl = document.getElementById("cams");
 
 function disableStatusButton() {
     statusBtnEl.disabled = true;
@@ -31,7 +32,7 @@ async function post(url = "", data = {}) {
 
 async function recover() {
     try {
-        await post("/post/reset-timer");
+        await post("/reset-timer");
         countdown();
     } catch (error) {
         console.error("can't reset timer");
@@ -40,13 +41,17 @@ async function recover() {
     }
 }
 
-window.onload = countdown;
+window.onload = async () => {
+    await render()
+    countdown()
+};
+
 statusBtnEl.onclick = async () => await recover();
 
 function countdown() {
     setTimeout(async function again() {
         try {
-            const timeLeft = await get("https://sanya.avigilon/get/countdown");
+            const timeLeft = await get("https://sanya.avigilon/countdown");
             updateCountdown(timeLeft);
             if (!timeLeft) {
                 enableStatusButton();
@@ -62,12 +67,43 @@ function countdown() {
     });
 }
 
+async function render() {
+    const cameraIDs = await get("https://sanya.avigilon/cameras-ids");
+
+    for (let idx = 0; idx < cameraIDs.length; idx++) {
+        const states = await get(`https://sanya.avigilon/cameras-info/${cameraIDs[idx]}`)
+        createCamera(`CAM-${idx}`, states);
+    }
+}
+
+function createCamera(name) {
+    const cam = newElement("fieldset", { className: "cam" });
+    const legend = newElement("legend", { innerText: name });
+    const truckIcon = newElement("i", { className: "fas fa-truck" });
+    const humanIcon = newElement("i", { className: "fas fa-street-view" })
+    const inputIcon = newElement("i", { className: "fa-solid fa-traffic-light" });
+
+    [legend, truckIcon, humanIcon, inputIcon].forEach(el => cam.appendChild(el));
+    camerasDivEl.appendChild(cam);
+}
+
+function newElement(tagName, options = {}) {
+    const e = document.createElement(tagName);
+    for (const prop of Object.keys(options)) {
+        e[prop] = options[prop];
+    }
+
+    return e
+}
+
+formatStatus = (status) => status ? " ready" : ""
+
 function updateCountdown(timeLeft = 0) {
-    const hours = format(Math.floor(timeLeft / 3600));
-    const minutes = format(Math.floor(timeLeft / 60 - hours * 60));
-    const seconds = format(timeLeft % 60);
+    const hours = formatNumber(Math.floor(timeLeft / 3600));
+    const minutes = formatNumber(Math.floor(timeLeft / 60 - hours * 60));
+    const seconds = formatNumber(timeLeft % 60);
 
     countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
 }
 
-format = (num) => num < 10 ? "0" + num: num
+formatNumber = (num) => num < 10 ? "0" + num: num
