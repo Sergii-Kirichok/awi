@@ -11,7 +11,7 @@ import (
 type syncer struct {
 	auth     *awp.Auth
 	wh       *awp.MyWebhooks // Массив моих вебхуков. По-хорошему вебхук вообще должен быть один
-	lastSinc time.Time       // Время последней синхронизации
+	lastSync time.Time       // Время последней синхронизации
 	blocker  bool            // Блокировка работы основной программы, если нет возможности синхронизироваться ok == true
 	m        *sync.Mutex
 }
@@ -29,8 +29,8 @@ func (s *syncer) Sync() {
 	var showInfo bool
 	for {
 		// Заполняем главную структуру актуальными данными
-		if time.Since(s.lastSinc).Seconds() > 60 {
-			s.lastSinc = time.Now()
+		if time.Since(s.lastSync).Seconds() > 60 {
+			s.lastSync = time.Now()
 			//Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
 				log.Printf("[ERROR] Can't sync data: %s\n", err)
