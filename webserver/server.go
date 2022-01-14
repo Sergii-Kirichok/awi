@@ -45,10 +45,15 @@ func New(name, version string, config *config.Config, control *controller.Contro
 	}
 }
 
+type Input struct {
+	Id    string `json:"id"`
+	State bool   `json:"state"`
+}
+
 type CameraStates struct {
-	Cars   bool `json:"cars"`
-	Humans bool `json:"humans"`
-	Inputs bool `json:"inputs"`
+	Cars   bool              `json:"cars"`
+	Humans bool              `json:"humans"`
+	Inputs map[string]*Input `json:"inputs"`
 }
 
 //const stabilizationTime = 5 * time.Minute / time.Second
@@ -59,11 +64,36 @@ var (
 
 	mutex         sync.RWMutex
 	camerasStates = map[string]*CameraStates{
-		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {},
+		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
+			Inputs: map[string]*Input{
+				"first": {
+					Id: "f12de34",
+				},
+				"second": {
+					Id: "a6fde34",
+				},
+			},
+		},
 		//"4xIx1DMw": {},
 		//"DW2tDBK": {},
 		//"CDilIfJ": {},
 	}
+
+	//zones = map[string]controller.Zone{
+	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631": {
+	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631",
+	//		Cameras: map[string]controller.Camera{
+	//			"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
+	//				Car:    true,
+	//				Human:  true,
+	//				Inputs: map[string]controller.Input{},
+	//			},
+	//		},
+	//	},
+	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632": {
+	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632",
+	//	},
+	//}
 )
 
 func updateCamerasStates() {
@@ -73,7 +103,9 @@ func updateCamerasStates() {
 		for _, state := range camerasStates {
 			state.Cars = 0 != rand.Intn(30)
 			state.Humans = 0 != rand.Intn(30)
-			state.Inputs = 0 != rand.Intn(30)
+			for _, input := range state.Inputs {
+				input.State = 0 != rand.Intn(30)
+			}
 			//fmt.Printf("name: %s\n\t%v\n", name, state)
 		}
 		mutex.Unlock()
@@ -105,7 +137,13 @@ func isStartCountdown() bool {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	for _, state := range camerasStates {
-		if !state.Cars || !state.Humans || !state.Inputs {
+		for _, input := range state.Inputs {
+			if !input.State {
+				return false
+			}
+		}
+
+		if !state.Cars || !state.Humans {
 			return false
 		}
 	}

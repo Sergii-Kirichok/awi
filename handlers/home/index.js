@@ -73,26 +73,27 @@ formatNumber = (num) => num < 10 ? "0" + num: num;
 
 function updateCameraStates(id, states) {
     const {cars, humans, inputs} = states;
-    const camera = document.getElementById(id) ?? createCamera(id);
+    console.log(inputs)
+    const camera = document.getElementById(id) ?? createCamera(id, inputs);
     for (const icon of camera.getElementsByTagName("i")) {
         if (icon.className.includes(truckIconClassName)) {
-            setStatus(icon, cars)
+            setStatus(icon, cars);
         } else if (icon.className.includes(humanIconClassName)) {
-            setStatus(icon, humans)
+            setStatus(icon, humans);
         } else if (icon.className.includes(inputIconClassName)) {
-            setStatus(icon, inputs)
+            setStatus(icon, Object.values(inputs).find(inp => inp.id === icon.id).state);
         }
     }
 }
 
-function createCamera(cameraID) {
+function createCamera(cameraID, inputs) {
     const camera = newElement("fieldset", { className: "cam", id: cameraID });
     const legend = newElement("legend", { innerText: `CAM-${++cameraIndex}` });
     const truckIcon = newElement("i", { className: truckIconClassName });
-    const humanIcon = newElement("i", { className: humanIconClassName })
-    const inputIcon = newElement("i", { className: inputIconClassName });
+    const humanIcon = newElement("i", { className: humanIconClassName });
+    const inputIcons = Object.values(inputs).map(inp => newElement("i", { className: inputIconClassName, id: inp.id }));
 
-    [legend, truckIcon, humanIcon, inputIcon].forEach(el => camera.appendChild(el));
+    [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
     camerasDivEl.appendChild(camera);
     return camera
 }
