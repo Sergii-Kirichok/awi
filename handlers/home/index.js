@@ -2,6 +2,9 @@ const countdownEl = document.getElementById("countdown");
 const statusBtnEl = document.getElementById("status-button");
 const camerasDivEl = document.getElementById("cams");
 
+const red   = "rgb(178, 49, 49)";
+const green = "rgb(19, 154, 19)";
+
 const truckIconClassName = "fas fa-truck";
 const humanIconClassName = "fas fa-street-view";
 const inputIconClassName = "fa-solid fa-traffic-light";
@@ -9,19 +12,23 @@ const inputIconClassName = "fa-solid fa-traffic-light";
 let cameraIndex = 0;
 let timeLeft    = 0;
 
-window.onload       = countdown;
-statusBtnEl.onclick = async () => await recover();
+window.onload       = startPolling;
+statusBtnEl.onclick = () => console.log("click");
 
 function disableStatusButton() {
     statusBtnEl.disabled = true;
-    statusBtnEl.style.backgroundColor = "rgb(178, 49, 49)";
+    statusBtnEl.style.backgroundColor = red;
     statusBtnEl.style.borderColor     = "rgb(94, 14, 14)";
 }
 
 function enableStatusButton() {
     statusBtnEl.disabled = false;
-    statusBtnEl.style.backgroundColor = "rgb(19, 154, 19)";
+    statusBtnEl.style.backgroundColor = green;
     statusBtnEl.style.borderColor     = "rgb(10, 78, 10)";
+}
+
+function changeColor(el, color) {
+    el.style.color = color
 }
 
 async function get(url = "") {
@@ -29,29 +36,7 @@ async function get(url = "") {
     return response.json();
 }
 
-async function post(url = "", data = {}) {
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    return response.json();
-}
-
-async function recover() {
-    try {
-        await post("/reset-timer");
-    } catch {
-        console.log("timer have already reset");
-    } finally {
-        countdown();
-        disableStatusButton();
-    }
-}
-
-function countdown() {
+function startPolling() {
     setTimeout(async function again() {
         const prevTimeLeft = timeLeft;
         timeLeft = await get("/countdown");
@@ -64,7 +49,10 @@ function countdown() {
 
         if (!timeLeft) {
             enableStatusButton();
-            return
+            changeColor(countdownEl, green);
+        } else {
+            disableStatusButton();
+            changeColor(countdownEl, red);
         }
 
         setTimeout(again, 1000);
@@ -72,7 +60,6 @@ function countdown() {
 }
 
 function updateCountdown(timeLeft = 0) {
-    console.log("update countdown...")
     const hours = formatNumber(Math.floor(timeLeft / 3600));
     const minutes = formatNumber(Math.floor(timeLeft / 60 - hours * 60));
     const seconds = formatNumber(timeLeft % 60);
@@ -83,7 +70,6 @@ function updateCountdown(timeLeft = 0) {
 formatNumber = (num) => num < 10 ? "0" + num: num;
 
 function updateCameraStates(id, states) {
-    console.log("update camera states...")
     const {cars, humans, inputs} = states;
     const camera = document.getElementById(id) ?? createCamera(id);
     for (const icon of camera.getElementsByTagName("i")) {

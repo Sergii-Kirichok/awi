@@ -66,12 +66,12 @@ var (
 func updateCamerasStates() {
 	for range time.Tick(time.Second) {
 		mutex.Lock()
-		fmt.Println("updating camera states:")
-		for name, state := range camerasStates {
-			state.Cars = 0 != rand.Intn(25)
-			state.Humans = 0 != rand.Intn(20)
+		//fmt.Println("updating camera states:")
+		for _, state := range camerasStates {
+			state.Cars = 0 != rand.Intn(30)
+			state.Humans = 0 != rand.Intn(30)
 			state.Inputs = 0 != rand.Intn(30)
-			fmt.Printf("name: %s\n\t%v\n", name, state)
+			//fmt.Printf("name: %s\n\t%v\n", name, state)
 		}
 		mutex.Unlock()
 	}
@@ -149,20 +149,6 @@ func getCameraInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func resetTimer(w http.ResponseWriter, r *http.Request) {
-	if atomic.LoadInt32(&timeLeft) != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
-	if _, err := w.Write([]byte("{}")); err != nil {
-		log.Printf("response error with empty data: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
 // ListenAndServe listens on the TCP address and serves requests.
 //func (s *Server) ListenAndServe() error {
 func (s *Server) ListenAndServeHTTPS() {
@@ -187,7 +173,6 @@ func (s *Server) ListenAndServeHTTPS() {
 	s.router.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
 	s.router.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
 	s.router.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
-	s.router.HandleFunc("/reset-timer", resetTimer).Methods(http.MethodPost)
 
 	go updateCamerasStates()
 	// Запуск веб-сервера
