@@ -6,6 +6,7 @@ package webserver
 //"www_certificate_key": "certificates/private.key",
 import (
 	"awi/config"
+	"awi/controller"
 	"awi/handlers/home"
 	"awi/handlers/webhooks"
 	"bytes"
@@ -27,18 +28,20 @@ type Server struct {
 	version string
 	router  *mux.Router
 
-	Index  int
-	Delay  int
-	config *config.Config
+	Index      int
+	Delay      int
+	config     *config.Config
+	controller *controller.Controller
 }
 
 // NewServer returns new Server.
-func New(name, version string, config *config.Config) *Server {
+func New(name, version string, config *config.Config, control *controller.Controller) *Server {
 	return &Server{
-		name:    name,
-		version: version,
-		config:  config,
-		router:  mux.NewRouter(),
+		name:       name,
+		version:    version,
+		config:     config,
+		router:     mux.NewRouter(),
+		controller: control,
 	}
 }
 

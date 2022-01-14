@@ -45,11 +45,12 @@ func (s *syncer) Sync() {
 			}
 
 			// Удаляем старые/чужие вебхуки если таковые имеются, создаём свои если их ешё нет
-			if s.getBlocker() == NotBlocked {
+			if s.GetBlocker() == NotBlocked {
 				if err := awp.WebhooksUpdater(s.auth, s.wh); err != nil {
 					log.Printf("[ERROR] Sync: %s\n", err)
 				}
 			}
+
 		}
 
 		if !showInfo && s.auth.Config.GetDebug() {
@@ -59,7 +60,6 @@ func (s *syncer) Sync() {
 				fmt.Printf("[INFO] Webhooks Key %v, Value: %#v\n", k, v)
 			}
 		}
-
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -79,20 +79,21 @@ func (s *syncer) update() error {
 	}
 
 	//todo: удалить инфо-вывод
+	// Обновляем данные камеры и ёё входов (имя,id и т.д.) в нашей рабочей структуре
 	for _, camera := range cameras {
 		log.Printf("[INFO] Camera Name: \"%s\", Serial: %s, Active: %v, Id: %s\n", camera.Name, camera.Serial, camera.Active, camera.Id)
 		//log.Printf("[INFO] Camera FULL DATA: %#v\n", camera)
 		//log.Printf("[INFO] Config: %#v\n", s.auth.Config)
-		// Обновляем данные камеры и ёё входов (имя,id и т.д.) в нашей рабочей структуре
+
 		s.cameraSet(camera)
 	}
-
-	//todo: Обновляем входы на камерах, прописываем их ИД
-
 	s.blocker = NotBlocked // Всё ок
 	return nil
 }
 
-func (s *syncer) getBlocker() blocker {
-	return s.blocker
+func (s *syncer) GetBlocker() blocker {
+	s.m.Lock()
+	bState := s.blocker
+	s.m.Unlock()
+	return bState
 }

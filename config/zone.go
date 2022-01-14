@@ -45,3 +45,15 @@ func (c *Config) checkZones() error {
 func genZoneId(name string) string {
 	return fmt.Sprintf("%x%x", ZoneNameAppendix, name)
 }
+
+// Дергаем в для получения копии текущих даннызх зоны
+func (c *Config) GetZoneData(name string) Zone {
+	c.Lock()
+	for _, z := range c.Zones {
+		if z.Name == name {
+			return z
+		}
+	}
+	c.Unlock()
+	return Zone{}
+}

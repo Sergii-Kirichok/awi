@@ -18,14 +18,14 @@ type Config struct {
 	WPPassword        string      `json:"wp_password"`         // webPoint  password
 	DevNonce          string      `json:"-"`                   // Avigilon developer nonce
 	DevKey            string      `json:"-"`                   // Avigilon developer key
-	Zones             []zone      `json:"zones"`               // Список весовых зон
+	Zones             []Zone      `json:"zones"`               // Список весовых зон
 	Debug             bool        `json:"-"`                   // Работа в режиме отладки
 	mu                *sync.Mutex `json:"-"`
 }
 
-type zone struct {
-	Id        string    `json:"Id"`               // По нему будем работать с Зоной.?zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
-	Name      string    `json:"name"`             // Имя зоны -> в вебе будет использоваться для отображения (?zone=hexEncoded(ZoneNameAppendix+name))
+type Zone struct {
+	Id        string    `json:"Id"`               // По нему будем работать с Зоной.?Zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
+	Name      string    `json:"name"`             // Имя зоны -> в вебе будет использоваться для отображения (?Zone=hexEncoded(ZoneNameAppendix+name))
 	Cameras   []Cam     `json:"cameras"`          // Камеры в пределах текущей зоны
 	DelaySec  int       `json:"delay_sec"`        // Задержка после сработки входа, наличия машины и отсутствия человека
 	Bookmarks bool      `json:"bookmarks"`        // Генерировать Закладки

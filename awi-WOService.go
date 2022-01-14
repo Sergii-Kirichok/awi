@@ -3,6 +3,7 @@ package main
 import (
 	"awi/awp"
 	"awi/config"
+	"awi/controller"
 	"awi/syncer"
 	"awi/webserver"
 	"log"
@@ -29,8 +30,10 @@ start:
 	// Синхронизатор. Проверяет конфиг, находит Ид камер, создаёт и удаляет вебхуки, ...
 	go syncer.New(auth).Sync()
 
-	//Todo: Тут рутинка, отвечающая за: таймеры обратного отсчёта по зонам
+	//Рутина, отвечающая за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera
+	control := controller.New(cfg)
+	go control.Service()
 
 	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
-	webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg).ListenAndServeHTTPS()
+	webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg, control).ListenAndServeHTTPS()
 }
