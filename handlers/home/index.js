@@ -33,10 +33,10 @@ async function post(url = "", data = {}) {
 async function recover() {
     try {
         await post("/reset-timer");
-        countdown();
-    } catch (error) {
-        console.error("can't reset timer");
+    } catch {
+        console.log("timer have already reset");
     } finally {
+        countdown();
         disableStatusButton();
     }
 }
@@ -50,16 +50,10 @@ statusBtnEl.onclick = async () => await recover();
 
 function countdown() {
     setTimeout(async function again() {
-        try {
-            const timeLeft = await get("https://sanya.avigilon/countdown");
-            updateCountdown(timeLeft);
-            if (!timeLeft) {
-                enableStatusButton();
-                return
-            }
-        } catch (error) {
-            console.error("countdown error:", error)
-            // todo: mb make something...
+        const timeLeft = await get("/countdown");
+        updateCountdown(timeLeft);
+        if (!timeLeft) {
+            enableStatusButton();
             return
         }
 
@@ -68,10 +62,10 @@ function countdown() {
 }
 
 async function render() {
-    const cameraIDs = await get("https://sanya.avigilon/cameras-ids");
+    const cameraIDs = await get("/cameras-ids");
 
     for (let idx = 0; idx < cameraIDs.length; idx++) {
-        const states = await get(`https://sanya.avigilon/cameras-info/${cameraIDs[idx]}`)
+        const states = await get(`/cameras-info/${cameraIDs[idx]}`)
         createCamera(`CAM-${idx}`, states);
     }
 }
@@ -88,12 +82,12 @@ function createCamera(name) {
 }
 
 function newElement(tagName, options = {}) {
-    const e = document.createElement(tagName);
+    const el = document.createElement(tagName);
     for (const prop of Object.keys(options)) {
-        e[prop] = options[prop];
+        el[prop] = options[prop];
     }
 
-    return e
+    return el
 }
 
 formatStatus = (status) => status ? " ready" : ""

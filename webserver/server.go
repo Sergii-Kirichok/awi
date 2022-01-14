@@ -46,11 +46,6 @@ const stabilizationTime = (15 * time.Second) / time.Second
 var timeLeft = int32(stabilizationTime)
 
 func getCountdown(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	if atomic.LoadInt32(&timeLeft) > 0 {
 		atomic.AddInt32(&timeLeft, -1)
 	}
@@ -134,11 +129,6 @@ func getCameraInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetTimer(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	if atomic.LoadInt32(&timeLeft) != 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
