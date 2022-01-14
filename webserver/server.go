@@ -55,7 +55,7 @@ var (
 	timeLeft = int32(stabilizationTime)
 
 	mutex         sync.RWMutex
-	camerasStates = map[string]*CameraStates{
+	camerasStates = map[string]CameraStates{
 		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {},
 		//"4xIx1DMw": {},
 		//"DW2tDBK": {},
@@ -138,6 +138,7 @@ func getCameraInfo(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(&b).Encode(camerasStates[mux.Vars(r)["camera-id"]]); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
+		mutex.RUnlock()
 		return
 	}
 	mutex.RUnlock()
