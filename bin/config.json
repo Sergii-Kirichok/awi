@@ -7,10 +7,11 @@
 	"wp_port": "8443",
 	"wp_user": "administrator",
 	"wp_password": "yjdsqgfhjkm",
+	"debug": true,
 	"zones": [
 		{
-			"Id": "5a6f6e654e616d654973d092d0b0d0b3d0b820e2849631",
-			"name": "Ваги №1",
+			"Id": "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631",
+			"name": "Весовая №1",
 			"cameras": [
 				{
 					"serial": "102109218992"
