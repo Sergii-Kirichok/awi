@@ -33,10 +33,10 @@ async function post(url = "", data = {}) {
 async function recover() {
     try {
         await post("/reset-timer");
-        countdown();
-    } catch (error) {
-        console.error("can't reset timer");
+    } catch {
+        console.log("timer have already reset");
     } finally {
+        countdown();
         disableStatusButton();
     }
 }
