@@ -26,23 +26,23 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = h.msg.Parse(b)
 	if err != nil {
-		log.Printf("Error [WebHooksHandler]-Parse: %s\n", err)
+		log.Printf("[ERROR] WebHooksHandler: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = h.processing()
 	if err != nil {
-		log.Printf("Error [WebHooksHandler]: %s\n", err)
+		log.Printf("[ERROR] WebHooksHandler: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	//todo: Remove info messages
 	fmt.Printf("Notification parsed [%s], has [%d] events:\n", h.msg.Type, len(h.msg.Notifications))
 	for k, e := range h.msg.Notifications {
-		fmt.Printf("%02d.Event [%s]=>[%s]:\n\n", k, e.Type, e.Event.Type)
+		fmt.Printf("[INFO] % 2d.Event [%s]=>[%s]:\n\n", k, e.Type, e.Event.Type)
 	}
+	fmt.Printf("[INFO] ---Data---\n[INFO] %s\n[INFO] ---Data-End---\n\n", string(b))
 
-	fmt.Printf("---Data---\n%s\n---Data-End---\n\n", string(b))
 	w.WriteHeader(http.StatusOK)
 }
