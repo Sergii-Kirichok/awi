@@ -55,7 +55,7 @@ var (
 	timeLeft = int32(stabilizationTime)
 
 	mutex         sync.RWMutex
-	camerasStates = map[string]CameraStates{
+	camerasStates = map[string]*CameraStates{
 		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {},
 		//"4xIx1DMw": {},
 		//"DW2tDBK": {},
