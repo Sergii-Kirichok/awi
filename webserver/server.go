@@ -159,13 +159,6 @@ func (s *Server) ListenAndServeHTTPS() {
 	bind := fmt.Sprintf("%s:%s", s.config.WWWAddr, s.config.WWWPort)
 	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
 
-	http.HandleFunc("/", home.Handler())
-	http.HandleFunc("/index.js", home.Scripts())
-	http.HandleFunc("/style.css", home.Styles())
-	http.HandleFunc("/favicon.ico", home.Favicon())
-	http.HandleFunc("/dseg7.woff2", home.DSEG7())
-
-	s.router.HandleFunc("/", home.Handler()).Methods(http.MethodGet)
 	s.router.HandleFunc("/index.js", home.Scripts()).Methods(http.MethodGet)
 	s.router.HandleFunc("/style.css", home.Styles()).Methods(http.MethodGet)
 	s.router.HandleFunc("/favicon.ico", home.Favicon()).Methods(http.MethodGet)
@@ -174,9 +167,11 @@ func (s *Server) ListenAndServeHTTPS() {
 	wh := webhooks.NewHandler(s.config)
 	s.router.HandleFunc("/webhooks", wh.WebHooksHandler).Methods(http.MethodPost)
 
-	s.router.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
-	s.router.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
-	s.router.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
+	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
+	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
+	zone.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
 
 	go updateCamerasStates()
 	// Запуск веб-сервера

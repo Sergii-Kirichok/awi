@@ -7,11 +7,11 @@ import (
 func TestIsStartCountdown(t *testing.T) {
 	testCases := []struct {
 		name          string
-		camerasStates map[string]CameraStates
+		camerasStates map[string]*CameraStates
 		output        bool
 	}{
 		{
-			camerasStates: map[string]CameraStates{
+			camerasStates: map[string]*CameraStates{
 				"first": {
 					Cars:   true,
 					Humans: true,
@@ -26,7 +26,7 @@ func TestIsStartCountdown(t *testing.T) {
 			output: true,
 		},
 		{
-			camerasStates: map[string]CameraStates{
+			camerasStates: map[string]*CameraStates{
 				"first": {
 					Cars:   true,
 					Humans: true,
@@ -41,7 +41,7 @@ func TestIsStartCountdown(t *testing.T) {
 			output: false,
 		},
 		{
-			camerasStates: map[string]CameraStates{
+			camerasStates: map[string]*CameraStates{
 				"first": {
 					Cars:   true,
 					Humans: false,
@@ -56,7 +56,7 @@ func TestIsStartCountdown(t *testing.T) {
 			output: false,
 		},
 		{
-			camerasStates: map[string]CameraStates{
+			camerasStates: map[string]*CameraStates{
 				"first": {
 					Cars:   false,
 					Humans: true,
@@ -71,7 +71,7 @@ func TestIsStartCountdown(t *testing.T) {
 			output: false,
 		},
 		{
-			camerasStates: map[string]CameraStates{
+			camerasStates: map[string]*CameraStates{
 				"first": {
 					Cars:   false,
 					Humans: false,
