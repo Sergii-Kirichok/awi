@@ -13,9 +13,11 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -40,13 +42,45 @@ func New(name, version string, config *config.Config) *Server {
 	}
 }
 
+type CameraStates struct {
+	Cars   bool `json:"cars"`
+	Humans bool `json:"humans"`
+	Inputs bool `json:"inputs"`
+}
+
 //const stabilizationTime = 5 * time.Minute / time.Second
 const stabilizationTime = (15 * time.Second) / time.Second
 
-var timeLeft = int32(stabilizationTime)
+var (
+	timeLeft = int32(stabilizationTime)
+
+	mutex         sync.RWMutex
+	camerasStates = map[string]CameraStates{
+		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {},
+		//"4xIx1DMw": {},
+		//"DW2tDBK": {},
+		//"CDilIfJ": {},
+	}
+)
+
+func updateCamerasStates() {
+	for range time.Tick(time.Second) {
+		mutex.Lock()
+		//fmt.Println("updating camera states:")
+		for _, state := range camerasStates {
+			state.Cars = 0 != rand.Intn(30)
+			state.Humans = 0 != rand.Intn(30)
+			state.Inputs = 0 != rand.Intn(30)
+			//fmt.Printf("name: %s\n\t%v\n", name, state)
+		}
+		mutex.Unlock()
+	}
+}
 
 func getCountdown(w http.ResponseWriter, r *http.Request) {
-	if atomic.LoadInt32(&timeLeft) > 0 {
+	if !isStartCountdown() {
+		atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
+	} else if atomic.LoadInt32(&timeLeft) > 0 {
 		atomic.AddInt32(&timeLeft, -1)
 	}
 
@@ -64,9 +98,25 @@ func getCountdown(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func isStartCountdown() bool {
+	mutex.RLock()
+	defer mutex.RUnlock()
+	for _, state := range camerasStates {
+		if !state.Cars || !state.Humans || !state.Inputs {
+			return false
+		}
+	}
+
+	return true
+}
+
 func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
-	//cameraIDs := []string{"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA"}
-	cameraIDs := []string{"CAM 1", "CAM 2", "CAM 3"}
+	mutex.RLock()
+	cameraIDs := make([]string, 0, len(camerasStates))
+	for cameraID := range camerasStates {
+		cameraIDs = append(cameraIDs, cameraID)
+	}
+	mutex.RUnlock()
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&cameraIDs); err != nil {
@@ -82,60 +132,18 @@ func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type CameraStates struct {
-	Cars   bool `json:"cars"`
-	Humans bool `json:"humans"`
-	Inputs bool `json:"inputs"`
-}
-
 func getCameraInfo(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["camera-id"]
-
-	states := map[string]*CameraStates{
-		//"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-		//	Cars:   true,
-		//	Humans: false,
-		//	Inputs: true,
-		//},
-		"CAM 1": {
-			Cars:   true,
-			Humans: true,
-			Inputs: true,
-		},
-		"CAM 2": {
-			Cars:   true,
-			Humans: false,
-			Inputs: true,
-		},
-		"CAM 3": {
-			Cars:   false,
-			Humans: true,
-			Inputs: false,
-		},
-	}
-
+	mutex.RLock()
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(states[id]); err != nil {
+	if err := json.NewEncoder(&b).Encode(camerasStates[mux.Vars(r)["camera-id"]]); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
+		mutex.RUnlock()
 		return
 	}
+	mutex.RUnlock()
 
 	if _, err := w.Write(b.Bytes()); err != nil {
-		log.Printf("response error with empty data: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func resetTimer(w http.ResponseWriter, r *http.Request) {
-	if atomic.LoadInt32(&timeLeft) != 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
-	if _, err := w.Write([]byte("{}")); err != nil {
 		log.Printf("response error with empty data: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -166,8 +174,8 @@ func (s *Server) ListenAndServeHTTPS() {
 	s.router.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
 	s.router.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
 	s.router.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
-	s.router.HandleFunc("/reset-timer", resetTimer).Methods(http.MethodPost)
 
+	go updateCamerasStates()
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	certFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificate)
