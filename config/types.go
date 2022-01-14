@@ -26,7 +26,7 @@ type Config struct {
 type zone struct {
 	Id        string    `json:"Id"`               // По нему будем работать с Зоной.?zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
 	Name      string    `json:"name"`             // Имя зоны -> в вебе будет использоваться для отображения (?zone=hexEncoded(ZoneNameAppendix+name))
-	Cameras   []cam     `json:"cameras"`          // Камеры в пределах текущей зоны
+	Cameras   []Cam     `json:"cameras"`          // Камеры в пределах текущей зоны
 	DelaySec  int       `json:"delay_sec"`        // Задержка после сработки входа, наличия машины и отсутствия человека
 	Bookmarks bool      `json:"bookmarks"`        // Генерировать Закладки
 	Alarms    bool      `json:"alarms,omitempty"` // Генерировать тревоги
@@ -35,17 +35,17 @@ type zone struct {
 	Countdown bool      `json:"-"`                // Можно-ли начинать обратный отсчёт по зоне.
 }
 
-type cam struct {
-	Id       string  `json:"-"`      // ИД-Камеры. Получаем по RESTу на основании serial
-	Serial   string  `json:"serial"` // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
-	ConState string  `json:"-"`      // Статус, получаем через WebPOint, например 'CONNECTED'
-	Name     string  `json:"-"`      // Имя камеры, получаем актуальное через WebPOint
-	Inputs   []input `json:"-"`      // Состояние входов
-	Car      bool    `json:"-"`      // В зоне обнаружена машина
-	Person   bool    `json:"-"`      // В зоне обнаружен человек
+type Cam struct {
+	Id       string            `json:"-"`      // ИД-Камеры. Получаем по RESTу на основании serial, пользователю в конфиге он не нужен
+	Serial   string            `json:"serial"` // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
+	ConState string            `json:"-"`      // Статус, получаем через WebPOint, например 'CONNECTED'
+	Name     string            `json:"-"`      // Имя камеры, получаем актуальное через WebPOint
+	Inputs   map[string]*Input `json:"-"`      // Состояние входов
+	Car      bool              `json:"-"`      // В зоне обнаружена машина
+	Person   bool              `json:"-"`      // В зоне обнаружен человек
 }
 
-type input struct {
+type Input struct {
 	EntityId string `json:"-"` // Заполняем динамически, берём у камеры в links []{ {type:"DIGITAL_INPUT", source: "4xIx1DMwMLSwMDW2tDBKNNBLycwzMBASCDilIfJR0W3apqrIovO_tncAAA"},{},...}
 	State    bool   `json:"-"` // Статус входа
 }

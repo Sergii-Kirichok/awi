@@ -36,7 +36,9 @@ func (s *syncer) Sync() {
 	for {
 		// Заполняем главную структуру актуальными данными
 		if time.Since(s.lastSync).Seconds() > 60 {
+			s.m.Lock()
 			s.lastSync = time.Now()
+			s.m.Unlock()
 			// Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
 				log.Printf("[ERROR] Sync: Can't sync data: %s\n", err)
@@ -68,17 +70,22 @@ func (s *syncer) Sync() {
 func (s *syncer) update() error {
 	s.m.Lock()
 	defer s.m.Unlock()
-	// Забираем у WebPointa все камеры
+
+	// Забираем у WebPointa все доступные камеры
 	cameras, err := awp.GetCameras(s.auth)
 	if err != nil {
 		s.blocker = Blocked
 		return fmt.Errorf("update: %s", err)
 	}
+
 	//todo: удалить инфо-вывод
-	for _, cam := range cameras {
-		log.Printf("[INFO] Camera Name: \"%s\", Serial: %s, Active: %v, Id: %s\n", cam.Name, cam.Serial, cam.Active, cam.Id)
+	for _, camera := range cameras {
+		log.Printf("[INFO] Camera Name: \"%s\", Serial: %s, Active: %v, Id: %s\n", camera.Name, camera.Serial, camera.Active, camera.Id)
+		//log.Printf("[INFO] Camera FULL DATA: %#v\n", camera)
+		//log.Printf("[INFO] Config: %#v\n", s.auth.Config)
+		// Обновляем данные камеры и ёё входов (имя,id и т.д.) в нашей рабочей структуре
+		s.cameraSet(camera)
 	}
-	//todo: Обновляем камеры (имя,id и т.д.) в нашем конфиге (рабочей структуре)
 
 	//todo: Обновляем входы на камерах, прописываем их ИД
 
@@ -89,13 +96,3 @@ func (s *syncer) update() error {
 func (s *syncer) getBlocker() blocker {
 	return s.blocker
 }
-
-//fmt.Printf("MyWebHooks: %v, data: %#v\n", wh, wh.Webhooks)
-//	for k, v := range wh.Webhooks {
-//		fmt.Printf("Webhooks Key %v, Value: %#v\n", k, v)
-//		v.Heartbeat.FrequencyMs = 30000
-//
-//		if err := wh.PostPutWebhook(auth, v, awp.PUT); err != nil {
-//			fmt.Printf("POST Error: %s\n", err)
-//		}
-//	}

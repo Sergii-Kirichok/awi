@@ -4,27 +4,28 @@ import "fmt"
 
 const zoneMinDelaySec int = 30
 
+// Если будем использовать не только при старте - добавить использование мьютексов
 func (c *Config) checkZones() error {
 	var willUpdate bool
-	for zId, z := range c.Zones {
+	for zIndex, z := range c.Zones {
 		// Проверка ID
 		zName := genZoneId(z.Name)
 		if z.Id != zName {
 			willUpdate = true
-			c.Zones[zId].Id = zName
+			c.Zones[zIndex].Id = zName
 		}
 		// Проверка минимального времени задержки
 		if zoneMinDelaySec > z.DelaySec {
 			willUpdate = true
-			c.Zones[zId].DelaySec = zoneMinDelaySec
+			c.Zones[zIndex].DelaySec = zoneMinDelaySec
 		}
 		// Проверка метода сохранения.
 		if !z.Bookmarks && !z.Alarms {
 			willUpdate = true
-			c.Zones[zId].Bookmarks = true
+			c.Zones[zIndex].Bookmarks = true
 		}
 		// Проверка камер в зоне
-		camsUpdated, err := c.camerasCheckInTheZone(zId)
+		camsUpdated, err := c.camerasCheckInTheZone(zIndex)
 		if err != nil {
 			return fmt.Errorf("checkZones: %s", err)
 		}

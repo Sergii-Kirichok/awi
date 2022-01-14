@@ -1,20 +1,19 @@
 package config
 
-func (c *Config) camerasCheckInTheZone(zoneId int) (bool, error) {
+// Если будем использовать не только при старте, добавить мьютексы и проверить на deadlock
+func (c *Config) camerasCheckInTheZone(zoneIndex int) (bool, error) {
 	var needUpdate bool
-	for index, camera := range c.Zones[zoneId].Cameras {
+	for index, camera := range c.Zones[zoneIndex].Cameras {
 		if camera.Serial == "" {
 			needUpdate = true
-			//удаляем камеру с пустым серийным номером
-			//c.Zones[zoneId].Cameras = append(c.Zones[zoneId].Cameras[:index], c.Zones[zoneId].Cameras[index+1:]...)
-			if len(c.Zones[zoneId].Cameras) == 1 {
-				c.Zones[zoneId].Cameras = []cam{}
+			//удаляем камеры с пустым серийным номером
+			if len(c.Zones[zoneIndex].Cameras) == 1 {
+				c.Zones[zoneIndex].Cameras = []Cam{}
 				continue
 			}
-			c.Zones[zoneId].Cameras[index] = c.Zones[zoneId].Cameras[len(c.Zones[zoneId].Cameras)-1]
-			c.Zones[zoneId].Cameras[len(c.Zones[zoneId].Cameras)-1] = cam{}
-			c.Zones[zoneId].Cameras = c.Zones[zoneId].Cameras[:len(c.Zones[zoneId].Cameras)-1]
-
+			c.Zones[zoneIndex].Cameras[index] = c.Zones[zoneIndex].Cameras[len(c.Zones[zoneIndex].Cameras)-1]
+			c.Zones[zoneIndex].Cameras[len(c.Zones[zoneIndex].Cameras)-1] = Cam{}
+			c.Zones[zoneIndex].Cameras = c.Zones[zoneIndex].Cameras[:len(c.Zones[zoneIndex].Cameras)-1]
 		}
 	}
 	return needUpdate, nil

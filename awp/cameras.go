@@ -8,25 +8,20 @@ import (
 )
 
 type Camera struct {
-	Id              string `json:"id"`
-	Name            string `json:"name"`
-	Available       bool   `json:"available"`
-	ConnectionState string `json:"connectionState"`
-	FirmwareVersion string `json:"firmwareVersion"`
-	IpAddress       string `json:"ipAddress"`
-	Model           string `json:"model"`
-	Serial          string `json:"serial"`
-	ServerId        string `json:"serverId"`
-	PhysicalAddress string `json:"physicalAddress"`
-	Active          bool   `json:"active"`
-	LogicalId       int    `json:"logicalId"`
-	links           []struct {
-		Type   string `json:"type"` //"DIGITAL_INPUT","DIGITAL_OUTPUT","AUDIO_INPUT","AUDIO_OUTPUT",
-		Id     string `json:"id"`
-		Source string `json:"source"`
-		Target string `json:"target"`
-	} `json:"links"`
-	Capabilities     map[string][]string `json:"capabilities"`
+	Id               string              `json:"id"`
+	Name             string              `json:"name"`
+	Available        bool                `json:"available"`
+	ConnectionState  string              `json:"connectionState"` //LONG_FAILED
+	FirmwareVersion  string              `json:"firmwareVersion"`
+	IpAddress        string              `json:"ipAddress"`
+	Model            string              `json:"model"`
+	Serial           string              `json:"serial"`
+	ServerId         string              `json:"serverId"`
+	PhysicalAddress  string              `json:"physicalAddress"`
+	Active           bool                `json:"active"`
+	LogicalId        int                 `json:"logicalId"`
+	Links            []Link              `json:"links"`
+	Capabilities     map[string][]string `json:"capabilities"` //Capabilities:map[string][]string{"acquisition":[]string{"FOCUS_ONE_SHOT"},
 	Connected        bool                `json:"connected"`
 	ConnectionStatus struct {
 		IsConnectable bool          `json:"isConnectable"`
@@ -34,6 +29,23 @@ type Camera struct {
 		ErrorFlags    []interface{} `json:"errorFlags"`
 		StartTime     time.Time     `json:"startTime"`
 	} `json:"connectionStatus"`
+}
+
+type InputTypes string
+
+const (
+	DIGITAL_INPUT  InputTypes = "DIGITAL_INPUT"
+	DIGITAL_OUTPUT InputTypes = "DIGITAL_OUTPUT"
+	AUDIO_INPUT    InputTypes = "AUDIO_INPUT"
+	AUDIO_OUTPUT   InputTypes = "AUDIO_OUTPUT"
+)
+
+//Данные о связях - входы и выходы, откуда читаем события ( в случае входа будет ID из source) и куда пишем..
+type Link struct {
+	Type   InputTypes `json:"type"`
+	Id     string     `json:"id"`
+	Source string     `json:"source"`
+	Target string     `json:"target"`
 }
 
 type ResponseCameras struct {

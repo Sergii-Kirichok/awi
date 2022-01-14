@@ -1,5 +1,8 @@
 package config
 
 func (c *Config) GetDebug() bool {
-	return c.Debug
+	c.Lock()
+	debug := c.Debug
+	c.Unlock()
+	return debug
 }
