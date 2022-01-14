@@ -33,12 +33,13 @@ func (h *HandlerData) inputState(e *Event) error {
 				//Ищем нужный вход
 				for iId, inptut := range cam.Inputs {
 					if inptut.EntityId == e.EntityId {
+						inptut := h.cfg.Zones[zId].Cameras[cId].Inputs[iId]
 						if EventTypes(e.Type) == DEVICE_DIGITAL_INPUT_ON {
-							h.cfg.Zones[zId].Cameras[cId].Inputs[iId].State = true
+							inptut.State = true
 							//я-бы вышел через return, но почему-то в сообщении не cameraId, a массив камер...
 							continue
 						}
-						h.cfg.Zones[zId].Cameras[cId].Inputs[iId].State = false
+						inptut.State = false
 					}
 				}
 			}

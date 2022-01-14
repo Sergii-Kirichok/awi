@@ -6,13 +6,14 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 func New() *Config {
-	return &Config{}
+	return &Config{mu: &sync.Mutex{}}
 }
 
-//Load configuration data from the encrypted file
+// Читаем конфигурацию  и производим проверки только при старте. Поэтому мьютексы тут не используем
 func (c *Config) Load() (*Config, error) {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
@@ -75,7 +76,7 @@ func (c *Config) makeDefault() {
 			Bookmarks: true,
 			Alarms:    true,
 			DelaySec:  300,
-			Cameras: []cam{
+			Cameras: []Cam{
 				0: {
 					Serial: "102109218992",
 					Name:   "Фронтальная 1.1",
@@ -89,7 +90,7 @@ func (c *Config) makeDefault() {
 		1: {
 			Name:      "Весовая №2",
 			Bookmarks: true,
-			Cameras: []cam{
+			Cameras: []Cam{
 				0: {
 					Serial: "1234567890124",
 					Name:   "Фронтальная 2.1",
