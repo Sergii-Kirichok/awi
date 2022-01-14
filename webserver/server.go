@@ -112,8 +112,10 @@ func updateCamerasStates() {
 	}
 }
 
-func getCountdown(w http.ResponseWriter, r *http.Request) {
-	if !isStartCountdown() {
+func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
+	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+
+	if !isStartCountdown(zone) {
 		atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
 	} else if atomic.LoadInt32(&timeLeft) > 0 {
 		atomic.AddInt32(&timeLeft, -1)
@@ -133,17 +135,17 @@ func getCountdown(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isStartCountdown() bool {
+func isStartCountdown(zone controller.Zone) bool {
 	mutex.RLock()
 	defer mutex.RUnlock()
-	for _, state := range camerasStates {
-		for _, input := range state.Inputs {
+	for _, camera := range zone.Cameras {
+		for _, input := range camera.Inputs {
 			if !input.State {
 				return false
 			}
 		}
 
-		if !state.Cars || !state.Humans {
+		if !camera.Car || !camera.Human {
 			return false
 		}
 	}
@@ -151,10 +153,13 @@ func isStartCountdown() bool {
 	return true
 }
 
-func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
+	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+
 	mutex.RLock()
-	cameraIDs := make([]string, 0, len(camerasStates))
-	for cameraID := range camerasStates {
+	cameraIDs := make([]string, 0, len(zone.Cameras))
+	for cameraID, c := range zone.Cameras {
+		fmt.Printf("cameraID: %s, CAM: %v\n", cameraID, c)
 		cameraIDs = append(cameraIDs, cameraID)
 	}
 	mutex.RUnlock()
@@ -173,10 +178,12 @@ func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCameraInfo(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCameraInfo(w http.ResponseWriter, r *http.Request) {
+	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+
 	mutex.RLock()
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(camerasStates[mux.Vars(r)["camera-id"]]); err != nil {
+	if err := json.NewEncoder(&b).Encode(zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		mutex.RUnlock()
@@ -207,11 +214,11 @@ func (s *Server) ListenAndServeHTTPS() {
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
-	zone.HandleFunc("/countdown", getCountdown).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-ids", getCamerasIDs).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
+	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)
 
-	go updateCamerasStates()
+	//go updateCamerasStates()
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	certFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificate)

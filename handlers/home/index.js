@@ -72,14 +72,14 @@ function updateCountdown(timeLeft = 0) {
 formatNumber = (num) => num < 10 ? "0" + num: num;
 
 function updateCameraStates(id, states) {
-    const {cars, humans, inputs} = states;
+    const {car, human, inputs} = states;
     console.log(inputs)
     const camera = document.getElementById(id) ?? createCamera(id, inputs);
     for (const icon of camera.getElementsByTagName("i")) {
         if (icon.className.includes(truckIconClassName)) {
-            setStatus(icon, cars);
+            setStatus(icon, car);
         } else if (icon.className.includes(humanIconClassName)) {
-            setStatus(icon, humans);
+            setStatus(icon, human);
         } else if (icon.className.includes(inputIconClassName)) {
             setStatus(icon, Object.values(inputs).find(inp => inp.id === icon.id).state);
         }

@@ -50,7 +50,7 @@ func genZoneId(name string) string {
 func (c *Config) GetZoneData(name string) Zone {
 	c.Lock()
 	for _, z := range c.Zones {
-		if z.Name == name {
+		if z.Id == name {
 			return z
 		}
 	}
