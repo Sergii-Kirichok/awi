@@ -57,3 +57,13 @@ func (c *Config) GetZoneData(name string) Zone {
 	c.Unlock()
 	return Zone{}
 }
+
+func (c *Config) GetZoneNames() map[string]string {
+	c.Lock()
+	names := make(map[string]string, len(c.Zones))
+	for _, z := range c.Zones {
+		names[z.Id] = z.Id
+	}
+	c.Unlock()
+	return names
+}

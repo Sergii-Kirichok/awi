@@ -32,6 +32,7 @@ func (h *HandlerData) inputState(e *Event) error {
 			if cam.Id == e.CameraId {
 				//Ищем нужный вход
 				for iId, inptut := range cam.Inputs {
+					// Нашли вход, дальше будем менять ему статус
 					if inptut.EntityId == e.EntityId {
 						inptut := h.cfg.Zones[zId].Cameras[cId].Inputs[iId]
 						if EventTypes(e.Type) == DEVICE_DIGITAL_INPUT_ON {
@@ -45,8 +46,8 @@ func (h *HandlerData) inputState(e *Event) error {
 			}
 		}
 	}
-	fmt.Printf("ПРОВЕРИТЬ, не тестировал\n")
-	//Если не нашли вход - пока забиваем, возможно надо ругаться что вход не найден ни у одной отслеживаемой камеры
+	fmt.Printf("[NOTI] ПРОВЕРИТЬ! Не тестировал!\n")
+	//Если не нашли вход - забиваем, возможно надо-бы ругаться что вход не найден ни у одной отслеживаемой камеры, но нас пока это не волнует
 	return nil
 }
 
