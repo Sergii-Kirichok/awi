@@ -50,16 +50,10 @@ statusBtnEl.onclick = async () => await recover();
 
 function countdown() {
     setTimeout(async function again() {
-        try {
-            const timeLeft = await get("/countdown");
-            updateCountdown(timeLeft);
-            if (!timeLeft) {
-                enableStatusButton();
-                return
-            }
-        } catch (error) {
-            console.error("countdown error:", error)
-            // todo: mb make something...
+        const timeLeft = await get("/countdown");
+        updateCountdown(timeLeft);
+        if (!timeLeft) {
+            enableStatusButton();
             return
         }
 
@@ -88,12 +82,12 @@ function createCamera(name) {
 }
 
 function newElement(tagName, options = {}) {
-    const e = document.createElement(tagName);
+    const el = document.createElement(tagName);
     for (const prop of Object.keys(options)) {
-        e[prop] = options[prop];
+        el[prop] = options[prop];
     }
 
-    return e
+    return el
 }
 
 formatStatus = (status) => status ? " ready" : ""
