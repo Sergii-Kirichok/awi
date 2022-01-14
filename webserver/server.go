@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -65,8 +66,8 @@ func getCountdown(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
-	//cameraIDs := []string{"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA"}
-	cameraIDs := []string{"CAM 1", "CAM 2", "CAM 3"}
+	cameraIDs := []string{"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA"}
+	//cameraIDs := []string{"4xIx1DMw", "DW2tDBK", "CDilIfJ"}
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&cameraIDs); err != nil {
@@ -92,26 +93,26 @@ func getCameraInfo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["camera-id"]
 
 	states := map[string]*CameraStates{
-		//"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-		//	Cars:   true,
-		//	Humans: false,
-		//	Inputs: true,
+		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
+			Cars:   0 == rand.Intn(2),
+			Humans: 0 == rand.Intn(2),
+			Inputs: 0 == rand.Intn(2),
+		},
+		//"4xIx1DMw": {
+		//	Cars:   0 == rand.Intn(2),
+		//	Humans: 0 == rand.Intn(2),
+		//	Inputs: 0 == rand.Intn(2),
 		//},
-		"CAM 1": {
-			Cars:   true,
-			Humans: true,
-			Inputs: true,
-		},
-		"CAM 2": {
-			Cars:   true,
-			Humans: false,
-			Inputs: true,
-		},
-		"CAM 3": {
-			Cars:   false,
-			Humans: true,
-			Inputs: false,
-		},
+		//"DW2tDBK": {
+		//	Cars:   0 == rand.Intn(2),
+		//	Humans: 0 == rand.Intn(2),
+		//	Inputs: 0 == rand.Intn(2),
+		//},
+		//"CDilIfJ": {
+		//	Cars:   0 == rand.Intn(2),
+		//	Humans: 0 == rand.Intn(2),
+		//	Inputs: 0 == rand.Intn(2),
+		//},
 	}
 
 	var b bytes.Buffer
