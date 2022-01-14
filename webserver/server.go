@@ -46,8 +46,18 @@ const stabilizationTime = (15 * time.Second) / time.Second
 
 var timeLeft = int32(stabilizationTime)
 
+var camerasStates = map[string]*CameraStates{
+	"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
+		Cars:   false,
+		Humans: false,
+		Inputs: false,
+	},
+}
+
 func getCountdown(w http.ResponseWriter, r *http.Request) {
-	if atomic.LoadInt32(&timeLeft) > 0 {
+	if !isStartCountdown() {
+		atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
+	} else if atomic.LoadInt32(&timeLeft) > 0 {
 		atomic.AddInt32(&timeLeft, -1)
 	}
 
@@ -63,6 +73,16 @@ func getCountdown(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func isStartCountdown() bool {
+	for _, state := range camerasStates {
+		if !state.Cars || !state.Humans || !state.Inputs {
+			return false
+		}
+	}
+
+	return true
 }
 
 func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
