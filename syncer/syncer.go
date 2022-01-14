@@ -50,7 +50,7 @@ func (s *syncer) Sync() {
 			}
 		}
 
-		if !showInfo {
+		if !showInfo && s.auth.Config.GetDebug() {
 			showInfo = true
 			fmt.Printf("[INFO] MyWebHooks: %v, data: %#v\n", s.wh, s.wh.Webhooks)
 			for k, v := range s.wh.Webhooks {

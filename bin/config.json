@@ -7,78 +7,24 @@
 	"wp_port": "8443",
 	"wp_user": "administrator",
 	"wp_password": "yjdsqgfhjkm",
-	"dev_nonce": "FO#09121901",
-	"dev_key": "9fbd5669d18031f8ce5d4261b17dc3334c78f9e1597bef0bb5d3c26c7cffee8a",
 	"zones": [
 		{
+			"Id": "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631",
 			"name": "Весовая №1",
 			"cameras": [
 				{
-					"cam_id": "AvigilonCamId",
-					"name": "Фронтальная 1.1",
-					"inputs": [
-						{
-							"id": "",
-							"name": ""
-						},
-						{
-							"id": "AvigilonId",
-							"name": "Вход №1.1"
-						}
-					]
-				},
-				{
-					"cam_id": "AvigilonCamId",
-					"name": "Фронтальная 1.2",
-					"inputs": [
-						{
-							"id": "",
-							"name": ""
-						},
-						{
-							"id": "AvigilonId",
-							"name": "Вход №1.2"
-						}
-					]
+					"serial": "102109218992"
 				}
 			],
-			"delay_sec": 300,
+			"delay_sec": 180,
 			"bookmarks": true,
 			"alarms": true
 		},
 		{
+			"Id": "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632",
 			"name": "Весовая №2",
-			"cameras": [
-				{
-					"cam_id": "AvigilonCamId",
-					"name": "Фронтальная 2.1",
-					"inputs": [
-						{
-							"id": "",
-							"name": ""
-						},
-						{
-							"id": "AvigilonId",
-							"name": "Вход №2.1"
-						}
-					]
-				},
-				{
-					"cam_id": "AvigilonCamId",
-					"name": "Фронтальная 2.2",
-					"inputs": [
-						{
-							"id": "",
-							"name": ""
-						},
-						{
-							"id": "AvigilonId",
-							"name": "Вход №2.2"
-						}
-					]
-				}
-			],
-			"delay_sec": 0,
+			"cameras": [],
+			"delay_sec": 30,
 			"bookmarks": true
 		}
 	]

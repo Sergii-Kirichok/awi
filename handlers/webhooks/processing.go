@@ -29,7 +29,7 @@ func (h *HandlerData) inputState(e *Event) error {
 		// проходим по камерам зоны в поисках подходящей камеры
 		for cId, cam := range zone.Cameras {
 			//Если нашли камеру, ищем у неё нужный вход
-			if cam.CamID == e.CameraId {
+			if cam.Id == e.CameraId {
 				//Ищем нужный вход
 				for iId, inptut := range cam.Inputs {
 					if inptut.EntityId == e.EntityId {

@@ -20,33 +20,40 @@ func (c *Config) Load() (*Config, error) {
 	if _, err := os.Stat(file); err == nil {
 		data, _ := ioutil.ReadFile(file)
 		if err := json.Unmarshal(data, &c); err != nil {
-			return c, fmt.Errorf("Error decoding config: %s", err)
+			return c, fmt.Errorf("Load: Error decoding config: %s", err)
 		}
 	} else if os.IsNotExist(err) {
 		c.makeDefault()
-		if err := c.Save(dir, "config.json"); err != nil {
-			return c, fmt.Errorf("Save config: %s", err)
+		if err := c.Save(); err != nil {
+			return c, fmt.Errorf("Load: %s", err)
 		}
 	} else {
-		return c, fmt.Errorf("Error reading config: %s", err)
+		return c, fmt.Errorf("Load: Error reading config: %s", err)
 	}
+
+	if err := c.checkZones(); err != nil {
+		return c, fmt.Errorf("Load: %s", err)
+	}
+
+	c.checkNonce()
 	return c, nil
 }
 
 //Encrypt configuration and Save it
-func (c *Config) Save(dir string, fileName string) error {
-	f, err := os.OpenFile(fmt.Sprintf("%s/%s", dir, fileName), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+func (c *Config) Save() error {
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	f, err := os.OpenFile(fmt.Sprintf("%s/config.json", dir), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	defer f.Close()
 
 	if err != nil {
-		return fmt.Errorf("Error writing config: %s", err)
+		return fmt.Errorf("Save: Error writing config: %s", err)
 	}
 
 	out := json.NewEncoder(f)
 	out.SetIndent("", "\t")
 
 	if err := out.Encode(c); err != nil {
-		return fmt.Errorf("Error encoding config: %s", err)
+		return fmt.Errorf("Save: Error encoding config: %s", err)
 	}
 	return nil
 }
