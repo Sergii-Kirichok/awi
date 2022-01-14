@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -41,17 +42,39 @@ func New(name, version string, config *config.Config) *Server {
 	}
 }
 
+type CameraStates struct {
+	Cars   bool `json:"cars"`
+	Humans bool `json:"humans"`
+	Inputs bool `json:"inputs"`
+}
+
 //const stabilizationTime = 5 * time.Minute / time.Second
 const stabilizationTime = (15 * time.Second) / time.Second
 
-var timeLeft = int32(stabilizationTime)
+var (
+	timeLeft = int32(stabilizationTime)
 
-var camerasStates = map[string]*CameraStates{
-	"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-		Cars:   false,
-		Humans: false,
-		Inputs: false,
-	},
+	mutex         sync.RWMutex
+	camerasStates = map[string]*CameraStates{
+		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {},
+		//"4xIx1DMw": {},
+		//"DW2tDBK": {},
+		//"CDilIfJ": {},
+	}
+)
+
+func updateCamerasStates() {
+	for range time.Tick(time.Second) {
+		mutex.Lock()
+		fmt.Println("updating camera states:")
+		for name, state := range camerasStates {
+			state.Cars = 0 != rand.Intn(25)
+			state.Humans = 0 != rand.Intn(20)
+			state.Inputs = 0 != rand.Intn(30)
+			fmt.Printf("name: %s\n\t%v\n", name, state)
+		}
+		mutex.Unlock()
+	}
 }
 
 func getCountdown(w http.ResponseWriter, r *http.Request) {
@@ -76,6 +99,8 @@ func getCountdown(w http.ResponseWriter, r *http.Request) {
 }
 
 func isStartCountdown() bool {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	for _, state := range camerasStates {
 		if !state.Cars || !state.Humans || !state.Inputs {
 			return false
@@ -86,8 +111,12 @@ func isStartCountdown() bool {
 }
 
 func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
-	cameraIDs := []string{"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA"}
-	//cameraIDs := []string{"4xIx1DMw", "DW2tDBK", "CDilIfJ"}
+	mutex.RLock()
+	cameraIDs := make([]string, 0, len(camerasStates))
+	for cameraID := range camerasStates {
+		cameraIDs = append(cameraIDs, cameraID)
+	}
+	mutex.RUnlock()
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&cameraIDs); err != nil {
@@ -103,44 +132,15 @@ func getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type CameraStates struct {
-	Cars   bool `json:"cars"`
-	Humans bool `json:"humans"`
-	Inputs bool `json:"inputs"`
-}
-
 func getCameraInfo(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["camera-id"]
-
-	states := map[string]*CameraStates{
-		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-			Cars:   0 == rand.Intn(2),
-			Humans: 0 == rand.Intn(2),
-			Inputs: 0 == rand.Intn(2),
-		},
-		//"4xIx1DMw": {
-		//	Cars:   0 == rand.Intn(2),
-		//	Humans: 0 == rand.Intn(2),
-		//	Inputs: 0 == rand.Intn(2),
-		//},
-		//"DW2tDBK": {
-		//	Cars:   0 == rand.Intn(2),
-		//	Humans: 0 == rand.Intn(2),
-		//	Inputs: 0 == rand.Intn(2),
-		//},
-		//"CDilIfJ": {
-		//	Cars:   0 == rand.Intn(2),
-		//	Humans: 0 == rand.Intn(2),
-		//	Inputs: 0 == rand.Intn(2),
-		//},
-	}
-
+	mutex.RLock()
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(states[id]); err != nil {
+	if err := json.NewEncoder(&b).Encode(camerasStates[mux.Vars(r)["camera-id"]]); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	mutex.RUnlock()
 
 	if _, err := w.Write(b.Bytes()); err != nil {
 		log.Printf("response error with empty data: %s\n", err)
@@ -189,6 +189,7 @@ func (s *Server) ListenAndServeHTTPS() {
 	s.router.HandleFunc("/cameras-info/{camera-id}", getCameraInfo).Methods(http.MethodGet)
 	s.router.HandleFunc("/reset-timer", resetTimer).Methods(http.MethodPost)
 
+	go updateCamerasStates()
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	certFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificate)
