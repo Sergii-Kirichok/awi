@@ -51,7 +51,7 @@ statusBtnEl.onclick = async () => await recover();
 function countdown() {
     setTimeout(async function again() {
         try {
-            const timeLeft = await get("https://sanya.avigilon/countdown");
+            const timeLeft = await get("/countdown");
             updateCountdown(timeLeft);
             if (!timeLeft) {
                 enableStatusButton();
@@ -68,10 +68,10 @@ function countdown() {
 }
 
 async function render() {
-    const cameraIDs = await get("https://sanya.avigilon/cameras-ids");
+    const cameraIDs = await get("/cameras-ids");
 
     for (let idx = 0; idx < cameraIDs.length; idx++) {
-        const states = await get(`https://sanya.avigilon/cameras-info/${cameraIDs[idx]}`)
+        const states = await get(`/cameras-info/${cameraIDs[idx]}`)
         createCamera(`CAM-${idx}`, states);
     }
 }
