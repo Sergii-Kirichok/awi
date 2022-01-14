@@ -1,3 +1,5 @@
+const zone = window.location.pathname.slice("/zones/".length);
+
 const countdownEl = document.getElementById("countdown");
 const statusBtnEl = document.getElementById("status-button");
 const camerasDivEl = document.getElementById("cams");
@@ -32,7 +34,7 @@ function changeColor(el, color) {
 }
 
 async function get(url = "") {
-    const response = await fetch(url);
+    const response = await fetch(`${zone}/${url}`);
     return response.json();
 }
 
