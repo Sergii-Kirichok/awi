@@ -81,7 +81,7 @@ type EventTopics struct {
 
 func GetWebhooks(a *Auth) ([]Webhook, error) {
 	//Всегда проверяем логин перед любым запросом.
-	if err := a.Login(); err != nil {
+	if _, err := a.Login(); err != nil {
 		return nil, fmt.Errorf("GetWebhooks: %s", err)
 	}
 
@@ -95,7 +95,7 @@ func GetWebhooks(a *Auth) ([]Webhook, error) {
 
 	var reqIface map[string]interface{}
 	if err := json.NewDecoder(&b).Decode(&reqIface); err != nil {
-		return nil, fmt.Errorf("Error decoding reqInface: %s", err)
+		return nil, fmt.Errorf("GetWebhooks: Error decoding reqInface: %s", err)
 	}
 
 	r := NewRequest(a.Config)
@@ -110,12 +110,12 @@ func GetWebhooks(a *Auth) ([]Webhook, error) {
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return nil, fmt.Errorf("Error decoding config: %s", err)
+		return nil, fmt.Errorf("GetWebhooks: Error decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {
 		d, _ := ErrorParse(answer)
-		return nil, fmt.Errorf("Can't read webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
+		return nil, fmt.Errorf("GetWebhooks: Can't read webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
 	}
 
 	return resp.Result.Webhooks, nil

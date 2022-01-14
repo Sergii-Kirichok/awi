@@ -48,16 +48,16 @@ func NewAuth(c *config.Config) *Auth {
 }
 
 //Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
-func (a *Auth) Login() error {
+func (a *Auth) Login() (*Auth, error) {
 	//Проверяем, может ещё не стоит авторизоваться снова.
 	if time.Since(a.AuthTime).Minutes() < 50 {
-		return nil
+		return a, nil
 	}
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(a.Request)
 	if err != nil {
-		return fmt.Errorf("Login Err: %s", err)
+		return a, fmt.Errorf("Login Err: %s", err)
 	}
 	r := NewRequest(a.Config)
 	r.Data = b.Bytes()
@@ -66,17 +66,17 @@ func (a *Auth) Login() error {
 
 	answer, err := r.MakeRequest()
 	if err != nil {
-		return fmt.Errorf("Login: %s", err)
+		return a, fmt.Errorf("Login: %s", err)
 	}
 
 	if err := json.Unmarshal(answer, &a.Response); err != nil {
-		return fmt.Errorf("Error decoding config: %s", err)
+		return a, fmt.Errorf("Error decoding config: %s", err)
 	}
 
 	if a.Response.Status != "success" {
-		return fmt.Errorf("Can't Login: Status == %s", a.Response.Status)
+		return a, fmt.Errorf("Can't Login: Status == %s", a.Response.Status)
 	}
 	a.AuthTime = time.Now()
 
-	return nil
+	return a, nil
 }

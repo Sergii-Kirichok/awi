@@ -12,9 +12,15 @@ type syncer struct {
 	auth     *awp.Auth
 	wh       *awp.MyWebhooks // Массив моих вебхуков. По-хорошему вебхук вообще должен быть один
 	lastSync time.Time       // Время последней синхронизации
-	blocker  bool            // Блокировка работы основной программы, если нет возможности синхронизироваться ok == true
+	blocker  blocker         // Блокировка работы основной программы, если нет возможности синхронизироваться ok == true
 	m        *sync.Mutex
 }
+type blocker bool
+
+const (
+	Blocked    blocker = false
+	NotBlocked blocker = true
+)
 
 func New(a *awp.Auth) *syncer {
 	return &syncer{
@@ -31,24 +37,24 @@ func (s *syncer) Sync() {
 		// Заполняем главную структуру актуальными данными
 		if time.Since(s.lastSync).Seconds() > 60 {
 			s.lastSync = time.Now()
-			//Обновляем/заполняем данными камеры и входы
+			// Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
-				log.Printf("[ERROR] Can't sync data: %s\n", err)
+				log.Printf("[ERROR] Sync: Can't sync data: %s\n", err)
 			}
 
 			// Удаляем старые/чужие вебхуки если таковые имеются, создаём свои если их ешё нет
-			if s.getBlocker() {
+			if s.getBlocker() == NotBlocked {
 				if err := awp.WebhooksUpdater(s.auth, s.wh); err != nil {
-					log.Printf("[ERROR] %s\n", err)
+					log.Printf("[ERROR] Sync: %s\n", err)
 				}
 			}
 		}
 
 		if !showInfo {
 			showInfo = true
-			fmt.Printf("MyWebHooks: %v, data: %#v\n", s.wh, s.wh.Webhooks)
+			fmt.Printf("[INFO] MyWebHooks: %v, data: %#v\n", s.wh, s.wh.Webhooks)
 			for k, v := range s.wh.Webhooks {
-				fmt.Printf("Webhooks Key %v, Value: %#v\n", k, v)
+				fmt.Printf("[INFO] Webhooks Key %v, Value: %#v\n", k, v)
 			}
 		}
 
@@ -65,7 +71,7 @@ func (s *syncer) update() error {
 	// Забираем у WebPointa все камеры
 	cameras, err := awp.GetCameras(s.auth)
 	if err != nil {
-		s.blocker = true
+		s.blocker = Blocked
 		return fmt.Errorf("update: %s", err)
 	}
 	//todo: удалить инфо-вывод
@@ -76,11 +82,11 @@ func (s *syncer) update() error {
 
 	//todo: Обновляем входы на камерах, прописываем их ИД
 
-	s.blocker = true // Всё ок, блокер должен отключен == ok == true
+	s.blocker = NotBlocked // Всё ок
 	return nil
 }
 
-func (s *syncer) getBlocker() bool {
+func (s *syncer) getBlocker() blocker {
 	return s.blocker
 }
 

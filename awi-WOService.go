@@ -6,23 +6,31 @@ import (
 	"awi/syncer"
 	"awi/webserver"
 	"log"
+	"time"
 )
 
 func main() {
-	cfg := config.New().Load()
-
-	auth := awp.NewAuth(cfg)
-	if err := auth.Login(); err != nil {
-		log.Fatalf("Login Err: %s", err)
+start:
+	cfg, err := config.New().Load()
+	if err != nil {
+		log.Printf("[ERROR] Load config: %s\n", err)
+		time.Sleep(10 * time.Second)
+		goto start
 	}
 
-	// Синхронизатор. Проверяет конфиг, находит Ид камер, содаёт и удаляет вебхуки, ...
-	s := syncer.New(auth)
-	go s.Sync()
+	//Если не смогли авторизоваться при старте, то явно какая-то ошибка в конфиге или с самим сервером WP. Поэтому идём перечитываем конфиг и пробуем ещё раз.
+	auth, err := awp.NewAuth(cfg).Login()
+	if err != nil {
+		log.Printf("Login Err: %s", err)
+		time.Sleep(10 * time.Second)
+		goto start
+	}
 
-	//Todo: Тут рутинка, отвечающая за, таймеры обратного отсчёта по зонам
+	// Синхронизатор. Проверяет конфиг, находит Ид камер, создаёт и удаляет вебхуки, ...
+	go syncer.New(auth).Sync()
+
+	//Todo: Тут рутинка, отвечающая за: таймеры обратного отсчёта по зонам
 
 	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
-	web := webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg)
-	web.ListenAndServeHTTPS()
+	webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg).ListenAndServeHTTPS()
 }

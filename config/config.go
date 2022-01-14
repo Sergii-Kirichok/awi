@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -14,39 +13,42 @@ func New() *Config {
 }
 
 //Load configuration data from the encrypted file
-func (c *Config) Load() *Config {
+func (c *Config) Load() (*Config, error) {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
 	file := fmt.Sprintf("%s/config.json", dir)
 	if _, err := os.Stat(file); err == nil {
 		data, _ := ioutil.ReadFile(file)
 		if err := json.Unmarshal(data, &c); err != nil {
-			log.Fatalf("Error decoding config: %s", err)
+			return c, fmt.Errorf("Error decoding config: %s", err)
 		}
 	} else if os.IsNotExist(err) {
 		c.makeDefault()
-		c.Save(dir, "config.json")
+		if err := c.Save(dir, "config.json"); err != nil {
+			return c, fmt.Errorf("Save config: %s", err)
+		}
 	} else {
-		log.Fatalf("Error reading config: %s", err)
+		return c, fmt.Errorf("Error reading config: %s", err)
 	}
-	return c
+	return c, nil
 }
 
 //Encrypt configuration and Save it
-func (c *Config) Save(dir string, fileName string) {
+func (c *Config) Save(dir string, fileName string) error {
 	f, err := os.OpenFile(fmt.Sprintf("%s/%s", dir, fileName), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	defer f.Close()
 
 	if err != nil {
-		log.Fatalf("Error writing config: %s", err)
+		return fmt.Errorf("Error writing config: %s", err)
 	}
 
 	out := json.NewEncoder(f)
 	out.SetIndent("", "\t")
 
 	if err := out.Encode(c); err != nil {
-		log.Fatalf("Error encoding config: %s", err)
+		return fmt.Errorf("Error encoding config: %s", err)
 	}
+	return nil
 }
 
 func (c *Config) makeDefault() {

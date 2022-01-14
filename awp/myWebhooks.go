@@ -29,7 +29,7 @@ func (w *MyWebhooks) Delete(name string) {
 
 func (w *MyWebhooks) PostPutWebhook(a *Auth, wh *Webhook, method Methods) error {
 	//Всегда проверяем логин перед любым запросом.
-	if err := a.Login(); err != nil {
+	if _, err := a.Login(); err != nil {
 		return fmt.Errorf("PostPutWebhook: %s", err)
 	}
 
@@ -59,12 +59,12 @@ func (w *MyWebhooks) PostPutWebhook(a *Auth, wh *Webhook, method Methods) error 
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return fmt.Errorf("Error decoding config: %s", err)
+		return fmt.Errorf("PostPutWebhooks: Error decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {
 		d, _ := ErrorParse(answer)
-		return fmt.Errorf("Can't %s webhooks: Status == %s. [%d]%s - %s", method, resp.Status, d.StatusCode, d.Status, d.Message)
+		return fmt.Errorf("PostPutWebhooks: Can't %s webhooks: Status == %s. [%d]%s - %s", method, resp.Status, d.StatusCode, d.Status, d.Message)
 	}
 
 	if method == POST {

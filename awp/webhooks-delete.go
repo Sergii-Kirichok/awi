@@ -30,7 +30,7 @@ func DeleteWebhooks(a *Auth, query *RequestWebhooksGet) error {
 
 func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
 	//Всегда проверяем логин перед любым запросом.
-	if err := a.Login(); err != nil {
+	if _, err := a.Login(); err != nil {
 		return fmt.Errorf("DeleteWebhook: %s", err)
 	}
 
@@ -38,7 +38,7 @@ func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(query)
 	if err != nil {
-		return fmt.Errorf("DeleteWebhooks: %s", err)
+		return fmt.Errorf("DeleteWebhook: %s", err)
 	}
 	//fmt.Printf("DeleteWebhook: Query encoded: %s\n", b.String())
 
@@ -49,18 +49,18 @@ func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
 
 	answer, err := r.MakeRequest()
 	if err != nil {
-		return fmt.Errorf("DeleteWebhooks: %s", err)
+		return fmt.Errorf("DeleteWebhook: %s", err)
 	}
 	//fmt.Printf("DELETE WEBHOOK ANSWER: %s\n", string(answer))
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return fmt.Errorf("Error decoding config: %s", err)
+		return fmt.Errorf("DeleteWebhook: Error decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {
 		d, _ := ErrorParse(answer)
-		return fmt.Errorf("Can't DELETE webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
+		return fmt.Errorf("DeleteWebhook: Can't DELETE webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
 	}
 	return nil
 }
