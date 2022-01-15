@@ -1,86 +1,127 @@
 package webserver
 
 import (
+	"awi/controller"
 	"testing"
 )
 
 func TestIsStartCountdown(t *testing.T) {
 	testCases := []struct {
-		name          string
-		camerasStates map[string]*CameraStates
-		output        bool
+		name   string
+		zone   controller.Zone
+		output bool
 	}{
 		{
-			camerasStates: map[string]*CameraStates{
-				"first": {
-					Cars:   true,
-					Humans: true,
-					Inputs: true,
-				},
-				"second": {
-					Cars:   true,
-					Humans: true,
-					Inputs: true,
+			zone: controller.Zone{
+				Cameras: map[string]*controller.Camera{
+					"first": {
+						Car:   true,
+						Human: true,
+						Inputs: map[string]*controller.Input{
+							"first": {
+								State: true,
+							},
+						},
+					},
+					"second": {
+						Car:   true,
+						Human: true,
+						Inputs: map[string]*controller.Input{
+							"first": {
+								State: true,
+							},
+							"second": {
+								State: true,
+							},
+						},
+					},
 				},
 			},
 			output: true,
 		},
 		{
-			camerasStates: map[string]*CameraStates{
-				"first": {
-					Cars:   true,
-					Humans: true,
-					Inputs: true,
+			zone: controller.Zone{
+				Cameras: map[string]*controller.Camera{
+					"first": {
+						Car:   true,
+						Human: true,
+						Inputs: map[string]*controller.Input{
+							"first": {
+								State: true,
+							},
+						}},
+					"second": {
+						Car:    true,
+						Human:  true,
+						Inputs: map[string]*controller.Input{},
+					},
 				},
-				"second": {
-					Cars:   true,
-					Humans: true,
-					Inputs: false,
+			},
+			output: true,
+		},
+		{
+			zone: controller.Zone{
+				Cameras: map[string]*controller.Camera{
+					"first": {
+						Car:    true,
+						Human:  false,
+						Inputs: map[string]*controller.Input{},
+					},
+					"second": {
+						Car:    true,
+						Human:  true,
+						Inputs: map[string]*controller.Input{},
+					},
 				},
 			},
 			output: false,
 		},
 		{
-			camerasStates: map[string]*CameraStates{
-				"first": {
-					Cars:   true,
-					Humans: false,
-					Inputs: true,
-				},
-				"second": {
-					Cars:   true,
-					Humans: true,
-					Inputs: false,
-				},
-			},
-			output: false,
-		},
-		{
-			camerasStates: map[string]*CameraStates{
-				"first": {
-					Cars:   false,
-					Humans: true,
-					Inputs: false,
-				},
-				"second": {
-					Cars:   true,
-					Humans: true,
-					Inputs: false,
+			zone: controller.Zone{
+				Cameras: map[string]*controller.Camera{
+					"first": {
+						Car:   false,
+						Human: true,
+						Inputs: map[string]*controller.Input{
+							"first": {
+								State: false,
+							},
+						},
+					},
+					"second": {
+						Car:   true,
+						Human: true,
+						Inputs: map[string]*controller.Input{
+							"second": {
+								State: false,
+							},
+						},
+					},
 				},
 			},
 			output: false,
 		},
 		{
-			camerasStates: map[string]*CameraStates{
-				"first": {
-					Cars:   false,
-					Humans: false,
-					Inputs: false,
-				},
-				"second": {
-					Cars:   false,
-					Humans: false,
-					Inputs: false,
+			zone: controller.Zone{
+				Cameras: map[string]*controller.Camera{
+					"first": {
+						Car:   false,
+						Human: false,
+						Inputs: map[string]*controller.Input{
+							"first": {
+								State: false,
+							},
+						},
+					},
+					"second": {
+						Car:   false,
+						Human: false,
+						Inputs: map[string]*controller.Input{
+							"second": {
+								State: false,
+							},
+						},
+					},
 				},
 			},
 			output: false,
@@ -89,12 +130,9 @@ func TestIsStartCountdown(t *testing.T) {
 
 	mutex.RLock()
 	defer mutex.RUnlock()
-	camerasStatesCopy := camerasStates
-	defer func() { camerasStates = camerasStatesCopy }()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			camerasStates = tc.camerasStates
-			if actual := isStartCountdown(); tc.output != actual {
+			if actual := isStartCountdown(tc.zone); tc.output != actual {
 				t.Fail()
 			}
 		})
