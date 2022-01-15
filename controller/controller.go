@@ -45,7 +45,7 @@ func New(c *config.Config) *Controller {
 func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
-		for zId, name := range confNames {
+		for _, name := range confNames {
 			//fmt.Printf("Zone: [%s]%s\n", zId, name)
 			c.updateZone(name)
 		}
