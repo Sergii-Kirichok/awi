@@ -47,14 +47,14 @@ func genZoneId(name string) string {
 }
 
 // Дергаем в для получения копии текущих даннызх зоны
-func (c *Config) GetZoneData(name string) Zone {
+func (c *Config) GetZoneData(zId string) Zone {
 	c.Lock()
+	defer c.Unlock()
 	for _, z := range c.Zones {
-		if z.Id == name {
+		if z.Id == zId {
 			return z
 		}
 	}
-	c.Unlock()
 	return Zone{}
 }
 
@@ -62,7 +62,7 @@ func (c *Config) GetZoneNames() map[string]string {
 	c.Lock()
 	names := make(map[string]string, len(c.Zones))
 	for _, z := range c.Zones {
-		names[z.Id] = z.Id
+		names[z.Id] = z.Name
 	}
 	c.Unlock()
 	return names

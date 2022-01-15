@@ -13,6 +13,7 @@ type Controller struct {
 }
 
 type Zone struct {
+	Id          string
 	Name        string
 	TimeLeftSec int
 	Cameras     map[string]*Camera
@@ -44,70 +45,76 @@ func New(c *config.Config) *Controller {
 func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
-		for _, name := range confNames {
-			c.updateZone(name)
+		for zId := range confNames {
+			c.updateZone(zId)
 		}
 		time.Sleep(1 * time.Second)
 	}
 }
 
-func (c *Controller) updateZone(name string) {
-	zConf := c.conf.GetZoneData(name)
-
-	z, ok := c.zones[zConf.Name]
+func (c *Controller) updateZone(zId string) {
+	zConf := c.conf.GetZoneData(zId)
+	c.mu.Lock()
+	z, ok := c.zones[zConf.Id]
+	c.mu.Unlock()
 	// Если первый запуски и зоны такой нет - создаём
 	if !ok {
-		z = &Zone{}
+		z = &Zone{
+			Id:   zConf.Id,
+			Name: zConf.Name,
+		}
 	}
 
-	z.Name = zConf.Name
 	z.TimeLeftSec = zConf.TimeLeft.Second()
 
 	// Проверка есть-ли вообще у зоны мапа камер
 	if z.Cameras == nil {
-		l := len(zConf.Cameras)
-		// Проверяем, есть-ли у этой зоны вообще камеры. Может администратор создал зону в конфише, а камеры в неё ещё не добавил...
-		if l > 0 {
-			z.Cameras = make(map[string]*Camera, len(zConf.Cameras))
-		}
+		z.Cameras = map[string]*Camera{}
 	}
 
 	// Обновляем данные по-камерам
 	for _, cam := range zConf.Cameras {
-		zCam := z.Cameras[cam.Id]
-		zCam.Name = cam.Name
-		zCam.Car = cam.Car
-		zCam.Human = cam.Person
-		zCam.Id = cam.Id
+		if _, ok := z.Cameras[cam.Id]; !ok {
+			z.Cameras[cam.Id] = &Camera{}
+		}
+		z.Cameras[cam.Id].Name = cam.Name
+		z.Cameras[cam.Id].Car = cam.Car
+		z.Cameras[cam.Id].Human = cam.Person
+		z.Cameras[cam.Id].Id = cam.Id
 
 		// Проверяем, есть-ли вообще у камеры мапа входов
-		if zCam.Inputs == nil {
+		if z.Cameras[cam.Id].Inputs == nil {
 			//Проверяем, может на камере вообще нет входов (т.е. когда мы получали данные в sync-eре webpoint нам сказал что у камеры нет входов нужного типа)
-			l := len(cam.Inputs)
-			if l > 0 {
-				zCam.Inputs = make(map[string]*Input)
-			}
+			z.Cameras[cam.Id].Inputs = make(map[string]*Input)
 		}
 
 		// Заполняем данные о статусе входов (если таковые имеются)
 		for _, cInput := range cam.Inputs {
-			zCam.Inputs[cInput.EntityId].Id = cInput.EntityId
-			zCam.Inputs[cInput.EntityId].State = cInput.State
+			if _, ok := z.Cameras[cam.Id].Inputs[cInput.EntityId]; !ok {
+				z.Cameras[cam.Id].Inputs[cInput.EntityId] = &Input{}
+			}
+			z.Cameras[cam.Id].Inputs[cInput.EntityId].Id = cInput.EntityId
+			z.Cameras[cam.Id].Inputs[cInput.EntityId].State = cInput.State
 		}
 	}
+
+	c.mu.Lock()
+	c.zones[zConf.Id] = z
+	c.mu.Unlock()
 }
 
-// Веб берёт данные по Zone, со всеми её статусами
-func (c *Controller) GetZoneData(name string) Zone {
+// Отсюда веб берёт данные по Zone, со всеми её статусами
+func (c *Controller) GetZoneData(zoneId string) Zone {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
-	for zName, zData := range c.zones {
-		if zName == name {
+	for zId, zData := range c.zones {
+		if zId == zoneId {
+			//fmt.Printf("Zone returned: %#v, cameras num %d\n", *zData, len(zData.Cameras))
 			return *zData
 		}
 	}
-	c.mu.Unlock()
-	return Zone{}
+	return Zone{TimeLeftSec: 36000}
 }
 
 func (c *Controller) MakeAction(name string) error {
