@@ -2,7 +2,6 @@ package controller
 
 import (
 	"awi/config"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -47,7 +46,7 @@ func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
 		for zId, name := range confNames {
-			fmt.Printf("Zone: [%s]%s\n", zId, name)
+			//fmt.Printf("Zone: [%s]%s\n", zId, name)
 			c.updateZone(name)
 		}
 		time.Sleep(1 * time.Second)
