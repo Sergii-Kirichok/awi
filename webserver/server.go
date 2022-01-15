@@ -43,16 +43,7 @@ func New(name, version string, config *config.Config, control *controller.Contro
 
 func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(&zone.Name); err != nil {
-		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if _, err := w.Write(b.Bytes()); err != nil {
-		log.Printf("response error with data %s : %s\n", b.String(), err)
+	if err := sendJSON(w, zone.Name); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -60,55 +51,20 @@ func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(&zone.TimeLeftSec); err != nil {
-		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
+	if err := sendJSON(w, zone.TimeLeftSec); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	if _, err := w.Write(b.Bytes()); err != nil {
-		log.Printf("response error with data %s : %s\n", b.String(), err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func isStartCountdown(zone controller.Zone) bool {
-	for _, camera := range zone.Cameras {
-		for _, input := range camera.Inputs {
-			if !input.State {
-				return false
-			}
-		}
-
-		if !camera.Car || !camera.Human {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-
 	cameraIDs := make([]string, 0, len(zone.Cameras))
-	for cameraID, c := range zone.Cameras {
-		fmt.Printf("cameraID: %s, CAM: %v\n", cameraID, c)
+	for cameraID := range zone.Cameras {
 		cameraIDs = append(cameraIDs, cameraID)
 	}
 
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(&cameraIDs); err != nil {
-		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if _, err := w.Write(b.Bytes()); err != nil {
-		log.Printf("response error with data %s : %s\n", b.String(), err)
+	if err := sendJSON(w, cameraIDs); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -116,23 +72,26 @@ func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getCameraInfo(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
-		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if _, err := w.Write(b.Bytes()); err != nil {
-		log.Printf("response error with empty data: %s\n", err)
+	if err := sendJSON(w, zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-// ListenAndServe listens on the TCP address and serves requests.
-//func (s *Server) ListenAndServe() error {
+func sendJSON(w http.ResponseWriter, data interface{}) error {
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(&data); err != nil {
+		return err
+	}
+
+	if _, err := w.Write(b.Bytes()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ListenAndServeHTTPS listens on the TCP address and serves requests.
 func (s *Server) ListenAndServeHTTPS() {
 	bind := fmt.Sprintf("%s:%s", s.config.WWWAddr, s.config.WWWPort)
 	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
@@ -152,7 +111,6 @@ func (s *Server) ListenAndServeHTTPS() {
 	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)
 
-	//go updateCamerasStates()
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	certFile := fmt.Sprintf("%s/%s", rootDir, s.config.WWWCertificate)

@@ -83,6 +83,7 @@ async function startPolling() {
 }
 
 function updateCountdown(countdownEl, timeLeft = 0) {
+    console.log("updating countdown...");
     const hours = formatNumber(Math.floor(timeLeft / 3600));
     const minutes = formatNumber(Math.floor(timeLeft / 60 - hours * 60));
     const seconds = formatNumber(timeLeft % 60);
@@ -94,6 +95,7 @@ function updateCountdown(countdownEl, timeLeft = 0) {
 formatNumber = (num) => num < 10 ? "0" + num: num;
 
 function createCamera(camerasDivEl, cameraID, states) {
+    console.log(`creating camera ${cameraID}...`);
     const {name, car, human, inputs} = states;
     const camera = newElement("fieldset", { className: "cam", id: cameraID });
     const legend = newElement("legend", { innerText: name });
@@ -124,6 +126,7 @@ function newElement(tagName, options = {}) {
 }
 
 function updateCameraStates(camera, states) {
+    console.log("updating camera states...");
     const {car, human, inputs} = states;
     for (const icon of camera.getElementsByTagName("i")) {
         if (icon.className.includes(truckIconClassName)) {
