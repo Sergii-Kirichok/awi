@@ -2,7 +2,6 @@ package controller
 
 import (
 	"awi/config"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -55,7 +54,6 @@ func (c *Controller) Service() {
 func (c *Controller) updateZone(name string) {
 	zConf := c.conf.GetZoneData(name)
 
-	fmt.Println("Name 2:", name, "zConf:", zConf, "zones:", c.zones)
 	z, ok := c.zones[zConf.Name]
 	// Если первый запуски и зоны такой нет - создаём
 	if !ok {
@@ -102,10 +100,14 @@ func (c *Controller) updateZone(name string) {
 // Веб берёт данные по Zone, со всеми её статусами
 func (c *Controller) GetZoneData(name string) Zone {
 	c.mu.Lock()
-	// todo: may be nil pointer => fix
-	zone := *c.zones[name]
+	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
+	for zName, zData := range c.zones {
+		if zName == name {
+			return *zData
+		}
+	}
 	c.mu.Unlock()
-	return zone
+	return Zone{}
 }
 
 func (c *Controller) MakeAction(name string) error {
