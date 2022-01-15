@@ -75,22 +75,6 @@ func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isStartCountdown(zone controller.Zone) bool {
-	for _, camera := range zone.Cameras {
-		for _, input := range camera.Inputs {
-			if !input.State {
-				return false
-			}
-		}
-
-		if !camera.Car || !camera.Human {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 

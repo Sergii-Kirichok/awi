@@ -46,6 +46,7 @@ func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
 		for zId := range confNames {
+			c.conf.CountDownZoneCheck(zId)
 			c.updateZone(zId)
 		}
 		time.Sleep(1 * time.Second)
