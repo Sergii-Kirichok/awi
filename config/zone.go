@@ -51,7 +51,7 @@ func genZoneId(name string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-// Дергаем в для получения копии текущих даннызх зоны
+// Дергаем в для получения копии текущих данных зоны
 func (c *Config) GetZoneData(zId string) Zone {
 	c.Lock()
 	defer c.Unlock()

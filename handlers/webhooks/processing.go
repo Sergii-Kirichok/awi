@@ -9,11 +9,9 @@ func (h *HandlerData) processing() error {
 	for _, e := range h.msg.Notifications {
 		switch EventTypes(e.Event.Type) {
 		case DEVICE_DIGITAL_INPUT_ON, DEVICE_DIGITAL_INPUT_OFF:
-			h.inputState(e.Event)
-			return nil
+			return h.inputState(e.Event)
 		case DEVICE_ANALYTICS_START, DEVICE_ANALYTICS_STOP:
-			h.personAndCarState(e.Event)
-			return nil
+			return h.personAndCarState(e.Event)
 		default:
 			return fmt.Errorf("processing: NOT Supported evetnt type [%s]", e.Event.Type)
 		}
@@ -50,6 +48,7 @@ func (h *HandlerData) inputState(e *Event) error {
 // Устанавливает у камеры состояние Car и/или Person в true|false
 func (h *HandlerData) personAndCarState(e *Event) error {
 	fmt.Printf("Processing: [%s]\n", e.Type)
-	//Найти камеру по её ID и установить ей состояние входа true
+	//var stateCar, statePerson bool
+
 	return nil
 }

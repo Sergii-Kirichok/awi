@@ -128,6 +128,6 @@ func (c *Controller) GetZoneData(zoneId string) Zone {
 	return Zone{TimeLeftSec: 36000}
 }
 
-func (c *Controller) MakeAction(name string) error {
+func (c *Controller) MakeAction(zoneId string) error {
 	return nil
 }
