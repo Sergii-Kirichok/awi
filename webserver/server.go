@@ -14,13 +14,9 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 type Server struct {
@@ -45,84 +41,28 @@ func New(name, version string, config *config.Config, control *controller.Contro
 	}
 }
 
-type Input struct {
-	Id    string `json:"id"`
-	State bool   `json:"state"`
-}
+func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
+	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 
-type CameraStates struct {
-	Cars   bool              `json:"cars"`
-	Humans bool              `json:"humans"`
-	Inputs map[string]*Input `json:"inputs"`
-}
-
-//const stabilizationTime = 5 * time.Minute / time.Second
-const stabilizationTime = (15 * time.Second) / time.Second
-
-var (
-	timeLeft = int32(stabilizationTime)
-
-	mutex         sync.RWMutex
-	camerasStates = map[string]*CameraStates{
-		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-			Inputs: map[string]*Input{
-				"first": {
-					Id: "f12de34",
-				},
-				"second": {
-					Id: "a6fde34",
-				},
-			},
-		},
-		//"4xIx1DMw": {},
-		//"DW2tDBK": {},
-		//"CDilIfJ": {},
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(&zone.Name); err != nil {
+		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	//zones = map[string]controller.Zone{
-	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631": {
-	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631",
-	//		Cameras: map[string]controller.Camera{
-	//			"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-	//				Car:    true,
-	//				Human:  true,
-	//				Inputs: map[string]controller.Input{},
-	//			},
-	//		},
-	//	},
-	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632": {
-	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632",
-	//	},
-	//}
-)
-
-func updateCamerasStates() {
-	for range time.Tick(time.Second) {
-		mutex.Lock()
-		//fmt.Println("updating camera states:")
-		for _, state := range camerasStates {
-			state.Cars = 0 != rand.Intn(30)
-			state.Humans = 0 != rand.Intn(30)
-			for _, input := range state.Inputs {
-				input.State = 0 != rand.Intn(30)
-			}
-			//fmt.Printf("name: %s\n\t%v\n", name, state)
-		}
-		mutex.Unlock()
+	if _, err := w.Write(b.Bytes()); err != nil {
+		log.Printf("response error with data %s : %s\n", b.String(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 
-	if !isStartCountdown(zone) {
-		atomic.StoreInt32(&timeLeft, int32(stabilizationTime))
-	} else if atomic.LoadInt32(&timeLeft) > 0 {
-		atomic.AddInt32(&timeLeft, -1)
-	}
-
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(&timeLeft); err != nil {
+	if err := json.NewEncoder(&b).Encode(&zone.TimeLeftSec); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -136,8 +76,6 @@ func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 }
 
 func isStartCountdown(zone controller.Zone) bool {
-	mutex.RLock()
-	defer mutex.RUnlock()
 	for _, camera := range zone.Cameras {
 		for _, input := range camera.Inputs {
 			if !input.State {
@@ -156,13 +94,11 @@ func isStartCountdown(zone controller.Zone) bool {
 func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 
-	mutex.RLock()
 	cameraIDs := make([]string, 0, len(zone.Cameras))
 	for cameraID, c := range zone.Cameras {
 		fmt.Printf("cameraID: %s, CAM: %v\n", cameraID, c)
 		cameraIDs = append(cameraIDs, cameraID)
 	}
-	mutex.RUnlock()
 
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&cameraIDs); err != nil {
@@ -181,15 +117,12 @@ func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getCameraInfo(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 
-	mutex.RLock()
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
 		w.WriteHeader(http.StatusInternalServerError)
-		mutex.RUnlock()
 		return
 	}
-	mutex.RUnlock()
 
 	if _, err := w.Write(b.Bytes()); err != nil {
 		log.Printf("response error with empty data: %s\n", err)
@@ -214,6 +147,7 @@ func (s *Server) ListenAndServeHTTPS() {
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
+	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)

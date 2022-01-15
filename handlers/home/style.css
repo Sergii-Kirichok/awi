@@ -53,8 +53,14 @@ body {
     align-items: center;
 }
 
+#zone {
+    font-family: "Georgia", serif;
+    font-size: 5em;
+    color: rgb(35, 93, 164);
+    margin-bottom: 50px;
+}
+
 #countdown {
-    /*font-family: "Fira Code", serif;*/
     font-family: "DSEG7", serif;
     font-size: 5em;
     color: rgb(190, 37, 37);
