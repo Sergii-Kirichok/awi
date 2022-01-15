@@ -57,7 +57,7 @@ func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCamerasID(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	cameraIDs := make([]string, 0, len(zone.Cameras))
 	for cameraID := range zone.Cameras {
@@ -70,7 +70,7 @@ func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) getCameraInfo(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCamera(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -108,8 +108,8 @@ func (s *Server) ListenAndServeHTTPS() {
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
 	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-id", s.getCamerasID).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras/{camera-id}", s.getCamera).Methods(http.MethodGet)
 
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))

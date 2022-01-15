@@ -48,6 +48,8 @@ async function startPolling() {
     const camerasDivEl = newElement("div", { id: "cams" });
 
     [zone, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
+    document.getElementById("spinner").style.display = "none";
+
     statusBtnEl.onclick = () => console.log("click");
 
     setTimeout(async function again() {
@@ -56,7 +58,7 @@ async function startPolling() {
         if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
 
         const prevCameraIDs = cameraIDs;
-        cameraIDs = await get("/cameras-ids");
+        cameraIDs = await get("/cameras-id");
 
         const toRemove = prevCameraIDs.filter(prevID => !cameraIDs.find(currID => prevID === currID));
         toRemove.forEach(id => {
@@ -66,7 +68,7 @@ async function startPolling() {
 
         for (const id of cameraIDs) {
             const camera = document.getElementById(id);
-            const states = await get(`/cameras-info/${id}`)
+            const states = await get(`/cameras/${id}`)
             camera ? updateCameraStates(camera, states) : createCamera(camerasDivEl, id, states);
         }
 

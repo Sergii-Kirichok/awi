@@ -124,3 +124,9 @@ i {
 i.ready {
     color: rgb(19, 154, 19);
 }
+
+#spinner {
+    position: absolute;
+    font-size: 5em;
+    color: rgb(35, 93, 164)
+}
