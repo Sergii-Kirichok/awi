@@ -1,6 +1,8 @@
 package webhooks
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func (h *HandlerData) processing() error {
 	//в зависимости от типа события - выполнить
@@ -22,31 +24,25 @@ func (h *HandlerData) processing() error {
 // Устанавливает у входа камеры  (DEVICE_DIGITAL_INPUT) состояние в true|false
 func (h *HandlerData) inputState(e *Event) error {
 	fmt.Printf("Processing: [%s]\n", e.Type)
-	//Todo: возмсжно надо боваить отдельный метод для установки состояния входа камеры
-	//Todo: ну и наверное всё-же мьютекс необходим
-	//Проходим по зонам в поисках камер
-	for zId, zone := range h.cfg.Zones {
-		// проходим по камерам зоны в поисках подходящей камеры
-		for cId, cam := range zone.Cameras {
-			//Если нашли камеру, ищем у неё нужный вход
-			if cam.Id == e.CameraId {
-				//Ищем нужный вход
-				for iId, inptut := range cam.Inputs {
-					// Нашли вход, дальше будем менять ему статус
-					if inptut.EntityId == e.EntityId {
-						inptut := h.cfg.Zones[zId].Cameras[cId].Inputs[iId]
-						if EventTypes(e.Type) == DEVICE_DIGITAL_INPUT_ON {
-							inptut.State = true
-							//я-бы вышел через return, но почему-то в сообщении не cameraId, a массив камер...
-							continue
-						}
-						inptut.State = false
-					}
-				}
-			}
+
+	var state bool
+	if e.Type == DEVICE_DIGITAL_INPUT_OFF {
+		state = true
+	}
+	errors := map[string]string{}
+
+	for _, cId := range e.CameraIds {
+		if err := h.cfg.SetInputState(cId, e.EntityId, state); err != nil {
+			errors[cId] = fmt.Sprintf("%s", err)
 		}
 	}
-	fmt.Printf("[NOTI] ПРОВЕРИТЬ! Не тестировал!\n")
+	if len(errors) > 0 {
+		errors := ""
+		for cId, err := range errors {
+			errors += fmt.Sprintf("inputState: cameraId[%s]:%s\n", cId, err)
+		}
+		return fmt.Errorf(errors)
+	}
 	//Если не нашли вход - забиваем, возможно надо-бы ругаться что вход не найден ни у одной отслеживаемой камеры, но нас пока это не волнует
 	return nil
 }
