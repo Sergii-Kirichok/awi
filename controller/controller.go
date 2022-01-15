@@ -46,6 +46,7 @@ func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
 		for zId := range confNames {
+			c.conf.CountDownZoneCheck(zId)
 			c.updateZone(zId)
 		}
 		time.Sleep(1 * time.Second)
@@ -67,7 +68,7 @@ func (c *Controller) updateZone(zId string) {
 	}
 
 	// Обновляем счётчик времени
-	timeSince := int(time.Since(zConf.TimeOk).Seconds())
+	timeSince := int(time.Since(zConf.TimeLasErr).Seconds())
 	if timeSince >= zConf.DelaySec {
 		z.TimeLeftSec = 0
 	} else {

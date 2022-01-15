@@ -30,7 +30,7 @@ func New(a *awp.Auth) *syncer {
 	}
 }
 
-// Основная рутина
+// Основная рутина синхронизирующая данные между веб-понитом и нами
 func (s *syncer) Sync() {
 	var showInfo bool
 	for {
@@ -81,7 +81,7 @@ func (s *syncer) update() error {
 	//todo: удалить инфо-вывод
 	// Обновляем данные камеры и ёё входов (имя,id и т.д.) в нашей рабочей структуре
 	for _, camera := range cameras {
-		log.Printf("[INFO] Camera Name: \"%s\", Serial: %s, Active: %v, Id: %s\n", camera.Name, camera.Serial, camera.Active, camera.Id)
+		//log.Printf("[INFO] Camera Name: \"%s\", Serial: %s, Active: %v, Id: %s\n", camera.Name, camera.Serial, camera.Active, camera.Id)
 		//log.Printf("[INFO] Camera FULL DATA: %#v\n", camera)
 		//log.Printf("[INFO] Config: %#v\n", s.auth.Config)
 

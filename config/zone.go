@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
 const zoneMinDelaySec int = 30
 
@@ -43,7 +46,9 @@ func (c *Config) checkZones() error {
 }
 
 func genZoneId(name string) string {
-	return fmt.Sprintf("%x%x", ZoneNameAppendix, name)
+	data := fmt.Sprintf("%s%s", ZoneNameAppendix, name)
+	hash := sha256.Sum256([]byte(data))
+	return fmt.Sprintf("%x", hash)
 }
 
 // Дергаем в для получения копии текущих даннызх зоны
