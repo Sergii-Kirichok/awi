@@ -110,6 +110,7 @@ func (c *Controller) GetZoneData(zoneId string) Zone {
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
 	for zId, zData := range c.zones {
 		if zId == zoneId {
+			//fmt.Printf("Zone returned: %#v, cameras num %d\n", *zData, len(zData.Cameras))
 			return *zData
 		}
 	}
