@@ -2,6 +2,7 @@ package controller
 
 import (
 	"awi/config"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -13,6 +14,7 @@ type Controller struct {
 }
 
 type Zone struct {
+	Id          string
 	Name        string
 	TimeLeftSec int
 	Cameras     map[string]*Camera
@@ -44,25 +46,29 @@ func New(c *config.Config) *Controller {
 func (c *Controller) Service() {
 	for {
 		confNames := c.conf.GetZoneNames()
-		for _, name := range confNames {
+		for zId, name := range confNames {
+			fmt.Printf("Zone: [%s]%s\n", zId, name)
 			c.updateZone(name)
 		}
 		time.Sleep(1 * time.Second)
 	}
 }
 
-func (c *Controller) updateZone(name string) {
-	zConf := c.conf.GetZoneData(name)
+func (c *Controller) updateZone(zId string) {
+	zConf := c.conf.GetZoneData(zId)
 
-	z, ok := c.zones[zConf.Name]
+	z, ok := c.zones[zConf.Id]
 	// Если первый запуски и зоны такой нет - создаём
 	if !ok {
-		z = &Zone{}
+		z = &Zone{
+			Id:   zConf.Id,
+			Name: zConf.Name,
+		}
 	}
 
-	z.Name = zConf.Name
 	z.TimeLeftSec = zConf.TimeLeft.Second()
 
+	//TODO: Разобраться с логикой камер
 	// Проверка есть-ли вообще у зоны мапа камер
 	if z.Cameras == nil {
 		l := len(zConf.Cameras)
@@ -74,25 +80,24 @@ func (c *Controller) updateZone(name string) {
 
 	// Обновляем данные по-камерам
 	for _, cam := range zConf.Cameras {
-		zCam := z.Cameras[cam.Id]
-		zCam.Name = cam.Name
-		zCam.Car = cam.Car
-		zCam.Human = cam.Person
-		zCam.Id = cam.Id
+		z.Cameras[cam.Id].Name = cam.Name
+		z.Cameras[cam.Id].Car = cam.Car
+		z.Cameras[cam.Id].Human = cam.Person
+		z.Cameras[cam.Id].Id = cam.Id
 
 		// Проверяем, есть-ли вообще у камеры мапа входов
-		if zCam.Inputs == nil {
+		if z.Cameras[cam.Id].Inputs == nil {
 			//Проверяем, может на камере вообще нет входов (т.е. когда мы получали данные в sync-eре webpoint нам сказал что у камеры нет входов нужного типа)
 			l := len(cam.Inputs)
 			if l > 0 {
-				zCam.Inputs = make(map[string]*Input)
+				z.Cameras[cam.Id].Inputs = make(map[string]*Input)
 			}
 		}
 
 		// Заполняем данные о статусе входов (если таковые имеются)
 		for _, cInput := range cam.Inputs {
-			zCam.Inputs[cInput.EntityId].Id = cInput.EntityId
-			zCam.Inputs[cInput.EntityId].State = cInput.State
+			z.Cameras[cam.Id].Inputs[cInput.EntityId].Id = cInput.EntityId
+			z.Cameras[cam.Id].Inputs[cInput.EntityId].State = cInput.State
 		}
 	}
 }
@@ -107,7 +112,7 @@ func (c *Controller) GetZoneData(name string) Zone {
 		}
 	}
 	c.mu.Unlock()
-	return Zone{}
+	return Zone{TimeLeftSec: 36000}
 }
 
 func (c *Controller) MakeAction(name string) error {
