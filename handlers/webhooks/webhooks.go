@@ -31,6 +31,7 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Обработка входящего вебхука
 	err = h.processing()
 	if err != nil {
 		log.Printf("[ERROR] WebHooksHandler: %s\n", err)

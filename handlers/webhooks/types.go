@@ -14,13 +14,22 @@ type WebhookMessage struct {
 // Основная часть. HELLO и HEARTBEAT состоят только из неё
 type Core struct {
 	SiteId string    `json:"siteId"` // IN2ir_lQRli_PuW2Un48ZQ
-	Type   string    `json:"type"`   // HELLO, NOTIFICATION, HEARTBEAT
+	Type   MainType  `json:"type"`   // HELLO, NOTIFICATION, HEARTBEAT
 	Time   time.Time `json:"time"`   // 2022-01-12T19:07:38.725Z
 }
 
+type MainType string
+
+const (
+	HELLO        MainType = "HELLO"
+	HEARTBEAT    MainType = "HEARTBEAT"
+	NOTIFICATION MainType = "NOTIFICATION"
+)
+
 type Notification struct {
 	Core
-	Id    string `json:"id"` // H8Ay08LvRM2Ie5hiWrSYRA
+	Id    string `json:"id"`   // H8Ay08LvRM2Ie5hiWrSYRA
+	Type  string `json:"type"` //EVENT
 	Event *Event `json:"event"`
 }
 
