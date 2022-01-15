@@ -1,7 +1,5 @@
 const zone = window.location.pathname.slice("/zones/".length);
 
-const statusBtnEl = document.getElementById("status-button");
-
 const red   = "rgb(178, 49, 49)";
 const green = "rgb(19, 154, 19)";
 
@@ -12,19 +10,20 @@ const inputIconClassName = "fa-solid fa-traffic-light";
 let timeLeft    = 0;
 let cameraIDs   = [];
 
-window.onload       = startPolling;
-statusBtnEl.onclick = () => console.log("click");
+window.onload = startPolling;
 
-function disableStatusButton() {
-    statusBtnEl.disabled = true;
-    statusBtnEl.style.backgroundColor = red;
-    statusBtnEl.style.borderColor     = "rgb(94, 14, 14)";
+function disableButton(btn) {
+    btn.disabled = true;
+    btn.style.backgroundColor = red;
+    btn.style.borderColor     = "rgb(94, 14, 14)";
+    return btn
 }
 
-function enableStatusButton() {
-    statusBtnEl.disabled = false;
-    statusBtnEl.style.backgroundColor = green;
-    statusBtnEl.style.borderColor     = "rgb(10, 78, 10)";
+function enableButton(btn) {
+    btn.disabled = false;
+    btn.style.backgroundColor = green;
+    btn.style.borderColor     = "rgb(10, 78, 10)";
+    return btn
 }
 
 function changeColor(el, color) {
@@ -37,11 +36,19 @@ async function get(url = "") {
 }
 
 async function startPolling() {
-    const countdownEl = document.getElementById("countdown");
+    const zone = newElement("p", {
+        id: "zone",
+        innerText: await get("/zone-name")
+    });
+    const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
+    const statusBtnEl = disableButton(newElement("button", {
+        id: "status-button",
+        innerText: "Взвесить"
+    }));
     const camerasDivEl = newElement("div", { id: "cams" });
-    document.body.appendChild(camerasDivEl);
 
-    document.getElementById("zone").innerText = await get("/zone-name");
+    [zone, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
+    statusBtnEl.onclick = () => console.log("click");
 
     setTimeout(async function again() {
         const prevTimeLeft = timeLeft;
@@ -64,10 +71,10 @@ async function startPolling() {
         }
 
         if (!timeLeft) {
-            enableStatusButton();
+            enableButton(statusBtnEl);
             changeColor(countdownEl, green);
         } else {
-            disableStatusButton();
+            disableButton(statusBtnEl);
             changeColor(countdownEl, red);
         }
 
@@ -81,6 +88,7 @@ function updateCountdown(countdownEl, timeLeft = 0) {
     const seconds = formatNumber(timeLeft % 60);
 
     countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
+    return countdownEl
 }
 
 formatNumber = (num) => num < 10 ? "0" + num: num;
