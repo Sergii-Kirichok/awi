@@ -33,7 +33,7 @@ type Event struct {
 	OriginatingEventId    string              `json:"originatingEventId"`    // 18036
 	OriginatingServerName string              `json:"originatingServerName"` // ARCHER
 	Location              string              `json:"location"`              // Unknown
-	Type                  string              `json:"type"`                  // DEVICE_MOTION_ST[ART|OP]/DEVICE_ANALYTICS_ST[ART|OP],DEVICE_DIGITAL_INPUT_O[N|FF] ....
+	Type                  EventTypes          `json:"type"`                  // DEVICE_MOTION_ST[ART|OP]/DEVICE_ANALYTICS_ST[ART|OP],DEVICE_DIGITAL_INPUT_O[N|FF] ....
 	OriginatingServerId   string              `json:"originatingServerId"`   // UMooFPEhRpayellyz_q3iA
 	CameraIds             []string            `json:"cameraIds"`             //
 	EntityIds             []string            `json:"entityIds"`             //
