@@ -100,9 +100,14 @@ func (c *Controller) updateZone(name string) {
 // Веб берёт данные по Zone, со всеми её статусами
 func (c *Controller) GetZoneData(name string) Zone {
 	c.mu.Lock()
-	zone := *c.zones[name]
+	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
+	for zName, zData := range c.zones {
+		if zName == name {
+			return *zData
+		}
+	}
 	c.mu.Unlock()
-	return zone
+	return Zone{}
 }
 
 func (c *Controller) MakeAction(name string) error {
