@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -62,55 +61,8 @@ const stabilizationTime = (15 * time.Second) / time.Second
 var (
 	timeLeft = int32(stabilizationTime)
 
-	mutex         sync.RWMutex
-	camerasStates = map[string]*CameraStates{
-		"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-			Inputs: map[string]*Input{
-				"first": {
-					Id: "f12de34",
-				},
-				"second": {
-					Id: "a6fde34",
-				},
-			},
-		},
-		//"4xIx1DMw": {},
-		//"DW2tDBK": {},
-		//"CDilIfJ": {},
-	}
-
-	//zones = map[string]controller.Zone{
-	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631": {
-	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849631",
-	//		Cameras: map[string]controller.Camera{
-	//			"4xIx1DMwMLSwMDW2tDBKNNBLTsw1MBASCDilIfJR0W3apqrIovO_tncAAA": {
-	//				Car:    true,
-	//				Human:  true,
-	//				Inputs: map[string]controller.Input{},
-	//			},
-	//		},
-	//	},
-	//	"5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632": {
-	//		Name: "5a6f6e654e616d654973d092d0b5d181d0bed0b2d0b0d18f20e2849632",
-	//	},
-	//}
+	mutex sync.RWMutex
 )
-
-func updateCamerasStates() {
-	for range time.Tick(time.Second) {
-		mutex.Lock()
-		//fmt.Println("updating camera states:")
-		for _, state := range camerasStates {
-			state.Cars = 0 != rand.Intn(30)
-			state.Humans = 0 != rand.Intn(30)
-			for _, input := range state.Inputs {
-				input.State = 0 != rand.Intn(30)
-			}
-			//fmt.Printf("name: %s\n\t%v\n", name, state)
-		}
-		mutex.Unlock()
-	}
-}
 
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
