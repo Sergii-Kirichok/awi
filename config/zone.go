@@ -49,12 +49,12 @@ func genZoneId(name string) string {
 // Дергаем в для получения копии текущих даннызх зоны
 func (c *Config) GetZoneData(zId string) Zone {
 	c.Lock()
+	defer c.Unlock()
 	for _, z := range c.Zones {
 		if z.Id == zId {
 			return z
 		}
 	}
-	c.Unlock()
 	return Zone{}
 }
 
