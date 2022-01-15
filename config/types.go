@@ -31,7 +31,7 @@ type Zone struct {
 	Bookmarks bool      `json:"bookmarks"`        // Генерировать Закладки
 	Alarms    bool      `json:"alarms,omitempty"` // Генерировать тревоги
 	State     bool      `json:"state,omitempty"`  // Текущее состояние (красная/зелёная) (результирующий - человек, машина, вход, задержка)
-	TimeLeft  time.Time `json:"-"`                // Время, которое осталось до активации кнопки взвешивания
+	TimeOk    time.Time `json:"-"`                // Время, когда на весовой были соблюдены все условия
 	Countdown bool      `json:"-"`                // Можно-ли начинать обратный отсчёт по зоне.
 }
 

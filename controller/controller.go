@@ -57,6 +57,7 @@ func (c *Controller) updateZone(zId string) {
 	c.mu.Lock()
 	z, ok := c.zones[zConf.Id]
 	c.mu.Unlock()
+
 	// Если первый запуски и зоны такой нет - создаём
 	if !ok {
 		z = &Zone{
@@ -65,7 +66,13 @@ func (c *Controller) updateZone(zId string) {
 		}
 	}
 
-	z.TimeLeftSec = zConf.TimeLeft.Second()
+	// Обновляем счётчик времени
+	timeSince := int(time.Since(zConf.TimeOk).Seconds())
+	if timeSince >= zConf.DelaySec {
+		z.TimeLeftSec = 0
+	} else {
+		z.TimeLeftSec = zConf.DelaySec - timeSince
+	}
 
 	// Проверка есть-ли вообще у зоны мапа камер
 	if z.Cameras == nil {
@@ -110,7 +117,6 @@ func (c *Controller) GetZoneData(zoneId string) Zone {
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			//fmt.Printf("Zone returned: %#v, cameras num %d\n", *zData, len(zData.Cameras))
 			return *zData
 		}
 	}
@@ -118,6 +124,5 @@ func (c *Controller) GetZoneData(zoneId string) Zone {
 }
 
 func (c *Controller) MakeAction(name string) error {
-
 	return nil
 }
