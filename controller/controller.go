@@ -68,7 +68,7 @@ func (c *Controller) updateZone(zId string) {
 	}
 
 	// Обновляем счётчик времени
-	timeSince := int(time.Since(zConf.TimeOk).Seconds())
+	timeSince := int(time.Since(zConf.TimeLasErr).Seconds())
 	if timeSince >= zConf.DelaySec {
 		z.TimeLeftSec = 0
 	} else {

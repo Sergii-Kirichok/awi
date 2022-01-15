@@ -11,11 +11,11 @@ func (c *Config) CountDownZoneCheck(zId string) {
 			for _, camera := range zone.Cameras {
 				for _, input := range camera.Inputs {
 					if !input.State {
-						c.Zones[zIndex].TimeOk = time.Now()
+						c.Zones[zIndex].TimeLasErr = time.Now()
 					}
 				}
 				if !camera.Car || !camera.Person {
-					c.Zones[zIndex].TimeOk = time.Now()
+					c.Zones[zIndex].TimeLasErr = time.Now()
 				}
 			}
 		}
