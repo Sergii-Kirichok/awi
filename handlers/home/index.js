@@ -82,19 +82,6 @@ function updateCountdown(timeLeft = 0) {
 
 formatNumber = (num) => num < 10 ? "0" + num: num;
 
-function updateCameraStates(camera, states) {
-    const {car, human, inputs} = states;
-    for (const icon of camera.getElementsByTagName("i")) {
-        if (icon.className.includes(truckIconClassName)) {
-            setStatus(icon, car);
-        } else if (icon.className.includes(humanIconClassName)) {
-            setStatus(icon, human);
-        } else if (icon.className.includes(inputIconClassName)) {
-            setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
-        }
-    }
-}
-
 function createCamera(cameraID, states) {
     const {car, human, inputs} = states;
     const camera = newElement("fieldset", { className: "cam", id: cameraID });
@@ -123,6 +110,19 @@ function newElement(tagName, options = {}) {
     }
 
     return el
+}
+
+function updateCameraStates(camera, states) {
+    const {car, human, inputs} = states;
+    for (const icon of camera.getElementsByTagName("i")) {
+        if (icon.className.includes(truckIconClassName)) {
+            setStatus(icon, car);
+        } else if (icon.className.includes(humanIconClassName)) {
+            setStatus(icon, human);
+        } else if (icon.className.includes(inputIconClassName)) {
+            setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
+        }
+    }
 }
 
 function setStatus(icon, status) {

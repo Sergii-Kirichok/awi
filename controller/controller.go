@@ -13,23 +13,23 @@ type Controller struct {
 }
 
 type Zone struct {
-	Id          string
-	Name        string
-	TimeLeftSec int
-	Cameras     map[string]*Camera
+	Id          string             `json:"id"`
+	Name        string             `json:"name"`
+	TimeLeftSec int                `json:"time_left_sec"`
+	Cameras     map[string]*Camera `json:"cameras"`
 }
 
 type Camera struct {
-	Id     string
-	Name   string
-	Human  bool
-	Car    bool
-	Inputs map[string]*Input
+	Id     string            `json:"id"`
+	Name   string            `json:"name"`
+	Human  bool              `json:"human"`
+	Car    bool              `json:"car"`
+	Inputs map[string]*Input `json:"inputs"`
 }
 
 type Input struct {
-	Id    string
-	State bool
+	Id    string `json:"id"`
+	State bool   `json:"state"`
 }
 
 func New(c *config.Config) *Controller {
