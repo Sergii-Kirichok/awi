@@ -75,12 +75,16 @@ func (c *Controller) updateZone(zId string) {
 	}
 
 	// Проверка есть-ли вообще у зоны мапа камер
-	if z.Cameras == nil {
+	if len(z.Cameras) == 0 {
 		z.Cameras = map[string]*Camera{}
 	}
 
 	// Обновляем данные по-камерам
 	for _, cam := range zConf.Cameras {
+		// Данные по камере отсутствуют в системе
+		if cam.Id == "" {
+			continue
+		}
 		if _, ok := z.Cameras[cam.Id]; !ok {
 			z.Cameras[cam.Id] = &Camera{}
 		}
