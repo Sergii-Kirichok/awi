@@ -1,8 +1,6 @@
 const zone = window.location.pathname.slice("/zones/".length);
 
-const countdownEl = document.getElementById("countdown");
 const statusBtnEl = document.getElementById("status-button");
-const camerasDivEl = document.getElementById("cams");
 
 const red   = "rgb(178, 49, 49)";
 const green = "rgb(19, 154, 19)";
@@ -11,7 +9,6 @@ const truckIconClassName = "fas fa-truck";
 const humanIconClassName = "fas fa-street-view";
 const inputIconClassName = "fa-solid fa-traffic-light";
 
-let cameraIndex = 0;
 let timeLeft    = 0;
 let cameraIDs   = [];
 
@@ -39,11 +36,17 @@ async function get(url = "") {
     return response.json();
 }
 
-function startPolling() {
+async function startPolling() {
+    const countdownEl = document.getElementById("countdown");
+    const camerasDivEl = newElement("div", { id: "cams" });
+    document.body.appendChild(camerasDivEl);
+
+    document.getElementById("zone").innerText = await get("/zone-name");
+
     setTimeout(async function again() {
         const prevTimeLeft = timeLeft;
         timeLeft = await get("/countdown");
-        if (timeLeft !== prevTimeLeft) updateCountdown(timeLeft);
+        if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
 
         const prevCameraIDs = cameraIDs;
         cameraIDs = await get("/cameras-ids");
@@ -57,7 +60,7 @@ function startPolling() {
         for (const id of cameraIDs) {
             const camera = document.getElementById(id);
             const states = await get(`/cameras-info/${id}`)
-            camera ? updateCameraStates(camera, states) : createCamera(id, states);
+            camera ? updateCameraStates(camera, states) : createCamera(camerasDivEl, id, states);
         }
 
         if (!timeLeft) {
@@ -72,7 +75,7 @@ function startPolling() {
     });
 }
 
-function updateCountdown(timeLeft = 0) {
+function updateCountdown(countdownEl, timeLeft = 0) {
     const hours = formatNumber(Math.floor(timeLeft / 3600));
     const minutes = formatNumber(Math.floor(timeLeft / 60 - hours * 60));
     const seconds = formatNumber(timeLeft % 60);
@@ -82,10 +85,10 @@ function updateCountdown(timeLeft = 0) {
 
 formatNumber = (num) => num < 10 ? "0" + num: num;
 
-function createCamera(cameraID, states) {
-    const {car, human, inputs} = states;
+function createCamera(camerasDivEl, cameraID, states) {
+    const {name, car, human, inputs} = states;
     const camera = newElement("fieldset", { className: "cam", id: cameraID });
-    const legend = newElement("legend", { innerText: `CAM-${++cameraIndex}` });
+    const legend = newElement("legend", { innerText: name });
 
     const truckIcon = newElement("i", { className: truckIconClassName });
     const humanIcon = newElement("i", { className: humanIconClassName });

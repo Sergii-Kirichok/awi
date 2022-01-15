@@ -41,15 +41,21 @@ func New(name, version string, config *config.Config, control *controller.Contro
 	}
 }
 
-type Input struct {
-	Id    string `json:"id"`
-	State bool   `json:"state"`
-}
+func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
+	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 
-type CameraStates struct {
-	Cars   bool              `json:"cars"`
-	Humans bool              `json:"humans"`
-	Inputs map[string]*Input `json:"inputs"`
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(&zone.Name); err != nil {
+		log.Printf("encoding error with data <%s> : %s\n", b.String(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := w.Write(b.Bytes()); err != nil {
+		log.Printf("response error with data %s : %s\n", b.String(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
@@ -141,6 +147,7 @@ func (s *Server) ListenAndServeHTTPS() {
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
+	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)
