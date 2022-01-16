@@ -144,10 +144,21 @@ class App {
 
         const truckIcon = newElement("i", { className: truckIconClassName });
         const humanIcon = newElement("i", { className: humanIconClassName });
-        const inputIcons = Object.values(inputs).map(inp => newElement("i", {
-            className: inputIconClassName,
-            id: inp.id
-        }));
+
+        let inputNum = 0;
+        const inputIcons = Object.entries(inputs).map(([name, inp]) => {
+            const inputEl = newElement("i", {
+                className: inputIconClassName + " tooltip",
+                id: inp.id
+            })
+            inputEl.appendChild(newElement("span", {
+                className: "tooltip-text",
+                // innerText: `Input: ${name}`,
+                innerText: `Input: ${++inputNum}`,
+            }))
+
+            return inputEl
+        });
 
         this.setStatus(truckIcon, car);
         this.setStatus(humanIcon, human);
