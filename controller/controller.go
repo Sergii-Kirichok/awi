@@ -15,6 +15,7 @@ type Controller struct {
 type Zone struct {
 	Id          string             `json:"id"`
 	Name        string             `json:"name"`
+	Heartbeat   bool               `json:"heartbeat"`
 	TimeLeftSec int                `json:"time_left_sec"`
 	Cameras     map[string]*Camera `json:"cameras"`
 }

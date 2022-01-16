@@ -7,6 +7,9 @@ const truckIconClassName = "fas fa-truck";
 const humanIconClassName = "fas fa-street-view";
 const inputIconClassName = "fa-solid fa-traffic-light";
 
+const heartPulseClassName = "fa-solid fa-heart"
+const heartCrackClassName = "fa-solid fa-heart-crack"
+
 let timeLeft    = 0;
 let cameraIDs   = [];
 
@@ -40,30 +43,16 @@ async function get(url = "", format = "json") {
 }
 
 async function startPolling() {
-    const zoneEl = newElement("p", {
-        id: "zone",
-        innerText: await get("zone-name")
-    });
-    const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
-    const statusBtnEl = disableButton(newElement("button", {
-        id: "status-button",
-        innerText: "Взвесить"
-    }));
-    const camerasDivEl = newElement("div", { id: "cams" });
-
-    [zoneEl, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
-    document.getElementById("spinner").style.display = "none";
-
-    statusBtnEl.onclick = async () => {
-        try {
-            await get("button-press", "text");
-            console.log("button was pressed successfully");
-        } catch (err) {
-            console.error(err);
-        }
-    }
+    await render();
+    const countdownEl = document.getElementById("countdown");
+    const statusBtnEl = document.getElementById("status-button");
+    const camerasDivEl = document.getElementById("cams");
+    const heartbeatEl = document.getElementById("heartbeat");
 
     setTimeout(async function again() {
+        const heartbeat = await get("heartbeat");
+        updateHeartbeat(heartbeatEl, heartbeat);
+
         const prevTimeLeft = timeLeft;
         timeLeft = await get("countdown");
         if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
@@ -93,6 +82,49 @@ async function startPolling() {
 
         setTimeout(again, 1000);
     });
+}
+
+async function render() {
+    const zoneEl = newElement("p", {
+        id: "zone",
+        innerText: await get("zone-name")
+    });
+    const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
+    const statusBtnEl = disableButton(newElement("button", {
+        id: "status-button",
+        innerText: "Взвесить"
+    }));
+    const camerasDivEl = newElement("div", { id: "cams" });
+
+    const heartbeat = newElement("i", {
+        className: heartCrackClassName,
+        id: "heartbeat"
+    });
+
+    [zoneEl, countdownEl, statusBtnEl, camerasDivEl, heartbeat].forEach(el => document.body.appendChild(el));
+    document.getElementById("spinner").style.display = "none";
+
+    statusBtnEl.onclick = async () => {
+        try {
+            await get("button-press", "text");
+            console.log("button was pressed successfully");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+}
+
+function updateHeartbeat(el, state) {
+    console.log("updating heartbeat...");
+    if (state) {
+        el.className = heartPulseClassName;
+        el.style.animation = "heartbeat 1s infinite";
+        el.style.color = green;
+    } else {
+        el.className = heartCrackClassName;
+        el.style.animation = "none";
+        el.style.color = red;
+    }
 }
 
 function updateCountdown(countdownEl, timeLeft = 0) {

@@ -53,6 +53,12 @@ body {
     align-items: center;
 }
 
+#spinner {
+    position: absolute;
+    font-size: 5em;
+    color: rgb(35, 93, 164)
+}
+
 #zone {
     font-family: "Georgia", serif;
     font-size: 5em;
@@ -125,8 +131,39 @@ i.ready {
     color: rgb(19, 154, 19);
 }
 
-#spinner {
-    position: absolute;
+@keyframes heartbeat
+{
+    0%
+    {
+        transform: scale( .75 );
+    }
+    20%
+    {
+        transform: scale( 1 );
+    }
+    40%
+    {
+        transform: scale( .75 );
+    }
+    60%
+    {
+        transform: scale( 1 );
+    }
+    80%
+    {
+        transform: scale( .75 );
+    }
+    100%
+    {
+        transform: scale( .75 );
+    }
+}
+
+#heartbeat {
+    position: fixed;
+    bottom: 0;
+    right: 0;
     font-size: 5em;
-    color: rgb(35, 93, 164)
+    margin-right: 20px;
+    margin-bottom: 20px;
 }
