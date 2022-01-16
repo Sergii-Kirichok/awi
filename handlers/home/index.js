@@ -18,24 +18,6 @@ let cameraIDs   = [];
 
 window.onload = startPolling;
 
-function disableButton(btn) {
-    btn.disabled = true;
-    btn.style.backgroundColor = red;
-    btn.style.borderColor     = "rgb(94, 14, 14)";
-    return btn
-}
-
-function enableButton(btn) {
-    btn.disabled = false;
-    btn.style.backgroundColor = green;
-    btn.style.borderColor     = "rgb(10, 78, 10)";
-    return btn
-}
-
-function changeColor(el, color) {
-    el.style.color = color
-}
-
 async function get(url = "", format = "json") {
     const resp = await fetch(`${zone}/${url}`);
     if (!resp.ok) {
@@ -52,39 +34,18 @@ async function startPolling() {
     const camerasDivEl = document.getElementById("cams");
     const webpointEl = document.getElementById("webpoint");
     const heartbeatEl = document.getElementById("heartbeat");
+    statusBtnEl.addEventListener("click", handleStatusButton);
 
     setTimeout(async function again() {
-        const webpoint = await get("webpoint");
-        updateWebpoint(webpointEl, webpoint);
-
-        const heartbeat = await get("heartbeat");
-        updateHeartbeat(heartbeatEl, heartbeat);
+        await updateWebpoint(webpointEl);
+        await updateHeartbeat(heartbeatEl);
+        await updateCameras(camerasDivEl);
 
         const prevTimeLeft = timeLeft;
         timeLeft = await get("countdown");
-        if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
-
-        const prevCameraIDs = cameraIDs;
-        cameraIDs = await get("cameras-id");
-
-        const toRemove = prevCameraIDs.filter(prevID => !cameraIDs.find(currID => prevID === currID));
-        toRemove.forEach(id => {
-            const el = document.getElementById(id);
-            el?.parentNode.removeChild(el);
-        });
-
-        for (const id of cameraIDs) {
-            const camera = document.getElementById(id);
-            const states = await get(`cameras/${id}`)
-            camera ? updateCameraStates(camera, states) : createCamera(camerasDivEl, id, states);
-        }
-
-        if (!timeLeft) {
-            enableButton(statusBtnEl);
-            changeColor(countdownEl, green);
-        } else {
-            disableButton(statusBtnEl);
-            changeColor(countdownEl, red);
+        if (timeLeft !== prevTimeLeft) {
+            updateCountdown(countdownEl, timeLeft);
+            updateStatusButton(statusBtnEl, timeLeft);
         }
 
         setTimeout(again, 1000);
@@ -97,7 +58,7 @@ async function render() {
         innerText: await get("zone-name")
     });
     const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
-    const statusBtnEl = disableButton(newElement("button", {
+    const statusBtnEl = updateStatusButton(newElement("button", {
         id: "status-button",
         innerText: "Взвесить"
     }));
@@ -116,20 +77,21 @@ async function render() {
 
     [zoneEl, countdownEl, statusBtnEl, camerasDivEl, statusbar].forEach(el => document.body.appendChild(el));
     document.getElementById("spinner").style.display = "none";
-
-    statusBtnEl.onclick = async () => {
-        try {
-            await get("button-press", "text");
-            console.log("button was pressed successfully");
-        } catch (err) {
-            console.error(err);
-        }
-    }
 }
 
-function updateWebpoint(el, state) {
+function newElement(tagName, options = {}) {
+    const el = document.createElement(tagName);
+    for (const prop of Object.keys(options)) {
+        el[prop] = options[prop];
+    }
+
+    return el
+}
+
+async function updateWebpoint(el) {
     console.log("updating webpoint...");
-    if (state) {
+    const isOk = await get("webpoint");
+    if (isOk) {
         el.className = linkClassName;
         el.style.color = green;
         return
@@ -139,9 +101,10 @@ function updateWebpoint(el, state) {
     el.style.color = red;
 }
 
-function updateHeartbeat(el, state) {
+async function updateHeartbeat(el) {
     console.log("updating heartbeat...");
-    if (state) {
+    const isOk = await get("heartbeat");
+    if (isOk) {
         el.className = heartPulseClassName;
         el.style.animation = "heartbeat 1s infinite";
         el.style.color = green;
@@ -160,10 +123,34 @@ function updateCountdown(countdownEl, timeLeft = 0) {
     const seconds = formatNumber(timeLeft % 60);
 
     countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
-    return countdownEl
+    countdownEl.style.color = timeLeft ? red : green;
+    return countdownEl;
 }
 
 formatNumber = (num) => num < 10 ? "0" + num: num;
+
+function updateStatusButton(statusBtnEl, timeLeft = 0) {
+    if (timeLeft) {
+        statusBtnEl.disabled = true;
+        statusBtnEl.style.backgroundColor = red;
+        statusBtnEl.style.borderColor     = "rgb(94, 14, 14)";
+        return
+    }
+
+    statusBtnEl.disabled = false;
+    statusBtnEl.style.backgroundColor = green;
+    statusBtnEl.style.borderColor     = "rgb(10, 78, 10)";
+    return statusBtnEl;
+}
+
+async function handleStatusButton() {
+    try {
+        await get("button-press", "text");
+        console.log("button was pressed successfully");
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 function createCamera(camerasDivEl, cameraID, states) {
     console.log(`creating camera ${cameraID}...`);
@@ -187,16 +174,24 @@ function createCamera(camerasDivEl, cameraID, states) {
     return camera
 }
 
-function newElement(tagName, options = {}) {
-    const el = document.createElement(tagName);
-    for (const prop of Object.keys(options)) {
-        el[prop] = options[prop];
-    }
+async function updateCameras(camerasDivEl) {
+    const prevCameraIDs = cameraIDs;
+    cameraIDs = await get("cameras-id");
 
-    return el
+    const toRemove = prevCameraIDs.filter(prevID => !cameraIDs.find(currID => prevID === currID));
+    toRemove.forEach(id => {
+        const el = document.getElementById(id);
+        el?.parentNode.removeChild(el);
+    });
+
+    for (const id of cameraIDs) {
+        const camera = document.getElementById(id);
+        const states = await get(`cameras/${id}`)
+        camera ? updateCamera(camera, states) : createCamera(camerasDivEl, id, states);
+    }
 }
 
-function updateCameraStates(camera, states) {
+function updateCamera(camera, states) {
     console.log("updating camera states...");
     const {car, human, inputs} = states;
     for (const icon of camera.getElementsByTagName("i")) {
