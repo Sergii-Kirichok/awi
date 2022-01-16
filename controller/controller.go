@@ -2,6 +2,7 @@ package controller
 
 import (
 	"awi/config"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -118,16 +119,17 @@ func (c *Controller) updateZone(zId string) {
 }
 
 // Отсюда веб берёт данные по Zone, со всеми её статусами
-func (c *Controller) GetZoneData(zoneId string) Zone {
+func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	//todo: Добавить сюда-же вывод других ошибок. например потеря связи с WP, проблема с авторизацией и т.д...
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			return *zData
+			return *zData, nil
 		}
 	}
-	return Zone{TimeLeftSec: 36000}
+	return Zone{}, fmt.Errorf("Зона с таким ID отсутствует")
 }
 
 func (c *Controller) MakeAction(zoneId string) error {
