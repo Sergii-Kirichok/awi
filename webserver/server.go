@@ -78,6 +78,14 @@ func (s *Server) getCamera(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) buttonPress(w http.ResponseWriter, r *http.Request) {
+	zone := mux.Vars(r)["zone-id"]
+	if err := s.controller.MakeAction(zone); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
 func sendJSON(w http.ResponseWriter, data interface{}) error {
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(&data); err != nil {
@@ -110,6 +118,7 @@ func (s *Server) ListenAndServeHTTPS() {
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-id", s.getCamerasID).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras/{camera-id}", s.getCamera).Methods(http.MethodGet)
+	zone.HandleFunc("/button-press", s.buttonPress).Methods(http.MethodGet)
 
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))

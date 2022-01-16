@@ -30,15 +30,19 @@ function changeColor(el, color) {
     el.style.color = color
 }
 
-async function get(url = "") {
-    const response = await fetch(`${zone}/${url}`);
-    return response.json();
+async function get(url = "", format = "json") {
+    const resp = await fetch(`${zone}/${url}`);
+    if (!resp.ok) {
+        throw Error(`code ${resp.status}: ${await resp.text()}`)
+    }
+
+    return format.toLowerCase() === "text" ? resp.text() : resp.json();
 }
 
 async function startPolling() {
-    const zone = newElement("p", {
+    const zoneEl = newElement("p", {
         id: "zone",
-        innerText: await get("/zone-name")
+        innerText: await get("zone-name")
     });
     const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
     const statusBtnEl = disableButton(newElement("button", {
@@ -47,18 +51,25 @@ async function startPolling() {
     }));
     const camerasDivEl = newElement("div", { id: "cams" });
 
-    [zone, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
+    [zoneEl, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
     document.getElementById("spinner").style.display = "none";
 
-    statusBtnEl.onclick = () => console.log("click");
+    statusBtnEl.onclick = async () => {
+        try {
+            await get("button-press", "text");
+            console.log("button was pressed successfully");
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     setTimeout(async function again() {
         const prevTimeLeft = timeLeft;
-        timeLeft = await get("/countdown");
+        timeLeft = await get("countdown");
         if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
 
         const prevCameraIDs = cameraIDs;
-        cameraIDs = await get("/cameras-id");
+        cameraIDs = await get("cameras-id");
 
         const toRemove = prevCameraIDs.filter(prevID => !cameraIDs.find(currID => prevID === currID));
         toRemove.forEach(id => {
@@ -68,7 +79,7 @@ async function startPolling() {
 
         for (const id of cameraIDs) {
             const camera = document.getElementById(id);
-            const states = await get(`/cameras/${id}`)
+            const states = await get(`cameras/${id}`)
             camera ? updateCameraStates(camera, states) : createCamera(camerasDivEl, id, states);
         }
 
