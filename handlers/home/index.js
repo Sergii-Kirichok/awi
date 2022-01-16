@@ -7,6 +7,9 @@ const truckIconClassName = "fas fa-truck";
 const humanIconClassName = "fas fa-street-view";
 const inputIconClassName = "fa-solid fa-traffic-light";
 
+const linkClassName      = "fa-solid fa-link"
+const linkSlashClassName = "fa-solid fa-link-slash"
+
 const heartPulseClassName = "fa-solid fa-heart"
 const heartCrackClassName = "fa-solid fa-heart-crack"
 
@@ -47,9 +50,13 @@ async function startPolling() {
     const countdownEl = document.getElementById("countdown");
     const statusBtnEl = document.getElementById("status-button");
     const camerasDivEl = document.getElementById("cams");
+    const webpointEl = document.getElementById("webpoint");
     const heartbeatEl = document.getElementById("heartbeat");
 
     setTimeout(async function again() {
+        const webpoint = await get("webpoint");
+        updateWebpoint(webpointEl, webpoint);
+
         const heartbeat = await get("heartbeat");
         updateHeartbeat(heartbeatEl, heartbeat);
 
@@ -96,12 +103,18 @@ async function render() {
     }));
     const camerasDivEl = newElement("div", { id: "cams" });
 
+    const statusbar = newElement("div", { id: "statusbar" });
+    const webpoint = newElement("i", {
+        className: linkSlashClassName,
+        id: "webpoint"
+    });
     const heartbeat = newElement("i", {
         className: heartCrackClassName,
         id: "heartbeat"
     });
+    [webpoint, heartbeat].forEach(el => statusbar.appendChild(el));
 
-    [zoneEl, countdownEl, statusBtnEl, camerasDivEl, heartbeat].forEach(el => document.body.appendChild(el));
+    [zoneEl, countdownEl, statusBtnEl, camerasDivEl, statusbar].forEach(el => document.body.appendChild(el));
     document.getElementById("spinner").style.display = "none";
 
     statusBtnEl.onclick = async () => {
@@ -114,17 +127,30 @@ async function render() {
     }
 }
 
+function updateWebpoint(el, state) {
+    console.log("updating webpoint...");
+    if (state) {
+        el.className = linkClassName;
+        el.style.color = green;
+        return
+    }
+
+    el.className = linkSlashClassName;
+    el.style.color = red;
+}
+
 function updateHeartbeat(el, state) {
     console.log("updating heartbeat...");
     if (state) {
         el.className = heartPulseClassName;
         el.style.animation = "heartbeat 1s infinite";
         el.style.color = green;
-    } else {
-        el.className = heartCrackClassName;
-        el.style.animation = "none";
-        el.style.color = red;
+        return
     }
+
+    el.className = heartCrackClassName;
+    el.style.animation = "none";
+    el.style.color = red;
 }
 
 function updateCountdown(countdownEl, timeLeft = 0) {

@@ -131,6 +131,17 @@ i.ready {
     color: rgb(19, 154, 19);
 }
 
+#statusbar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: 5em;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
 @keyframes heartbeat
 {
     0%
@@ -159,11 +170,6 @@ i.ready {
     }
 }
 
-#heartbeat {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    font-size: 5em;
-    margin-right: 20px;
-    margin-bottom: 20px;
+#statusbar > i + i {
+    margin-top: 20px;
 }

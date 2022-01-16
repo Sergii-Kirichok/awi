@@ -50,6 +50,15 @@ func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) getWebpoint(w http.ResponseWriter, r *http.Request) {
+	//zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	//if err := sendJSON(w, zone.Webpoint); err != nil {
+	if err := sendJSON(w, 0 != rand.Intn(15)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 func (s *Server) getHeartbeat(w http.ResponseWriter, r *http.Request) {
 	//zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	//if err := sendJSON(w, zone.Heartbeat); err != nil {
@@ -125,6 +134,7 @@ func (s *Server) ListenAndServeHTTPS() {
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
 	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
+	zone.HandleFunc("/webpoint", s.getWebpoint).Methods(http.MethodGet)
 	zone.HandleFunc("/heartbeat", s.getHeartbeat).Methods(http.MethodGet)
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
 	zone.HandleFunc("/cameras-id", s.getCamerasID).Methods(http.MethodGet)

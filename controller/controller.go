@@ -16,6 +16,7 @@ type Zone struct {
 	Id          string             `json:"id"`
 	Name        string             `json:"name"`
 	Heartbeat   bool               `json:"heartbeat"`
+	Webpoint    bool               `json:"webpoint"`
 	TimeLeftSec int                `json:"time_left_sec"`
 	Cameras     map[string]*Camera `json:"cameras"`
 }
