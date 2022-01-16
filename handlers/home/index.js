@@ -31,7 +31,7 @@ async function startPolling() {
     await render();
     const countdownEl = document.getElementById("countdown");
     const statusBtnEl = document.getElementById("status-button");
-    const camerasDivEl = document.getElementById("cams");
+    const camerasDivEl = document.getElementById("cameras");
     const webpointEl = document.getElementById("webpoint");
     const heartbeatEl = document.getElementById("heartbeat");
     statusBtnEl.addEventListener("click", handleStatusButton);
@@ -53,30 +53,15 @@ async function startPolling() {
 }
 
 async function render() {
-    const zoneEl = newElement("p", {
-        id: "zone",
-        innerText: await get("zone-name")
-    });
-    const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
-    const statusBtnEl = updateStatusButton(newElement("button", {
-        id: "status-button",
-        innerText: "Взвесить"
-    }));
-    const camerasDivEl = newElement("div", { id: "cams" });
-
-    const statusbar = newElement("div", { id: "statusbar" });
-    const webpoint = newElement("i", {
-        className: linkSlashClassName,
-        id: "webpoint"
-    });
-    const heartbeat = newElement("i", {
-        className: heartCrackClassName,
-        id: "heartbeat"
-    });
-    [webpoint, heartbeat].forEach(el => statusbar.appendChild(el));
-
-    [zoneEl, countdownEl, statusBtnEl, camerasDivEl, statusbar].forEach(el => document.body.appendChild(el));
-    document.getElementById("spinner").style.display = "none";
+    document.body.innerHTML = `
+        <p id="zone">${await get("zone-name")}</p>
+        <p id="countdown">00:00:00</p>
+        <button id="status-button">Взвесить</button>
+        <div id="cameras"></div>
+        <div id="statusbar">
+            <i class="${linkSlashClassName}"  id="webpoint"></i>
+            <i class="${heartCrackClassName}" id="heartbeat"></i>
+        </div>`;
 }
 
 function newElement(tagName, options = {}) {
@@ -155,7 +140,7 @@ async function handleStatusButton() {
 function createCamera(camerasDivEl, cameraID, states) {
     console.log(`creating camera ${cameraID}...`);
     const {name, car, human, inputs} = states;
-    const camera = newElement("fieldset", { className: "cam", id: cameraID });
+    const camera = newElement("fieldset", { className: "camera", id: cameraID });
     const legend = newElement("legend", { innerText: name });
 
     const truckIcon = newElement("i", { className: truckIconClassName });
