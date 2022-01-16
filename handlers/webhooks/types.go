@@ -50,13 +50,13 @@ type Event struct {
 	TargetIdsDeprecated   []interface{}       `json:"targetIdsDeprecated"`
 	AnalyticEventName     string              `json:"analyticEventName"` // [Automation Analytic Event]
 	Area                  string              `json:"area"`              // ""
-	Activity              string              `json:"activity"`          // UNKNOWN, OBJECT_COUNTING_ENTER
+	Activity              Activity            `json:"activity"`          // UNKNOWN, OBJECT_COUNTING_ENTER
 	EventTriggerTime      time.Time           `json:"eventTriggerTime"`  //2020-05-20T19:55:55.550Z
 	classifiedObjects     []classifiedObject  `json:"classifiedObjects"`
 }
 type classifiedObject struct {
-	Subclass string `json:"subclass"` //VEHICLE_CAR, PERSON_FACE
-	ObjectId int    `json:"objectId"` //242288522
+	Subclass ClassifiedObject `json:"subclass"` //VEHICLE_CAR, PERSON_FACE
+	ObjectId int              `json:"objectId"` //242288522
 }
 type recordTriggerParams struct {
 	PrePostRecordTime string `json:"prePostRecordTime"` // 5000000000

@@ -50,7 +50,8 @@ func NewAuth(c *config.Config) *Auth {
 //Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
 func (a *Auth) Login() (*Auth, error) {
 	//Проверяем, может ещё не стоит авторизоваться снова.
-	if time.Since(a.AuthTime).Minutes() < 50 {
+	timeLimit := 2
+	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) {
 		return a, nil
 	}
 
@@ -74,7 +75,7 @@ func (a *Auth) Login() (*Auth, error) {
 	}
 
 	if a.Response.Status != "success" {
-		return a, fmt.Errorf("Can't Login: Status == %s", a.Response.Status)
+		return a, fmt.Errorf("Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
 	}
 	a.AuthTime = time.Now()
 

@@ -18,8 +18,9 @@ type syncer struct {
 type blocker bool
 
 const (
-	Blocked    blocker = false
-	NotBlocked blocker = true
+	Blocked           blocker = false
+	NotBlocked        blocker = true
+	WebPointSyncDelay float64 = 10
 )
 
 func New(a *awp.Auth) *syncer {
@@ -35,7 +36,7 @@ func (s *syncer) Sync() {
 	var showInfo bool
 	for {
 		// Заполняем главную структуру актуальными данными
-		if time.Since(s.lastSync).Seconds() > 60 {
+		if time.Since(s.lastSync).Seconds() > WebPointSyncDelay {
 			s.m.Lock()
 			s.lastSync = time.Now()
 			s.m.Unlock()
