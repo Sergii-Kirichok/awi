@@ -7,113 +7,19 @@ const truckIconClassName = "fas fa-truck";
 const humanIconClassName = "fas fa-street-view";
 const inputIconClassName = "fa-solid fa-traffic-light";
 
-let timeLeft    = 0;
-let cameraIDs   = [];
+const linkClassName      = "fa-solid fa-link"
+const linkSlashClassName = "fa-solid fa-link-slash"
 
-window.onload = startPolling;
+const heartPulseClassName = "fa-solid fa-heart"
+const heartCrackClassName = "fa-solid fa-heart-crack"
 
-function disableButton(btn) {
-    btn.disabled = true;
-    btn.style.backgroundColor = red;
-    btn.style.borderColor     = "rgb(94, 14, 14)";
-    return btn
-}
+async function get(url = "", format = "json") {
+    const resp = await fetch(`${zone}/${url}`);
+    if (!resp.ok) {
+        throw Error(`code ${resp.status}: ${await resp.text()}`)
+    }
 
-function enableButton(btn) {
-    btn.disabled = false;
-    btn.style.backgroundColor = green;
-    btn.style.borderColor     = "rgb(10, 78, 10)";
-    return btn
-}
-
-function changeColor(el, color) {
-    el.style.color = color
-}
-
-async function get(url = "") {
-    const response = await fetch(`${zone}/${url}`);
-    return response.json();
-}
-
-async function startPolling() {
-    const zone = newElement("p", {
-        id: "zone",
-        innerText: await get("/zone-name")
-    });
-    const countdownEl = updateCountdown(newElement("p", { id: "countdown" }));
-    const statusBtnEl = disableButton(newElement("button", {
-        id: "status-button",
-        innerText: "Взвесить"
-    }));
-    const camerasDivEl = newElement("div", { id: "cams" });
-
-    [zone, countdownEl, statusBtnEl, camerasDivEl].forEach(el => document.body.appendChild(el));
-    statusBtnEl.onclick = () => console.log("click");
-
-    setTimeout(async function again() {
-        const prevTimeLeft = timeLeft;
-        timeLeft = await get("/countdown");
-        if (timeLeft !== prevTimeLeft) updateCountdown(countdownEl, timeLeft);
-
-        const prevCameraIDs = cameraIDs;
-        cameraIDs = await get("/cameras-ids");
-
-        const toRemove = prevCameraIDs.filter(prevID => !cameraIDs.find(currID => prevID === currID));
-        toRemove.forEach(id => {
-            const el = document.getElementById(id);
-            el?.parentNode.removeChild(el);
-        });
-
-        for (const id of cameraIDs) {
-            const camera = document.getElementById(id);
-            const states = await get(`/cameras-info/${id}`)
-            camera ? updateCameraStates(camera, states) : createCamera(camerasDivEl, id, states);
-        }
-
-        if (!timeLeft) {
-            enableButton(statusBtnEl);
-            changeColor(countdownEl, green);
-        } else {
-            disableButton(statusBtnEl);
-            changeColor(countdownEl, red);
-        }
-
-        setTimeout(again, 1000);
-    });
-}
-
-function updateCountdown(countdownEl, timeLeft = 0) {
-    console.log("updating countdown...");
-    const hours = formatNumber(Math.floor(timeLeft / 3600));
-    const minutes = formatNumber(Math.floor(timeLeft / 60 - hours * 60));
-    const seconds = formatNumber(timeLeft % 60);
-
-    countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
-    return countdownEl
-}
-
-formatNumber = (num) => num < 10 ? "0" + num: num;
-
-function createCamera(camerasDivEl, cameraID, states) {
-    console.log(`creating camera ${cameraID}...`);
-    const {name, car, human, inputs} = states;
-    const camera = newElement("fieldset", { className: "cam", id: cameraID });
-    const legend = newElement("legend", { innerText: name });
-
-    const truckIcon = newElement("i", { className: truckIconClassName });
-    const humanIcon = newElement("i", { className: humanIconClassName });
-    const inputIcons = Object.values(inputs).map(inp => newElement("i", {
-        className: inputIconClassName,
-        id: inp.id
-    }));
-
-    setStatus(truckIcon, car);
-    setStatus(humanIcon, human);
-    inputIcons.forEach(icon => setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
-
-    [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
-    camerasDivEl.appendChild(camera);
-    return camera
+    return format.toLowerCase() === "text" ? resp.text() : resp.json();
 }
 
 function newElement(tagName, options = {}) {
@@ -125,23 +31,174 @@ function newElement(tagName, options = {}) {
     return el
 }
 
-function updateCameraStates(camera, states) {
-    console.log("updating camera states...");
-    const {car, human, inputs} = states;
-    for (const icon of camera.getElementsByTagName("i")) {
-        if (icon.className.includes(truckIconClassName)) {
-            setStatus(icon, car);
-        } else if (icon.className.includes(humanIconClassName)) {
-            setStatus(icon, human);
-        } else if (icon.className.includes(inputIconClassName)) {
-            setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
+class App {
+    constructor() {
+        this.timeLeft  = 0;
+        this.cameraIDs = [];
+    }
+
+    async render() {
+        document.body.innerHTML = `
+        <p id="zone">${await get("zone-name")}</p>
+        <p id="countdown">00:00:00</p>
+        <button id="status-button">Взвесить</button>
+        <div id="cameras"></div>
+        <div id="statusbar">
+            <i class="${linkSlashClassName}"  id="webpoint"></i>
+            <i class="${heartCrackClassName}" id="heartbeat"></i>
+        </div>`;
+
+        this.countdownEl = document.getElementById("countdown");
+        this.statusBtnEl = document.getElementById("status-button");
+        this.camerasDivEl = document.getElementById("cameras");
+        this.webpointEl = document.getElementById("webpoint");
+        this.heartbeatEl = document.getElementById("heartbeat");
+        this.statusBtnEl.addEventListener("click", this.handleStatusButton);
+    }
+
+    startPolling() {
+        const self = this;
+        setTimeout(async function again() {
+            await self.updateWebpoint();
+            await self.updateHeartbeat();
+            await self.updateCameras();
+
+            const prevTimeLeft = this.timeLeft;
+            this.timeLeft = await get("countdown");
+            if (timeLeft !== prevTimeLeft) {
+                self.updateCountdown(timeLeft);
+                self.updateStatusButton(timeLeft);
+            }
+
+            setTimeout(again, 1000);
+        });
+    }
+
+    async updateWebpoint() {
+        console.log("updating webpoint...");
+        const isOk = await get("webpoint");
+        if (isOk) {
+            this.webpointEl.className   = linkClassName;
+            this.webpointEl.style.color = green;
+            return
+        }
+
+        this.webpointEl.className   = linkSlashClassName;
+        this.webpointEl.style.color = red;
+    }
+
+    async updateHeartbeat() {
+        console.log("updating heartbeat...");
+        const isOk = await get("heartbeat");
+        if (isOk) {
+            this.heartbeatEl.className       = heartPulseClassName;
+            this.heartbeatEl.style.animation = "heartbeat 1s infinite";
+            this.heartbeatEl.style.color     = green;
+            return
+        }
+
+        this.heartbeatEl.className       = heartCrackClassName;
+        this.heartbeatEl.style.animation = "none";
+        this.heartbeatEl.style.color     = red;
+    }
+
+    updateCountdown(timeLeft = 0) {
+        console.log("updating countdown...");
+        const hours   = this.formatNumber(Math.floor(timeLeft / 3600));
+        const minutes = this.formatNumber(Math.floor(timeLeft / 60 - hours * 60));
+        const seconds = this.formatNumber(timeLeft % 60);
+
+        this.countdownEl.innerText   = `${hours}:${minutes}:${seconds}`;
+        this.countdownEl.style.color = timeLeft ? red : green;
+    }
+
+    formatNumber = (num) => num < 10 ? "0" + num: num;
+
+    updateStatusButton(timeLeft = 0) {
+        if (timeLeft) {
+            this.statusBtnEl.disabled              = true;
+            this.statusBtnEl.style.backgroundColor = red;
+            this.statusBtnEl.style.borderColor     = "rgb(94, 14, 14)";
+            return
+        }
+
+        this.statusBtnEl.disabled              = false;
+        this.statusBtnEl.style.backgroundColor = green;
+        this.statusBtnEl.style.borderColor     = "rgb(10, 78, 10)";
+    }
+
+    async handleStatusButton() {
+        try {
+            await get("button-press", "text");
+            console.log("button was pressed successfully");
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    createCamera(cameraID, states) {
+        console.log(`creating camera ${cameraID}...`);
+        const {name, car, human, inputs} = states;
+        const camera = newElement("fieldset", { className: "camera", id: cameraID });
+        const legend = newElement("legend", { innerText: name });
+
+        const truckIcon = newElement("i", { className: truckIconClassName });
+        const humanIcon = newElement("i", { className: humanIconClassName });
+        const inputIcons = Object.values(inputs).map(inp => newElement("i", {
+            className: inputIconClassName,
+            id: inp.id
+        }));
+
+        this.setStatus(truckIcon, car);
+        this.setStatus(humanIcon, human);
+        inputIcons.forEach(icon => this.setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
+
+        [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
+        this.camerasDivEl.appendChild(camera);
+        return camera
+    }
+
+    async updateCameras() {
+        const prevCameraIDs = this.cameraIDs;
+        this.cameraIDs = await get("cameras-id");
+
+        const toRemove = prevCameraIDs.filter(prevID => !this.cameraIDs.find(currID => prevID === currID));
+        toRemove.forEach(id => {
+            const el = document.getElementById(id);
+            el?.parentNode.removeChild(el);
+        });
+
+        for (const id of this.cameraIDs) {
+            const camera = document.getElementById(id);
+            const states = await get(`cameras/${id}`)
+            camera ? this.updateCamera(camera, states) : this.createCamera(id, states);
+        }
+    }
+
+    updateCamera(camera, states) {
+        console.log("updating camera states...");
+        const {car, human, inputs} = states;
+        for (const icon of camera.getElementsByTagName("i")) {
+            if (icon.className.includes(truckIconClassName)) {
+                this.setStatus(icon, car);
+            } else if (icon.className.includes(humanIconClassName)) {
+                this.setStatus(icon, human);
+            } else if (icon.className.includes(inputIconClassName)) {
+                this.setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
+            }
+        }
+    }
+
+    setStatus(icon, status) {
+        const isReady = icon.classList.contains("ready");
+        if (isReady && !status || !isReady && status) {
+            icon.classList.toggle("ready");
         }
     }
 }
 
-function setStatus(icon, status) {
-    const isReady = icon.classList.contains("ready");
-    if (isReady && !status || !isReady && status) {
-        icon.classList.toggle("ready");
-    }
+window.onload = async () => {
+    const app = new App();
+    await app.render();
+    app.startPolling();
 }

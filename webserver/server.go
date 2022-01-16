@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -49,6 +50,24 @@ func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) getWebpoint(w http.ResponseWriter, r *http.Request) {
+	//zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	//if err := sendJSON(w, zone.Webpoint); err != nil {
+	if err := sendJSON(w, 0 != rand.Intn(15)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) getHeartbeat(w http.ResponseWriter, r *http.Request) {
+	//zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	//if err := sendJSON(w, zone.Heartbeat); err != nil {
+	if err := sendJSON(w, 0 != rand.Intn(15)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.TimeLeftSec); err != nil {
@@ -57,7 +76,7 @@ func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCamerasID(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	cameraIDs := make([]string, 0, len(zone.Cameras))
 	for cameraID := range zone.Cameras {
@@ -70,10 +89,18 @@ func (s *Server) getCamerasIDs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) getCameraInfo(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCamera(w http.ResponseWriter, r *http.Request) {
 	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) buttonPress(w http.ResponseWriter, r *http.Request) {
+	zone := mux.Vars(r)["zone-id"]
+	if err := s.controller.MakeAction(zone); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 }
@@ -107,9 +134,12 @@ func (s *Server) ListenAndServeHTTPS() {
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
 	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
+	zone.HandleFunc("/webpoint", s.getWebpoint).Methods(http.MethodGet)
+	zone.HandleFunc("/heartbeat", s.getHeartbeat).Methods(http.MethodGet)
 	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-ids", s.getCamerasIDs).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-info/{camera-id}", s.getCameraInfo).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras-id", s.getCamerasID).Methods(http.MethodGet)
+	zone.HandleFunc("/cameras/{camera-id}", s.getCamera).Methods(http.MethodGet)
+	zone.HandleFunc("/button-press", s.buttonPress).Methods(http.MethodGet)
 
 	// Запуск веб-сервера
 	rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))

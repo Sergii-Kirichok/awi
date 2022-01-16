@@ -53,6 +53,12 @@ body {
     align-items: center;
 }
 
+#spinner {
+    position: absolute;
+    font-size: 5em;
+    color: rgb(35, 93, 164)
+}
+
 #zone {
     font-family: "Georgia", serif;
     font-size: 5em;
@@ -85,7 +91,7 @@ body {
     margin-bottom: 50px;
 }
 
-#cams {
+#cameras {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
@@ -98,7 +104,7 @@ legend {
     color: rgb(35, 93, 164);
 }
 
-.cam {
+.camera {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -113,7 +119,7 @@ legend {
     font-size: 3em;
 }
 
-.cam + .cam {
+.camera + .camera {
     margin-left: 20px;
 }
 
@@ -123,4 +129,47 @@ i {
 
 i.ready {
     color: rgb(19, 154, 19);
+}
+
+#statusbar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: 5em;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
+@keyframes heartbeat
+{
+    0%
+    {
+        transform: scale( .75 );
+    }
+    20%
+    {
+        transform: scale( 1 );
+    }
+    40%
+    {
+        transform: scale( .75 );
+    }
+    60%
+    {
+        transform: scale( 1 );
+    }
+    80%
+    {
+        transform: scale( .75 );
+    }
+    100%
+    {
+        transform: scale( .75 );
+    }
+}
+
+#statusbar > i + i {
+    margin-top: 20px;
 }
