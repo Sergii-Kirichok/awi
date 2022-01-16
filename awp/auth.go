@@ -36,23 +36,33 @@ type Auth struct {
 }
 
 func NewAuth(c *config.Config) *Auth {
-	return &Auth{
+	a := &Auth{
 		Config: c,
 		Request: &loginRequest{
 			Login:      c.WPUser,
 			Password:   c.WPPassword,
-			Token:      GenToken(c),
 			ClientName: "AWI-Service",
 		},
 	}
+
+	a.genToken()
+	return a
+}
+
+func (a *Auth) updateToken() {
+	a.Request.Token = a.genToken()
 }
 
 //Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
 func (a *Auth) Login() (*Auth, error) {
 	//Проверяем, может ещё не стоит авторизоваться снова.
-	if time.Since(a.AuthTime).Minutes() < 50 {
+	timeLimit := 50
+	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) {
 		return a, nil
 	}
+
+	//Дело сессии уже подходит к концу, в первую очередь обновляем токен
+	a.updateToken()
 
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(a.Request)
@@ -74,7 +84,7 @@ func (a *Auth) Login() (*Auth, error) {
 	}
 
 	if a.Response.Status != "success" {
-		return a, fmt.Errorf("Can't Login: Status == %s", a.Response.Status)
+		return a, fmt.Errorf("Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
 	}
 	a.AuthTime = time.Now()
 

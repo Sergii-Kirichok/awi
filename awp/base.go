@@ -69,6 +69,8 @@ type Request struct {
 }
 
 func NewRequest(c *config.Config) *Request {
+	c.Lock()
+	defer c.Unlock()
 	return &Request{
 		Method:   GET,
 		HType:    HTTPS,
