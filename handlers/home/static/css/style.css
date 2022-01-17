@@ -74,7 +74,8 @@ p.alert {
 
 #zone {
     font-family: "Georgia", serif;
-    font-size: 5em;
+    font-weight: bold;
+    font-size: 4em;
     color: rgb(35, 93, 164);
     margin-bottom: 50px;
 }
@@ -112,16 +113,15 @@ p.alert {
 
 legend {
     font-family: "Georgia", serif;
-    font-size: 1rem;
+    font-weight: bold;
+    font-size: 1.1em;
     padding: 0 0.25em;
     color: rgb(35, 93, 164);
 }
 
 fieldset {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
+    padding: 25px;
     background-color: rgba(35, 93, 196, 0.15);
     border: 2px solid rgb(35, 93, 164);
     border-radius: 10px;
@@ -130,21 +130,10 @@ fieldset {
 .camera {
     margin-bottom: 20px;
     color: rgb(190, 37, 37);
-    width: 250px;
-    height: 100px;
-    font-size: 3em;
 }
 
 .camera + .camera {
-    margin-left: 20px;
-}
-
-i {
-    color: rgb(190, 37, 37);
-}
-
-i.ready {
-    color: rgb(19, 154, 19);
+    margin-left: 25px;
 }
 
 /* Tooltip container */
@@ -157,9 +146,9 @@ i.ready {
 .tooltip .tooltip-text {
     visibility: hidden;
     width: 120px;
-    background-color: #555;
+    background-color: rgb(85, 85, 85);
     font-family: "Georgia", serif;
-    font-size: 1rem;
+    font-weight: bold;
     color: rgb(255, 255, 255);
     text-align: center;
     padding: 5px 0;
@@ -201,6 +190,88 @@ i.ready {
     margin-bottom: 20px;
 }
 
+.icon {
+    display: inline-block;
+    background-size: cover;
+}
+
+.icon + .icon {
+    margin-left: 25px;
+}
+
+.spinner {
+    background-image: url(../img/spinner.svg);
+}
+
+.truck {
+    background-image: url(../img/truck-red.svg);
+    --truck-width: 94px;
+    --truck-height: 75px;
+    width: var(--truck-width);
+    height: var(--truck-height);
+}
+
+.truck.ready {
+    background-image: url(../img/truck-green.svg);
+}
+
+.human {
+    background-image: url(../img/human-red.svg);
+    --human-width: 75px;
+    --human-height: 75px;
+    width: var(--human-width);
+    height: var(--human-height);
+}
+
+.human.ready {
+    background-image: url(../img/human-green.svg);
+}
+
+.input {
+    --input-width: 47px;
+    --input-height: 75px;
+    width: var(--input-width);
+    height: var(--input-height);
+    background-image: url(../img/input-red.svg);
+}
+
+.input.ready {
+    background-image: url(../img/input-green.svg);
+}
+
+.heart-pulse {
+    background-image: url(../img/heart.svg);
+    --heart-pulse-width: 75px;
+    --heart-pulse-height: 75px;
+    width: var(--heart-pulse-width);
+    height: var(--heart-pulse-height);
+    animation: heartbeat 1s infinite;
+}
+
+.heart-crack {
+    background-image: url(../img/heart-crack.svg);
+    --heart-crack-width: 75px;
+    --heart-crack-height: 75px;
+    width: var(--heart-crack-width);
+    height: var(--heart-crack-height);
+}
+
+.link {
+    background-image: url(../img/link.svg);
+    --link-width: 94px;
+    --link-height: 75px;
+    width: var(--link-width);
+    height: var(--link-height);
+}
+
+.link-slash {
+    background-image: url(../img/link-slash.svg);
+    --link-slash-width: 94px;
+    --link-slash-height: 75px;
+    width: var(--link-slash-width);
+    height: var(--link-slash-height);
+}
+
 @keyframes heartbeat
 {
     0%
@@ -227,32 +298,4 @@ i.ready {
     {
         transform: scale( .75 );
     }
-}
-
-.icon {
-    display: inline-block;
-    width: 70px;
-    height: 70px;
-    background-size: cover;
-}
-
-.heart-pulse {
-    background-image: url(../img/heart-solid.svg);
-    animation: heartbeat 1s infinite;
-}
-
-.heart-pulse > path {
-    fill: rgb(19, 154, 19);
-}
-
-.heart-crack {
-    background-image: url(../img/heart-crack-solid.svg);
-}
-
-.heart-crack > path {
-    fill: rgb(190, 37, 37);
-}
-
-#statusbar > i + i {
-    margin-top: 20px;
 }

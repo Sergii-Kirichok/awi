@@ -3,12 +3,12 @@ const zone = window.location.pathname.slice("/zones/".length);
 const red   = "rgb(178, 49, 49)";
 const green = "rgb(19, 154, 19)";
 
-const truckIconClassName = "fas fa-truck";
-const humanIconClassName = "fas fa-street-view";
-const inputIconClassName = "fa-solid fa-traffic-light";
+const truckIconClassName = "icon truck";
+const humanIconClassName = "icon human";
+const inputIconClassName = "icon input";
 
-const linkClassName      = "fa-solid fa-link"
-const linkSlashClassName = "fa-solid fa-link-slash"
+const linkClassName      = "icon link"
+const linkSlashClassName = "icon link-slash"
 
 const heartPulseClassName = "icon heart-pulse";
 const heartCrackClassName = "icon heart-crack";
@@ -45,7 +45,7 @@ class App {
         <button id="status-button">Взвесить</button>
         <div id="cameras"></div>
         <div id="statusbar">
-            <i class="${linkSlashClassName}"  id="webpoint"></i>
+            <span class="${linkSlashClassName}"  id="webpoint"></span>
             <span class="${heartCrackClassName}" id="heartbeat"></span>
         </div>`;
 
@@ -63,7 +63,7 @@ class App {
     spin() {
         document.body.innerHTML = `
         <div id="alert-container">
-            <i class="fas fa-spinner fa-pulse" id="spinner"></i>
+            <span class="icon spinner" id="spinner"></span>
             <fieldset>
                 <p class="alert">Нет соединения с веб-сервером</p>
             </fieldset>
@@ -152,12 +152,12 @@ class App {
         const camera = newElement("fieldset", { className: "camera", id: cameraID });
         const legend = newElement("legend", { innerText: name });
 
-        const truckIcon = newElement("i", { className: truckIconClassName });
-        const humanIcon = newElement("i", { className: humanIconClassName });
+        const truckIcon = newElement("span", { className: truckIconClassName });
+        const humanIcon = newElement("span", { className: humanIconClassName });
 
         let inputNum = 0;
         const inputIcons = Object.entries(inputs).map(([name, inp]) => {
-            const inputEl = newElement("i", {
+            const inputEl = newElement("span", {
                 className: inputIconClassName + " tooltip",
                 id: inp.id
             })
@@ -199,7 +199,7 @@ class App {
     updateCamera(camera, states) {
         console.log(`updating camera ${camera.id} states...`);
         const {car, human, inputs} = states;
-        for (const icon of camera.getElementsByTagName("i")) {
+        for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
             if (icon.className.includes(truckIconClassName)) {
                 this.setStatus(icon, car);
             } else if (icon.className.includes(humanIconClassName)) {
