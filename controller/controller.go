@@ -136,12 +136,9 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	defer c.mu.Unlock()
 	//todo: Добавить сюда-же вывод других ошибок. например потеря связи с WP, проблема с авторизацией и т.д...
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
+
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			//zData.TimeLeftSec = 0
-			zData.Cameras["dfsdfsdf"] = &Camera{Id: "dfsdfsdf", Name: "Camera 2", Human: true, Car: false, Inputs: map[string]*Input{"fdfsdfsd": {Id: "fdfsdfsd", State: true}}}
-			//zData.Cameras["dfsdfsd2"] = &Camera{Id: "dfsdfsd2", Name: "Camera 3", Human: true, Car: false, Inputs: map[string]*Input{"fdfsdfsd2": {Id: "fdfsdfsd2", State: true}}}
-			//zData.Cameras["dfsdfsd3"] = &Camera{Id: "dfsdfsd3", Name: "Camera 3", Human: true, Car: false, Inputs: map[string]*Input{"asdfasdf3": {Id: "asdfasdf3", State: true}}}
 			return *zData, nil
 		}
 	}
@@ -150,6 +147,7 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 }
 
 func (c *Controller) MakeAction(zoneId string) error {
+	//fmt.Printf("ASK FOR MAKE ACTION FOR ZONE: %s\n", zoneId)
 	_, err := c.auth.MakeBookmark(zoneId)
 	return err
 }
