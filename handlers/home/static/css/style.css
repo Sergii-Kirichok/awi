@@ -181,14 +181,22 @@ fieldset {
 }
 
 .spinner {
-    background-image: url(../img/spinner.svg);
     --spinner-width: 75px;
     --spinner-height: 75px;
     width: var(--spinner-width);
     height: var(--spinner-height);
     align-self: center;
-    color: rgb(35, 93, 164);
     margin-bottom: 20px;
+    animation: 2.5s spin linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
 }
 
 .truck {
