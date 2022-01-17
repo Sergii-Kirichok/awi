@@ -127,6 +127,8 @@ func (s *Server) ListenAndServeHTTPS() {
 	s.router.HandleFunc("/style.css", home.Styles()).Methods(http.MethodGet)
 	s.router.HandleFunc("/favicon.ico", home.Favicon()).Methods(http.MethodGet)
 	s.router.HandleFunc("/dseg7.woff2", home.DSEG7()).Methods(http.MethodGet)
+	s.router.HandleFunc("/heart-solid.svg", home.HeartSolid()).Methods(http.MethodGet)
+	s.router.HandleFunc("/heart-crack-solid.svg", home.HeartCrackSolid()).Methods(http.MethodGet)
 
 	wh := webhooks.NewHandler(s.config)
 	s.router.HandleFunc("/webhooks", wh.WebHooksHandler).Methods(http.MethodPost)

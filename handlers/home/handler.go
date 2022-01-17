@@ -42,6 +42,20 @@ func DSEG7() http.HandlerFunc {
 	return getStatic(dseg7, "font/woff2")
 }
 
+//go:embed heart-solid.svg
+var heartSolid []byte
+
+func HeartSolid() http.HandlerFunc {
+	return getStatic(heartSolid, "image/svg+xml")
+}
+
+//go:embed heart-crack-solid.svg
+var heartCrackSolid []byte
+
+func HeartCrackSolid() http.HandlerFunc {
+	return getStatic(heartCrackSolid, "image/svg+xml")
+}
+
 func getStatic(data []byte, mimeType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("From %s %s %s", r.RemoteAddr, r.Method, r.URL.Path)

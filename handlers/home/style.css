@@ -229,6 +229,30 @@ i.ready {
     }
 }
 
+.icon {
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    background-size: cover;
+}
+
+.heart-pulse {
+    background-image: url(/heart-solid.svg);
+    animation: heartbeat 1s infinite;
+}
+
+.heart-pulse > path {
+    fill: rgb(19, 154, 19);
+}
+
+.heart-crack {
+    background-image: url(/heart-crack-solid.svg);
+}
+
+.heart-crack > path {
+    fill: rgb(190, 37, 37);
+}
+
 #statusbar > i + i {
     margin-top: 20px;
 }

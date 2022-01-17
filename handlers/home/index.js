@@ -10,8 +10,8 @@ const inputIconClassName = "fa-solid fa-traffic-light";
 const linkClassName      = "fa-solid fa-link"
 const linkSlashClassName = "fa-solid fa-link-slash"
 
-const heartPulseClassName = "fa-solid fa-heart"
-const heartCrackClassName = "fa-solid fa-heart-crack"
+const heartPulseClassName = "icon heart-pulse";
+const heartCrackClassName = "icon heart-crack";
 
 async function get(url = "", format = "json") {
     const resp = await fetch(`${zone}/${url}`);
@@ -46,7 +46,7 @@ class App {
         <div id="cameras"></div>
         <div id="statusbar">
             <i class="${linkSlashClassName}"  id="webpoint"></i>
-            <i class="${heartCrackClassName}" id="heartbeat"></i>
+            <span class="${heartCrackClassName}" id="heartbeat"></span>
         </div>`;
 
         this.countdownEl = document.getElementById("countdown");
@@ -109,16 +109,7 @@ class App {
     async updateHeartbeat() {
         console.log("updating heartbeat...");
         const isOk = await get("heartbeat");
-        if (isOk) {
-            this.heartbeatEl.className       = heartPulseClassName;
-            this.heartbeatEl.style.animation = "heartbeat 1s infinite";
-            this.heartbeatEl.style.color     = green;
-            return
-        }
-
-        this.heartbeatEl.className       = heartCrackClassName;
-        this.heartbeatEl.style.animation = "none";
-        this.heartbeatEl.style.color     = red;
+        this.heartbeatEl.className = isOk ? heartPulseClassName : heartCrackClassName;
     }
 
     updateCountdown(timeLeft = 0) {
