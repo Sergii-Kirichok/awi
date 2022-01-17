@@ -25,6 +25,7 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.msg.Parse(b)
+	//fmt.Printf("WebHooksHandler: dataIn: %s\n", string(b))
 	if err != nil {
 		log.Printf("[ERROR] WebHooksHandler: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -36,6 +37,7 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR] WebHooksHandler: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	//todo: Remove info messages

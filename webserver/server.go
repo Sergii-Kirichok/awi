@@ -43,7 +43,7 @@ func New(name, version string, config *config.Config, control *controller.Contro
 }
 
 func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
-	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.Name); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -69,7 +69,7 @@ func (s *Server) getHeartbeat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
-	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.TimeLeftSec); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -77,7 +77,7 @@ func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getCamerasID(w http.ResponseWriter, r *http.Request) {
-	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	cameraIDs := make([]string, 0, len(zone.Cameras))
 	for cameraID := range zone.Cameras {
 		cameraIDs = append(cameraIDs, cameraID)
@@ -90,7 +90,7 @@ func (s *Server) getCamerasID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getCamera(w http.ResponseWriter, r *http.Request) {
-	zone := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
 	if err := sendJSON(w, zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
