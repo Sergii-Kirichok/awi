@@ -123,18 +123,13 @@ func (s *Server) ListenAndServeHTTPS() {
 	bind := fmt.Sprintf("%s:%s", s.config.WWWAddr, s.config.WWWPort)
 	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
 
-	s.router.HandleFunc("/index.js", home.Scripts()).Methods(http.MethodGet)
-	s.router.HandleFunc("/style.css", home.Styles()).Methods(http.MethodGet)
-	s.router.HandleFunc("/favicon.ico", home.Favicon()).Methods(http.MethodGet)
-	s.router.HandleFunc("/dseg7.woff2", home.DSEG7()).Methods(http.MethodGet)
-	s.router.HandleFunc("/heart-solid.svg", home.HeartSolid()).Methods(http.MethodGet)
-	s.router.HandleFunc("/heart-crack-solid.svg", home.HeartCrackSolid()).Methods(http.MethodGet)
+	s.router.PathPrefix("/static").Handler(home.Static)
 
 	wh := webhooks.NewHandler(s.config)
 	s.router.HandleFunc("/webhooks", wh.WebHooksHandler).Methods(http.MethodPost)
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
-	zone.HandleFunc("", home.Handler()).Methods(http.MethodGet)
+	zone.HandleFunc("", home.Handler).Methods(http.MethodGet)
 	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
 	zone.HandleFunc("/webpoint", s.getWebpoint).Methods(http.MethodGet)
 	zone.HandleFunc("/heartbeat", s.getHeartbeat).Methods(http.MethodGet)

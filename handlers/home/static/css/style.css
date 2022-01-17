@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {font-size:inherit; font-weight: 400;}
 
 @font-face {
     font-family: "DSEG7";
-    src: url("dseg7.woff2") format("woff2")
+    src: url(../fonts/dseg7.woff2) format("woff2")
 }
 
 body {
@@ -237,7 +237,7 @@ i.ready {
 }
 
 .heart-pulse {
-    background-image: url(/heart-solid.svg);
+    background-image: url(../img/heart-solid.svg);
     animation: heartbeat 1s infinite;
 }
 
@@ -246,7 +246,7 @@ i.ready {
 }
 
 .heart-crack {
-    background-image: url(/heart-crack-solid.svg);
+    background-image: url(../img/heart-crack-solid.svg);
 }
 
 .heart-crack > path {
