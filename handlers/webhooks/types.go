@@ -52,12 +52,14 @@ type Event struct {
 	Area                  string              `json:"area"`              // ""
 	Activity              Activity            `json:"activity"`          // UNKNOWN, OBJECT_COUNTING_ENTER
 	EventTriggerTime      time.Time           `json:"eventTriggerTime"`  //2020-05-20T19:55:55.550Z
-	classifiedObjects     []classifiedObject  `json:"classifiedObjects"`
+	ClassifiedObjects     []classifiedObject  `json:"classifiedObjects"`
 }
+
 type classifiedObject struct {
-	Subclass ClassifiedObject `json:"subclass"` //VEHICLE_CAR, PERSON_FACE
-	ObjectId int              `json:"objectId"` //242288522
+	Subclass ClassifiedObjectT `json:"subclass"` //VEHICLE_CAR, PERSON_FACE
+	ObjectId int               `json:"objectId"` //242288522
 }
+
 type recordTriggerParams struct {
 	PrePostRecordTime string `json:"prePostRecordTime"` // 5000000000
 	IsPrePost         bool   `json:"isPrePost"`         // true
@@ -95,18 +97,18 @@ const (
 //)
 
 //The list of objects that triggered the event. Each classified object specifies a supertype (e.g. vehicle) and subtype (e.g. truck) and has a unique ID associated with it.
-type ClassifiedObject string
+type ClassifiedObjectT string
 
 const (
-	PERSON            ClassifiedObject = "PERSON"
-	PERSON_BODY       ClassifiedObject = "PERSON_BODY"
-	PERSON_FACE       ClassifiedObject = "PERSON_FACE"
-	VEHICLE           ClassifiedObject = "VEHICLE"
-	VEHICLE_BICYCLE   ClassifiedObject = "VEHICLE_BICYCLE"
-	VEHICLE_MOTORCYLE ClassifiedObject = "VEHICLE_MOTORCYLE"
-	VEHICLE_CAR       ClassifiedObject = "VEHICLE_CAR"
-	VEHICLE_TRUCK     ClassifiedObject = "VEHICLE_TRUCK"
-	VEHICLE_BUS       ClassifiedObject = "VEHICLE_BUS"
+	PERSON            ClassifiedObjectT = "PERSON"
+	PERSON_BODY       ClassifiedObjectT = "PERSON_BODY"
+	PERSON_FACE       ClassifiedObjectT = "PERSON_FACE"
+	VEHICLE           ClassifiedObjectT = "VEHICLE"
+	VEHICLE_BICYCLE   ClassifiedObjectT = "VEHICLE_BICYCLE"
+	VEHICLE_MOTORCYLE ClassifiedObjectT = "VEHICLE_MOTORCYLE"
+	VEHICLE_CAR       ClassifiedObjectT = "VEHICLE_CAR"
+	VEHICLE_TRUCK     ClassifiedObjectT = "VEHICLE_TRUCK"
+	VEHICLE_BUS       ClassifiedObjectT = "VEHICLE_BUS"
 )
 
 type EventTypes string

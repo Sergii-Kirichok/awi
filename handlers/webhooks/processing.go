@@ -44,19 +44,19 @@ func (h *HandlerData) inputState(e *Event) error {
 		state = true
 	}
 
-	errors := map[string]string{}
+	errs := map[string]string{}
 	for _, cId := range e.CameraIds {
 		if err := h.cfg.SetInputState(cId, e.EntityId, state); err != nil {
-			errors[cId] = fmt.Sprintf("%s", err)
+			errs[cId] = fmt.Sprintf("%s", err)
 		}
 	}
 
-	if len(errors) > 0 {
-		errors := ""
-		for cId, err := range errors {
-			errors += fmt.Sprintf("inputState: cameraId[%s]:%s\n", cId, err)
+	if len(errs) > 0 {
+		errrs := ""
+		for cId, err := range errs {
+			errrs += fmt.Sprintf("inputState: cameraId[%s]:%s\n", cId, err)
 		}
-		return fmt.Errorf(errors)
+		return fmt.Errorf(errrs)
 	}
 	//Если не нашли вход - забиваем, возможно надо-бы ругаться что вход не найден ни у одной отслеживаемой камеры, но нам пока на это "пи-ли-вать"
 	return nil
@@ -67,8 +67,10 @@ func (h *HandlerData) inputState(e *Event) error {
 func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 	fmt.Printf("Processing: [%s]\n", e.Type)
 
-	// Обработка событий входа в зону, они имеют массив classifiedObjects
-	for _, object := range e.classifiedObjects {
+	// Обработка событий входа в зону, они имеют массив ClassifiedObjects
+	//fmt.Printf("ClassifiedObjects num [%d]\n", len(e.ClassifiedObjects))
+	//fmt.Printf("personAndCarAnalyticStart: eventData: %#v\n", e)
+	for _, object := range e.ClassifiedObjects {
 		switch object.Subclass {
 		case VEHICLE, VEHICLE_BICYCLE, VEHICLE_MOTORCYLE, VEHICLE_CAR, VEHICLE_TRUCK, VEHICLE_BUS:
 			if e.Activity == OBJECT_PRESENT {
@@ -90,7 +92,7 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 	// Обработка событий выхода из зоны
 	// При выходе из зоны, мы смотрим только на тип ивента (DEVICE_ANALYTICS_STOP), activity (OBJECT_PRESENT) и linkedEventId (carEventId и personEventId)
 
-	return fmt.Errorf("personAndCarAnalyticStart: Wrong event data. Doesn't contain any classifiedObjects")
+	return fmt.Errorf("personAndCarAnalyticStart: Wrong event data. Doesn't contain any ClassifiedObjects")
 }
 
 func (h *HandlerData) personAndCarAnalyticStop(e *Event) error {

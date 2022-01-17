@@ -18,6 +18,11 @@ start:
 		time.Sleep(10 * time.Second)
 		goto start
 	}
+	//структура хранящая данные для генерации данных по зонам, камерам и ошибок (связи,синхронизации) передаваемых при get-запросе из веба
+	control := controller.New(cfg)
+
+	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
+	go webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg, control).ListenAndServeHTTPS()
 
 	//Если не смогли авторизоваться при старте, то явно какая-то ошибка в конфиге или с самим сервером WP. Поэтому идём перечитываем конфиг и пробуем ещё раз.
 	auth, err := awp.NewAuth(cfg).Login()
@@ -30,10 +35,6 @@ start:
 	// Синхронизатор. Проверяет конфиг, находит Ид камер, создаёт и удаляет вебхуки, ...
 	go syncer.New(auth).Sync()
 
-	//Рутина, отвечающая за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera
-	control := controller.New(cfg)
-	go control.Service()
-
-	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
-	webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg, control).ListenAndServeHTTPS()
+	//сервис отвечающий за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera\
+	control.Service()
 }
