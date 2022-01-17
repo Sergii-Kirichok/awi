@@ -2,7 +2,7 @@ package controller
 
 import (
 	"awi/awp"
-	"fmt"
+	"errors"
 	"sync"
 	"time"
 )
@@ -128,6 +128,8 @@ func (c *Controller) updateZone(zId string) {
 	c.mu.Unlock()
 }
 
+var zoneErr = errors.New("zone doesn't exist")
+
 // Отсюда веб берёт данные по Zone, со всеми её статусами
 func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	c.mu.Lock()
@@ -143,7 +145,8 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 			return *zData, nil
 		}
 	}
-	return Zone{}, fmt.Errorf("Зона с таким ID отсутствует")
+
+	return Zone{}, zoneErr
 }
 
 func (c *Controller) MakeAction(zoneId string) error {

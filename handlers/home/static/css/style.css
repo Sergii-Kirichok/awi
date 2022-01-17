@@ -58,18 +58,10 @@ body {
     flex-direction: column;
 }
 
-#spinner {
-    align-self: center;
-    font-size: 5em;
-    color: rgb(35, 93, 164);
-    margin-bottom: 20px;
-}
-
 p.alert {
     font-family: "Georgia", serif;
     font-size: 2em;
     color: rgb(140, 21, 21);
-    padding: 10px 0;
 }
 
 #zone {
@@ -179,17 +171,6 @@ fieldset {
     visibility: visible;
 }
 
-#statusbar {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    font-size: 5em;
-    margin-right: 20px;
-    margin-bottom: 20px;
-}
-
 .icon {
     display: inline-block;
     background-size: cover;
@@ -200,7 +181,22 @@ fieldset {
 }
 
 .spinner {
-    background-image: url(../img/spinner.svg);
+    --spinner-width: 75px;
+    --spinner-height: 75px;
+    width: var(--spinner-width);
+    height: var(--spinner-height);
+    align-self: center;
+    margin-bottom: 20px;
+    animation: 2.5s spin linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
 }
 
 .truck {
@@ -239,13 +235,12 @@ fieldset {
     background-image: url(../img/input-green.svg);
 }
 
-.heart-pulse {
-    background-image: url(../img/heart.svg);
-    --heart-pulse-width: 75px;
-    --heart-pulse-height: 75px;
-    width: var(--heart-pulse-width);
-    height: var(--heart-pulse-height);
-    animation: heartbeat 1s infinite;
+#webpoint {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-right: 20px;
+    margin-bottom: 20px;
 }
 
 .heart-crack {
@@ -256,46 +251,10 @@ fieldset {
     height: var(--heart-crack-height);
 }
 
-.link {
-    background-image: url(../img/link.svg);
-    --link-width: 94px;
-    --link-height: 75px;
-    width: var(--link-width);
-    height: var(--link-height);
-}
-
 .link-slash {
     background-image: url(../img/link-slash.svg);
     --link-slash-width: 94px;
     --link-slash-height: 75px;
     width: var(--link-slash-width);
     height: var(--link-slash-height);
-}
-
-@keyframes heartbeat
-{
-    0%
-    {
-        transform: scale( .75 );
-    }
-    20%
-    {
-        transform: scale( 1 );
-    }
-    40%
-    {
-        transform: scale( .75 );
-    }
-    60%
-    {
-        transform: scale( 1 );
-    }
-    80%
-    {
-        transform: scale( .75 );
-    }
-    100%
-    {
-        transform: scale( .75 );
-    }
 }
