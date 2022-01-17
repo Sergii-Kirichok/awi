@@ -86,8 +86,8 @@ func (c *Config) ClearCarOrPesonState(cid string, eventId string) error {
 					c.Zones[zId].Cameras[camId].Car = false
 					return nil
 				}
-				if c.Zones[zId].Cameras[camId].CarEventId == eventId {
-					c.Zones[zId].Cameras[camId].CarEventId = ""
+				if c.Zones[zId].Cameras[camId].PersonEventId == eventId {
+					c.Zones[zId].Cameras[camId].PersonEventId = ""
 					c.Zones[zId].Cameras[camId].Person = true
 					return nil
 				}

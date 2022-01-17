@@ -41,11 +41,12 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//todo: Remove info messages
-	fmt.Printf("Notification parsed [%s], has [%d] events:\n", h.msg.Type, len(h.msg.Notifications))
+	fmt.Printf("[LOG-SART] Webhook Notification parsed [%s], has [%d] events:\n", h.msg.Type, len(h.msg.Notifications))
 	for k, e := range h.msg.Notifications {
-		fmt.Printf("[INFO] % 2d.Event [%s]=>[%s]:\n\n", k, e.Type, e.Event.Type)
+		fmt.Printf("[INFO] % 2d.Event [%s]=>[%s]:\n", k, e.Type, e.Event.Type)
 	}
-	fmt.Printf("[INFO] ---Data---\n[INFO] %s\n[INFO] ---Data-End---\n\n", string(b))
+	fmt.Printf("[INFO] ---Data---\n[INFO] %s\n[INFO] ---Data-End---\n", string(b))
+	fmt.Printf("[LOG-SART]\n")
 
 	w.WriteHeader(http.StatusOK)
 }
