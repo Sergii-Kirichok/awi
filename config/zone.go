@@ -22,11 +22,6 @@ func (c *Config) checkZones() error {
 			willUpdate = true
 			c.Zones[zIndex].DelaySec = zoneMinDelaySec
 		}
-		// Проверка метода сохранения.
-		if !z.Bookmarks && !z.Alarms {
-			willUpdate = true
-			c.Zones[zIndex].Bookmarks = true
-		}
 		// Проверка камер в зоне
 		camsUpdated, err := c.camerasCheckInTheZone(zIndex)
 		if err != nil {

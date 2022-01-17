@@ -70,9 +70,8 @@ func (c *Config) makeDefault() {
 	c.WPPassword = "admin1234"
 	c.Zones = []Zone{
 		0: {
-			Name:      "Весовая №1",
-			Bookmarks: true,
-			DelaySec:  180,
+			Name:     "Весовая №1",
+			DelaySec: 180,
 			Cameras: []Cam{
 				0: {
 					Serial: "102109218992",
@@ -83,9 +82,8 @@ func (c *Config) makeDefault() {
 			},
 		},
 		1: {
-			Name:      "Весовая №2",
-			Bookmarks: true,
-			DelaySec:  180,
+			Name:     "Весовая №2",
+			DelaySec: 180,
 			Cameras: []Cam{
 				0: {
 					Serial: "1234567890124",

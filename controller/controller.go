@@ -136,6 +136,7 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
 	for zId, zData := range c.zones {
 		if zId == zoneId {
+			zData.TimeLeftSec = 0
 			return *zData, nil
 		}
 	}
@@ -143,5 +144,19 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 }
 
 func (c *Controller) MakeAction(zoneId string) error {
-	return nil
+	_, err := c.auth.MakeBookmark(zoneId)
+	return err
 }
+
+//func (c Config) MakeAction(zoneId string) error {
+//	z := c.GetZoneData(zoneId)
+//	if z.Alarms {
+//		fmt.Printf("Config.MakeAction: Sending alarm to WebPoint Zone: %s\n", zoneId)
+//		//return err
+//	}
+//	if z.Bookmarks {
+//		fmt.Printf("Config.MakeAction: Sending Bookmarks to WebPoint. Zone: %s\n", zoneId)
+//		//return err
+//	}
+//	return nil
+//}

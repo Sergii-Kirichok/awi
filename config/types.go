@@ -26,14 +26,12 @@ type Config struct {
 }
 
 type Zone struct {
-	Id         string    `json:"Id"`               // По нему будем работать с Зоной.?Zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
-	Name       string    `json:"name"`             // Имя зоны -> в вебе будет использоваться для отображения (?Zone=hexEncoded(ZoneNameAppendix+name))
-	Cameras    []Cam     `json:"cameras"`          // Камеры в пределах текущей зоны
-	DelaySec   int       `json:"delay_sec"`        // Задержка после сработки входа, наличия машины и отсутствия человека
-	Bookmarks  bool      `json:"bookmarks"`        // Генерировать Закладки
-	Alarms     bool      `json:"alarms,omitempty"` // Генерировать тревоги
-	State      bool      `json:"state,omitempty"`  // Текущее состояние (красная/зелёная) (результирующий - человек, машина, вход, задержка)
-	TimeLasErr time.Time `json:"-"`                // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
+	Id         string    `json:"Id"`              // По нему будем работать с Зоной.?Zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
+	Name       string    `json:"name"`            // Имя зоны -> в вебе будет использоваться для отображения (?Zone=hexEncoded(ZoneNameAppendix+name))
+	Cameras    []Cam     `json:"cameras"`         // Камеры в пределах текущей зоны
+	DelaySec   int       `json:"delay_sec"`       // Задержка после сработки входа, наличия машины и отсутствия человека
+	State      bool      `json:"state,omitempty"` // Текущее состояние (красная/зелёная) (результирующий - человек, машина, вход, задержка)
+	TimeLasErr time.Time `json:"-"`               // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
 }
 
 type Cam struct {
