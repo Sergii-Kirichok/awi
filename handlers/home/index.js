@@ -33,6 +33,7 @@ function newElement(tagName, options = {}) {
 
 class App {
     constructor() {
+        this.isHealthy = true;
         this.timeLeft  = 0;
         this.cameraIDs = [];
     }
@@ -40,7 +41,7 @@ class App {
     async render() {
         document.body.innerHTML = `
         <p id="zone">${await get("zone-name")}</p>
-        <p id="countdown">00:00:00</p>
+        <p id="countdown"></p>
         <button id="status-button">Взвесить</button>
         <div id="cameras"></div>
         <div id="statusbar">
@@ -53,25 +54,43 @@ class App {
         this.camerasDivEl = document.getElementById("cameras");
         this.webpointEl = document.getElementById("webpoint");
         this.heartbeatEl = document.getElementById("heartbeat");
+
+        this.updateCountdown();
+        this.updateStatusButton();
         this.statusBtnEl.addEventListener("click", this.handleStatusButton);
     }
 
-    startPolling() {
-        const self = this;
-        setTimeout(async function again() {
-            await self.updateWebpoint();
-            await self.updateHeartbeat();
-            await self.updateCameras();
+    spin() {
+        document.body.innerHTML = `
+        <div id="alert-container">
+            <i class="fas fa-spinner fa-pulse" id="spinner"></i>
+            <fieldset>
+                <p class="alert">Нет соединения с веб-сервером</p>
+            </fieldset>
+        </div>`;
+    }
 
-            const prevTimeLeft = this.timeLeft;
+    async update() {
+        const prevTimeLeft = this.timeLeft;
+
+        try {
+            await this.updateWebpoint();
+            await this.updateHeartbeat();
+            await this.updateCameras();
+
             this.timeLeft = await get("countdown");
-            if (timeLeft !== prevTimeLeft) {
-                self.updateCountdown(timeLeft);
-                self.updateStatusButton(timeLeft);
-            }
+            if (!this.isHealthy) await this.render();
+            this.isHealthy = true;
+        } catch (err) {
+            if (this.isHealthy) this.spin();
+            this.isHealthy = false
+            return
+        }
 
-            setTimeout(again, 1000);
-        });
+        if (this.timeLeft !== prevTimeLeft) {
+            this.updateCountdown(this.timeLeft);
+            this.updateStatusButton(this.timeLeft);
+        }
     }
 
     async updateWebpoint() {
@@ -187,7 +206,7 @@ class App {
     }
 
     updateCamera(camera, states) {
-        console.log("updating camera states...");
+        console.log(`updating camera ${camera.id} states...`);
         const {car, human, inputs} = states;
         for (const icon of camera.getElementsByTagName("i")) {
             if (icon.className.includes(truckIconClassName)) {
@@ -211,5 +230,8 @@ class App {
 window.onload = async () => {
     const app = new App();
     await app.render();
-    app.startPolling();
+    setTimeout(function cycle() {
+        app.update();
+        setTimeout(cycle, 1000);
+    });
 }
