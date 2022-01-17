@@ -83,6 +83,8 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 			if e.Activity == OBJECT_PRESENT {
 				fmt.Printf("Человек на весовой, это плохо - человечик красный\n")
 				h.cfg.SetPersonState(e.CameraId, e.ThisId, false)
+				h.cfg.Lock()
+				defer h.cfg.Unlock()
 				return nil
 			}
 			return fmt.Errorf("personAndCarAnalyticStart: unsupported person activity: %s", e.Activity)
