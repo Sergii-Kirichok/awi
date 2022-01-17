@@ -41,29 +41,23 @@ class App {
     async render() {
         document.body.innerHTML = `
         <p id="zone">${await get("zone-name")}</p>
-        <p id="countdown"></p>
+        <p id="countdown">00:00:00</p>
         <button id="status-button">Взвесить</button>
         <div id="cameras"></div>
-        <div id="statusbar">
-            <span class="${linkSlashClassName}"  id="webpoint"></span>
-            <span class="${heartCrackClassName}" id="heartbeat"></span>
-        </div>`;
+        <span id="webpoint"></span>`;
 
         this.countdownEl = document.getElementById("countdown");
         this.statusBtnEl = document.getElementById("status-button");
         this.camerasDivEl = document.getElementById("cameras");
         this.webpointEl = document.getElementById("webpoint");
-        this.heartbeatEl = document.getElementById("heartbeat");
 
-        this.updateCountdown();
-        this.updateStatusButton();
         this.statusBtnEl.addEventListener("click", this.handleStatusButton);
     }
 
     spin() {
         document.body.innerHTML = `
         <div id="alert-container">
-            <span class="icon spinner" id="spinner"></span>
+            <span class="icon spinner"></span>
             <fieldset>
                 <p class="alert">Нет соединения с веб-сервером</p>
             </fieldset>
@@ -75,13 +69,13 @@ class App {
 
         try {
             await this.updateWebpoint();
-            await this.updateHeartbeat();
             await this.updateCameras();
 
             this.timeLeft = await get("countdown");
             if (!this.isHealthy) await this.render();
             this.isHealthy = true;
         } catch (err) {
+            console.log(`updating error: ${err}`);
             if (this.isHealthy) this.spin();
             this.isHealthy = false
             return
@@ -95,21 +89,23 @@ class App {
 
     async updateWebpoint() {
         console.log("updating webpoint...");
-        const isOk = await get("webpoint");
-        if (isOk) {
-            this.webpointEl.className   = linkClassName;
-            this.webpointEl.style.color = green;
+        let webpoint = await get("webpoint");
+        if (!webpoint) {
+            this.webpointEl.className = linkSlashClassName;
+            this.webpointEl.style.display = "block";
             return
         }
 
-        this.webpointEl.className   = linkSlashClassName;
-        this.webpointEl.style.color = red;
-    }
-
-    async updateHeartbeat() {
         console.log("updating heartbeat...");
-        const isOk = await get("heartbeat");
-        this.heartbeatEl.className = isOk ? heartPulseClassName : heartCrackClassName;
+        const heartbeat = await get("heartbeat");
+        if (!heartbeat) {
+            this.webpointEl.className = heartCrackClassName;
+            this.webpointEl.style.display = "block";
+            return
+        }
+
+        this.webpointEl.className = "";
+        this.webpointEl.style.display = "none";
     }
 
     updateCountdown(timeLeft = 0) {
