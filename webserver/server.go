@@ -43,7 +43,12 @@ func New(name, version string, config *config.Config, control *controller.Contro
 }
 
 func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
-	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	zone, err := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := sendJSON(w, zone.Name); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

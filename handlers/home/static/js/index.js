@@ -7,10 +7,7 @@ const truckIconClassName = "icon truck";
 const humanIconClassName = "icon human";
 const inputIconClassName = "icon input";
 
-const linkClassName      = "icon link"
 const linkSlashClassName = "icon link-slash"
-
-const heartPulseClassName = "icon heart-pulse";
 const heartCrackClassName = "icon heart-crack";
 
 async function get(url = "", format = "json") {
@@ -75,7 +72,7 @@ class App {
             if (!this.isHealthy) await this.render();
             this.isHealthy = true;
         } catch (err) {
-            console.log(`updating error: ${err}`);
+            console.error(`updating error: ${err}`);
             if (this.isHealthy) this.spin();
             this.isHealthy = false
             return
@@ -216,7 +213,19 @@ class App {
 
 window.onload = async () => {
     const app = new App();
-    await app.render();
+
+    try {
+        await app.render();
+    } catch {
+        document.body.innerHTML = `
+        <div id="alert-container">
+            <fieldset>
+                <p class="alert">Зона не найдена</p>
+            </fieldset>
+        </div>`;
+        return
+    }
+
     setTimeout(function cycle() {
         app.update();
         setTimeout(cycle, 1000);
