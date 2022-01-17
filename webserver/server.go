@@ -125,7 +125,7 @@ func (s *Server) ListenAndServeHTTPS() {
 
 	s.router.PathPrefix("/static").Handler(home.Static)
 
-	wh := webhooks.NewHandler(s.config)
+	wh := webhooks.NewHandler(s.config, s.controller)
 	s.router.HandleFunc("/webhooks", wh.WebHooksHandler).Methods(http.MethodPost)
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()

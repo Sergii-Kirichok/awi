@@ -6,7 +6,10 @@ import (
 
 // Обработчик ивентов веб-хуков
 func (h *HandlerData) processing() error {
-	//TODO: Добавить провеку authenticationToken`а
+	if !h.controller.IsItMyToken(h.msg.AuthenticationToken) {
+		return fmt.Errorf("processing: Wrong AuthenticationToken")
+	}
+
 	//в зависимости от типа события - выполнить
 	switch h.msg.Type {
 	case NOTIFICATION:

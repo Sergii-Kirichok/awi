@@ -7,6 +7,7 @@
 	"wp_port": "8443",
 	"wp_user": "administrator",
 	"wp_password": "yjdsqgfhjkm",
+	"debug": true,
 	"zones": [
 		{
 			"Id": "8283cdb7daba1c1f498659f2f6ca0111c60e811890ac994dee9d7d1740883d69",

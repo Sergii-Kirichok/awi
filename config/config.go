@@ -60,44 +60,38 @@ func (c *Config) Save() error {
 }
 
 func (c *Config) makeDefault() {
-	c.WWWAddr = "127.0.0.1"
-	c.WWWPort = "8080"
+	c.WWWAddr = "avigilon" // Тут запустим наш вебервис
+	c.WWWPort = "443"
 	c.WWWCertificate = "certificates/src_certs_server.pem"
 	c.WWWCertificateKey = "certificates/src_certs_server.key"
 	c.WPServer = "avigilon"
 	c.WPPort = "8443"
 	c.WPUser = "administrator"
-	c.WPPassword = "yjdsqgfhjkm"
-	c.DevNonce = "FO#09121901"
-	c.DevKey = "9fbd5669d18031f8ce5d4261b17dc3334c78f9e1597bef0bb5d3c26c7cffee8a"
+	c.WPPassword = "admin1234"
 	c.Zones = []Zone{
 		0: {
 			Name:      "Весовая №1",
 			Bookmarks: true,
-			Alarms:    true,
-			DelaySec:  300,
+			DelaySec:  180,
 			Cameras: []Cam{
 				0: {
 					Serial: "102109218992",
-					Name:   "Фронтальная 1.1",
 				},
 				1: {
 					Serial: "1234567890123",
-					Name:   "Фронтальная 1.2",
 				},
 			},
 		},
 		1: {
 			Name:      "Весовая №2",
 			Bookmarks: true,
+			DelaySec:  180,
 			Cameras: []Cam{
 				0: {
 					Serial: "1234567890124",
-					Name:   "Фронтальная 2.1",
 				},
 				1: {
 					Serial: "1234567890125",
-					Name:   "Фронтальная 2.2",
 				},
 			},
 		},

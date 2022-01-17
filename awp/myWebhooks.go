@@ -11,10 +11,19 @@ type MyWebhooks struct {
 }
 
 //Используем для мониторигна созданных нами вебхуков
-func NewWebhooksMy() *MyWebhooks {
-	return &MyWebhooks{
-		Webhooks: map[string]*Webhook{},
+//func NewWebhooksMy() *MyWebhooks {
+//	return &MyWebhooks{
+//		Webhooks: map[string]*Webhook{},
+//	}
+//}
+
+func (w *MyWebhooks) IsItMyToken(token string) bool {
+	for _, webhook := range w.Webhooks {
+		if webhook.AuthenticationToken == token {
+			return true
+		}
 	}
+	return false
 }
 
 func (w *MyWebhooks) Add(id string, wh *Webhook) {
@@ -27,7 +36,7 @@ func (w *MyWebhooks) Delete(name string) {
 	}
 }
 
-func (w *MyWebhooks) PostPutWebhook(a *Auth, wh *Webhook, method Methods) error {
+func (a *Auth) PostPutWebhook(wh *Webhook, method Methods) error {
 	//Всегда проверяем логин перед любым запросом.
 	if _, err := a.Login(); err != nil {
 		return fmt.Errorf("PostPutWebhook: %s", err)
@@ -73,7 +82,7 @@ func (w *MyWebhooks) PostPutWebhook(a *Auth, wh *Webhook, method Methods) error 
 	}
 
 	//Сохраняем/обновляем вебхук в нашей мапе.
-	w.Add(resp.Result.Id, wh)
+	a.wh.Add(resp.Result.Id, wh)
 	return nil
 }
 

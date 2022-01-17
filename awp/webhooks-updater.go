@@ -6,31 +6,36 @@ import (
 )
 
 // Удаляем лишние вебхуки. Оставляем только те, которые есть у нас в всписке
-func WebhooksUpdater(auth *Auth, wh *MyWebhooks) error {
-	// Получаем все активные вебхуки на сервере
-	webhooks, err := GetWebhooks(auth)
+func (a *Auth) WebhooksUpdater() error {
+	// Получаем все активные вебхуки на сервере WebPointа (внутри функция логин, a.Lock вызовет deadlock)
+	webhooks, err := a.GetWebhooksFromWP()
 	if err != nil {
 		return fmt.Errorf("WebhooksUpdater: %s", err)
 	}
 
 	// Если нашли что-то - будем проверять
 	if len(webhooks) > 0 {
-		ids := webhooksWPCheck(wh, webhooks)
+		ids := a.webhooksWPCheck(webhooks)
 		if len(ids) > 0 {
-			if err := DeleteWebhooks(auth, &RequestWebhooksGet{Ids: ids}); err != nil {
+			if err := a.DeleteWebhooks(&RequestWebhooksGet{Ids: ids}); err != nil {
 				return fmt.Errorf("WebhooksUpdater: %s\n", err)
 			}
 		}
 	}
 
-	// Обратная проверке, есть-ли в нашем массиве лишние вебхуки (отсутствующие). Еcли есть - там-же их и удаляем.
-	if len(wh.Webhooks) > 0 {
+	a.Lock()
+	whLen := len(a.wh.Webhooks)
+	a.Unlock()
+	// Обратная проверке, есть-ли в нашем массиве лишние вебхуки (отсутствующие на сервере). Еcли есть - там-же их и удаляем.
+	if whLen > 0 {
 		// Todo: Добавить проверку на соответствие параметров вебхука полученного от WP нашим настройкам (может кто-то сделал PUT и их изменил)
-		wh.webhooksReveseCheck(webhooks)
+		a.Lock()
+		a.wh.webhooksReveseCheck(webhooks)
+		a.Unlock()
 	} else {
 		// нет на сервере вебхуков, надо создать
-		webhook := NewWebhook(auth.Config)
-		if err := wh.PostPutWebhook(auth, webhook, POST); err != nil {
+		webhook := NewWebhook(a.Config)
+		if err := a.PostPutWebhook(webhook, POST); err != nil {
 			return fmt.Errorf("WebhooksUpdater: %s\n", err)
 		}
 	}
@@ -38,12 +43,15 @@ func WebhooksUpdater(auth *Auth, wh *MyWebhooks) error {
 	return nil
 }
 
-// Проверка вебхуков полученных от WebPointa
-func webhooksWPCheck(wh *MyWebhooks, whArr []Webhook) []string {
-	// log.Printf("[INFO] Found %d webhooks on wp\n", len(whArr))
+// Проверка вебхуков полученных от WebPointa. На выходе массив лишних вебхуков
+func (a *Auth) webhooksWPCheck(whArr []Webhook) []string {
+	a.Lock()
+	defer a.Unlock()
+
+	// Сравниваем полученные вебхуки с нашим массивом
 	var ids []string
 	for _, hook := range whArr {
-		if _, ok := wh.Webhooks[hook.Id]; !ok {
+		if _, ok := a.wh.Webhooks[hook.Id]; !ok {
 			log.Printf("[INFO] Going to delete this WebHook -> ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %#v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
 			ids = append(ids, hook.Id)
 		}

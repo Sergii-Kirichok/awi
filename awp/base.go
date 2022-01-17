@@ -70,8 +70,7 @@ type Request struct {
 
 func NewRequest(c *config.Config) *Request {
 	c.Lock()
-	defer c.Unlock()
-	return &Request{
+	r := &Request{
 		Method:   GET,
 		HType:    HTTPS,
 		Header:   map[string]string{"Content-Type": "application/json"},
@@ -80,6 +79,8 @@ func NewRequest(c *config.Config) *Request {
 		Login:    c.WPUser,
 		Password: c.WPPassword,
 	}
+	c.Unlock()
+	return r
 }
 
 //Makes Request (GET|POST|DELETE|Etc)

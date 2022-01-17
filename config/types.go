@@ -16,10 +16,12 @@ type Config struct {
 	WPPort            string      `json:"wp_port"`             // webPoint  порт
 	WPUser            string      `json:"wp_user"`             // webPoint  user
 	WPPassword        string      `json:"wp_password"`         // webPoint  password
-	DevNonce          string      `json:"-"`                   // Avigilon developer nonce
-	DevKey            string      `json:"-"`                   // Avigilon developer key
+	Nonce             string      `json:"-"`                   // Avigilon developer nonce
+	DevNonce          string      `json:"dev_nonce,omitempty"` // DevNonce if we need it
+	Key               string      `json:"-"`                   // Avigilon developer key
+	DevKey            string      `json:"dev_key,omitempty"`   // DevKey if we need it
 	Zones             []Zone      `json:"zones"`               // Список весовых зон
-	Debug             bool        `json:"-"`                   // Работа в режиме отладки
+	Debug             bool        `json:"debug,omitempty"`     // Работа в режиме отладки
 	mu                *sync.Mutex `json:"-"`
 }
 
@@ -32,7 +34,6 @@ type Zone struct {
 	Alarms     bool      `json:"alarms,omitempty"` // Генерировать тревоги
 	State      bool      `json:"state,omitempty"`  // Текущее состояние (красная/зелёная) (результирующий - человек, машина, вход, задержка)
 	TimeLasErr time.Time `json:"-"`                // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
-	Countdown  bool      `json:"-"`                // Можно-ли начинать обратный отсчёт по зоне.
 }
 
 type Cam struct {
