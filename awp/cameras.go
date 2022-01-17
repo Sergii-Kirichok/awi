@@ -61,7 +61,7 @@ type RequestCameras struct {
 }
 
 // Возвращает список доступных камер
-func GetCameras(a *Auth) ([]Camera, error) {
+func (a *Auth) GetCameras() ([]Camera, error) {
 	//Всегда проверяем логин перед любым запросом.
 	if _, err := a.Login(); err != nil {
 		return nil, fmt.Errorf("GetCameras: %s", err)
@@ -102,6 +102,5 @@ func GetCameras(a *Auth) ([]Camera, error) {
 		d, _ := ErrorParse(answer)
 		return nil, fmt.Errorf("GetCameras: Can't read cameras: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
 	}
-
 	return resp.Result.Cameras, nil
 }

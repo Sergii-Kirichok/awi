@@ -42,12 +42,14 @@ type Webhook struct {
 
 func NewWebhook(c *config.Config) *Webhook {
 	var addr string
+	c.Lock()
 	switch c.WWWPort {
 	case "", "443":
 		addr = fmt.Sprintf("https://%s/webhooks", c.WWWAddr)
 	default:
 		addr = fmt.Sprintf("https://%s:%s/webhooks", c.WWWAddr, c.WWWPort)
 	}
+	c.Unlock()
 
 	return &Webhook{Url: addr,
 		Heartbeat: Heartbeat{
@@ -79,10 +81,10 @@ type EventTopics struct {
 	Exclude   []string `json:"exclude,omitempty"`
 }
 
-func GetWebhooks(a *Auth) ([]Webhook, error) {
+func (a *Auth) GetWebhooksFromWP() ([]Webhook, error) {
 	//Всегда проверяем логин перед любым запросом.
 	if _, err := a.Login(); err != nil {
-		return nil, fmt.Errorf("GetWebhooks: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: %s", err)
 	}
 
 	query := &RequestWebhooksGet{Session: a.Response.Result.Session}
@@ -90,32 +92,35 @@ func GetWebhooks(a *Auth) ([]Webhook, error) {
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(query)
 	if err != nil {
-		return nil, fmt.Errorf("GetWebhooks: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: %s", err)
 	}
 
 	var reqIface map[string]interface{}
 	if err := json.NewDecoder(&b).Decode(&reqIface); err != nil {
-		return nil, fmt.Errorf("GetWebhooks: Error decoding reqInface: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: Error decoding reqInface: %s", err)
 	}
 
+	a.Lock()
 	r := NewRequest(a.Config)
+	a.Unlock()
+
 	r.Data = b.Bytes()
 	r.Method = GET
 	r.Path = fmt.Sprintf("mt/api/rest/v1/webhooks?%s", GenGetter(reqIface))
 
 	answer, err := r.MakeRequest()
 	if err != nil {
-		return nil, fmt.Errorf("GetWebhooks: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: %s", err)
 	}
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return nil, fmt.Errorf("GetWebhooks: Error decoding config: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: Error decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {
 		d, _ := ErrorParse(answer)
-		return nil, fmt.Errorf("GetWebhooks: Can't read webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
+		return nil, fmt.Errorf("GetWebhooksFromWP: Can't read webhooks: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
 	}
 
 	return resp.Result.Webhooks, nil

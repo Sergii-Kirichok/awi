@@ -14,10 +14,10 @@ func (a *Auth) genToken() string {
 	tNow := time.Now()
 	timeStamp := tNow.Unix()
 	//timeStamp := 1641806505
-	data := fmt.Sprintf("%d%s", timeStamp, a.Config.DevKey)
+	data := fmt.Sprintf("%d%s", timeStamp, a.Config.Key)
 	hexEncoded := sha256.Sum256([]byte(data))
-	//fmt.Printf("Nonce: %s, Key: %s, Time: %d, data: %s,Hash: %x\n", c.DevNonce, c.DevKey, timeStamp, data, hexEncoded)
+	//fmt.Printf("Nonce: %s, Key: %s, Time: %d, data: %s,Hash: %x\n", c.Nonce, c.Key, timeStamp, data, hexEncoded)
 
-	token := fmt.Sprintf("%s:%d:%x", a.Config.DevNonce, timeStamp, hexEncoded)
+	token := fmt.Sprintf("%s:%d:%x", a.Config.Nonce, timeStamp, hexEncoded)
 	return token
 }

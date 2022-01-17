@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func DeleteWebhooks(a *Auth, query *RequestWebhooksGet) error {
+func (a *Auth) DeleteWebhooks(query *RequestWebhooksGet) error {
 	const step = 16
 	ids := query.Ids
 	l := len(query.Ids)
@@ -20,7 +20,7 @@ func DeleteWebhooks(a *Auth, query *RequestWebhooksGet) error {
 		}
 
 		query.Ids = ids[i:border]
-		err := DeleteWebhook(a, query)
+		err := a.DeleteWebhook(query)
 		if err != nil {
 			return fmt.Errorf("DeleteWebhooks: %s", err)
 		}
@@ -28,7 +28,7 @@ func DeleteWebhooks(a *Auth, query *RequestWebhooksGet) error {
 	return nil
 }
 
-func DeleteWebhook(a *Auth, query *RequestWebhooksGet) error {
+func (a *Auth) DeleteWebhook(query *RequestWebhooksGet) error {
 	//Всегда проверяем логин перед любым запросом.
 	if _, err := a.Login(); err != nil {
 		return fmt.Errorf("DeleteWebhook: %s", err)

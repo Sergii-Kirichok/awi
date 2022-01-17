@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"awi/config"
+	"awi/awp"
 	"fmt"
 	"sync"
 	"time"
 )
 
 type Controller struct {
-	conf  *config.Config
+	auth  *awp.Auth
 	zones map[string]*Zone
 	mu    *sync.Mutex
 }
@@ -35,29 +35,39 @@ type Input struct {
 	State bool   `json:"state"`
 }
 
-func New(c *config.Config) *Controller {
+func New(a *awp.Auth) *Controller {
+	a.Config.Lock()
+	zonesNum := len(a.Config.Zones)
+	a.Config.Unlock()
 	return &Controller{
-		conf:  c,
+		auth:  a,
 		mu:    &sync.Mutex{},
-		zones: make(map[string]*Zone, len(c.Zones)),
+		zones: make(map[string]*Zone, zonesNum),
 	}
+}
+
+func (c *Controller) IsItMyToken(token string) bool {
+	return c.auth.IsItMyToken(token)
 }
 
 // Рутина собирающая данные из конфига, обрабатывающая и генерирующая данные для отображения веба.
 // Веб, получает данные по-зонам обращаясь к методам Controller`a
 func (c *Controller) Service() {
 	for {
-		confNames := c.conf.GetZoneNames()
+		c.auth.Lock()
+
+		confNames := c.auth.Config.GetZoneNames()
 		for zId := range confNames {
-			c.conf.CountDownZoneCheck(zId)
-			c.updateZone(zId)
+			c.auth.Config.CountDownZoneCheck(zId)
+			c.updateZone(zId) //можно сделать рутинкой.
 		}
+		c.auth.Unlock()
 		time.Sleep(1 * time.Second)
 	}
 }
 
 func (c *Controller) updateZone(zId string) {
-	zConf := c.conf.GetZoneData(zId)
+	zConf := c.auth.Config.GetZoneData(zId)
 	c.mu.Lock()
 	z, ok := c.zones[zConf.Id]
 	c.mu.Unlock()

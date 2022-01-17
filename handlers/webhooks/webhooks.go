@@ -2,6 +2,7 @@ package webhooks
 
 import (
 	"awi/config"
+	"awi/controller"
 	_ "embed"
 	"fmt"
 	"io"
@@ -10,12 +11,17 @@ import (
 )
 
 type HandlerData struct {
-	cfg *config.Config
-	msg *WebhookMessage
+	cfg        *config.Config
+	controller *controller.Controller
+	msg        *WebhookMessage
 }
 
-func NewHandler(cfg *config.Config) *HandlerData {
-	return &HandlerData{cfg: cfg, msg: NewMessage()}
+func NewHandler(cfg *config.Config, ctrler *controller.Controller) *HandlerData {
+	return &HandlerData{
+		cfg:        cfg,
+		controller: ctrler,
+		msg:        NewMessage(),
+	}
 }
 
 func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {

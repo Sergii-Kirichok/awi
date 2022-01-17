@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -33,6 +34,8 @@ type Auth struct {
 	AuthTime time.Time     // Временная метка последней удачной авторизации
 	Request  *loginRequest // Данные для запроса
 	Response authResponse  // Ответ от сервера
+	wh       *MyWebhooks   //Массив ВебХуков
+	mu       *sync.Mutex
 }
 
 func NewAuth(c *config.Config) *Auth {
@@ -43,21 +46,41 @@ func NewAuth(c *config.Config) *Auth {
 			Password:   c.WPPassword,
 			ClientName: "AWI-Service",
 		},
+		wh: &MyWebhooks{
+			Webhooks: map[string]*Webhook{},
+		},
+		mu: &sync.Mutex{},
 	}
 
 	a.genToken()
 	return a
 }
 
+func (a *Auth) Lock() {
+	a.mu.Lock()
+}
+
+func (a *Auth) Unlock() {
+	a.mu.Unlock()
+}
+func (a *Auth) LockState() *sync.Mutex {
+	return a.mu
+}
+
+// Мьюеткс не трограем
 func (a *Auth) updateToken() {
 	a.Request.Token = a.genToken()
 }
 
 //Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
 func (a *Auth) Login() (*Auth, error) {
+	a.Lock()
+	defer a.Unlock()
+
 	//Проверяем, может ещё не стоит авторизоваться снова.
 	timeLimit := 50
 	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) {
+
 		return a, nil
 	}
 
@@ -69,6 +92,7 @@ func (a *Auth) Login() (*Auth, error) {
 	if err != nil {
 		return a, fmt.Errorf("Login Err: %s", err)
 	}
+
 	r := NewRequest(a.Config)
 	r.Data = b.Bytes()
 	r.Method = POST
@@ -89,4 +113,11 @@ func (a *Auth) Login() (*Auth, error) {
 	a.AuthTime = time.Now()
 
 	return a, nil
+}
+
+func (a *Auth) IsItMyToken(token string) bool {
+	a.Lock()
+	result := a.wh.IsItMyToken(token)
+	a.Unlock()
+	return result
 }
