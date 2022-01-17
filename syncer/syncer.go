@@ -39,7 +39,6 @@ func (s *syncer) Sync() {
 			s.m.Lock()
 			s.lastSync = time.Now()
 			s.m.Unlock()
-
 			// Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
 				log.Printf("[ERROR] Sync: Can't sync data: %s\n", err)
@@ -65,7 +64,7 @@ func (s *syncer) update() error {
 	defer s.m.Unlock()
 
 	// Забираем у WebPointa все доступные камеры
-	cameras, err := awp.GetCameras(s.auth)
+	cameras, err := s.auth.GetCameras()
 	if err != nil {
 		s.blocker = Blocked
 		return fmt.Errorf("update: %s", err)

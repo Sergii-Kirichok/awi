@@ -63,6 +63,9 @@ func (a *Auth) Lock() {
 func (a *Auth) Unlock() {
 	a.mu.Unlock()
 }
+func (a *Auth) LockState() *sync.Mutex {
+	return a.mu
+}
 
 // Мьюеткс не трограем
 func (a *Auth) updateToken() {
@@ -77,6 +80,7 @@ func (a *Auth) Login() (*Auth, error) {
 	//Проверяем, может ещё не стоит авторизоваться снова.
 	timeLimit := 50
 	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) {
+
 		return a, nil
 	}
 
@@ -88,6 +92,7 @@ func (a *Auth) Login() (*Auth, error) {
 	if err != nil {
 		return a, fmt.Errorf("Login Err: %s", err)
 	}
+
 	r := NewRequest(a.Config)
 	r.Data = b.Bytes()
 	r.Method = POST

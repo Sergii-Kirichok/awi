@@ -47,10 +47,7 @@ func New(a *awp.Auth) *Controller {
 }
 
 func (c *Controller) IsItMyToken(token string) bool {
-	c.auth.Lock()
-	result := c.auth.IsItMyToken(token)
-	c.auth.Unlock()
-	return result
+	return c.auth.IsItMyToken(token)
 }
 
 // Рутина собирающая данные из конфига, обрабатывающая и генерирующая данные для отображения веба.
@@ -58,12 +55,13 @@ func (c *Controller) IsItMyToken(token string) bool {
 func (c *Controller) Service() {
 	for {
 		c.auth.Lock()
-		defer c.auth.Unlock()
+
 		confNames := c.auth.Config.GetZoneNames()
 		for zId := range confNames {
 			c.auth.Config.CountDownZoneCheck(zId)
 			c.updateZone(zId) //можно сделать рутинкой.
 		}
+		c.auth.Unlock()
 		time.Sleep(1 * time.Second)
 	}
 }
