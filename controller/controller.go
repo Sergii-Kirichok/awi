@@ -18,9 +18,9 @@ type Zone struct {
 	Name        string             `json:"name"`
 	Heartbeat   bool               `json:"heartbeat"`
 	Webpoint    bool               `json:"webpoint"`
-	TimeLeftSec int                `json:"time_left_sec"`
+	TimeLeftSec int                `json:"timeLeft"`
 	Cameras     map[string]*Camera `json:"cameras"`
-	Err         error              `json:"error"`
+	Err         error              `json:"error"` // todo: mb error string
 }
 
 type Camera struct {

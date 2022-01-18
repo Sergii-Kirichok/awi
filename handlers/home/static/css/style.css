@@ -77,9 +77,10 @@ p.alert {
 #zone {
     font-family: "Georgia", serif;
     font-weight: bold;
-    font-size: 3.5em;
+    font-size: 2.5em;
     color: var(--blue-border);
     margin-bottom: 30px;
+    max-width: 450px;
 }
 
 #countdown {

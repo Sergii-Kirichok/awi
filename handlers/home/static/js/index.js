@@ -13,10 +13,17 @@ const circleXmarkClassName = "icon circle-xmark";
 async function get(url = "", format = "json") {
     const resp = await fetch(`${zone}/${url}`);
     if (!resp.ok) {
-        throw Error(`code ${resp.status}: ${await resp.text()}`)
+        throw new FetchError(resp.status, await resp.text());
     }
 
     return format.toLowerCase() === "text" ? resp.text() : resp.json();
+}
+
+class FetchError extends Error {
+    constructor(status, text) {
+        super(`code ${status}: ${text}`);
+        this.name = this.constructor.name;
+    }
 }
 
 function newElement(tagName, options = {}) {
@@ -25,19 +32,19 @@ function newElement(tagName, options = {}) {
         el[prop] = options[prop];
     }
 
-    return el
+    return el;
 }
 
 class App {
     constructor() {
-        this.isHealthy = true;
+        this.isHealthy = false;
         this.timeLeft  = 0;
-        this.cameraIDs = [];
+        this.cameras = {};
     }
 
-    async render() {
+    render(name = "") {
         document.body.innerHTML = `
-        <p id="zone">${await get("zone-name")}</p>
+        <p id="zone">${name}</p>
         <p id="countdown">00:00:00</p>
         <button id="status-button" disabled>Зважити</button>
         <div id="status-bar">
@@ -53,14 +60,14 @@ class App {
         this.statusBtnEl.addEventListener("click", this.handleStatusButton.bind(this));
     }
 
-    spin() {
+    error(message, spinner) {
         document.body.innerHTML = `
         <div id="alert-container">
-            <svg aria-hidden="true" focusable="false" class="icon spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <svg style="display: ${spinner ? "block" : "none"}" aria-hidden="true" focusable="false" class="icon spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path fill="rgb(35, 93, 164)" d="M96 256c0-26.5-21.5-48-48-48S0 229.5 0 256s21.5 48 48 48S96 282.5 96 256zM108.9 60.89c-26.5 0-48.01 21.49-48.01 47.99S82.39 156.9 108.9 156.9s47.99-21.51 47.99-48.01S135.4 60.89 108.9 60.89zM108.9 355.1c-26.5 0-48.01 21.51-48.01 48.01S82.39 451.1 108.9 451.1s47.99-21.49 47.99-47.99S135.4 355.1 108.9 355.1zM256 416c-26.5 0-48 21.5-48 48S229.5 512 256 512s48-21.5 48-48S282.5 416 256 416zM464 208C437.5 208 416 229.5 416 256s21.5 48 48 48S512 282.5 512 256S490.5 208 464 208zM403.1 355.1c-26.5 0-47.99 21.51-47.99 48.01S376.6 451.1 403.1 451.1s48.01-21.49 48.01-47.99S429.6 355.1 403.1 355.1zM256 0C229.5 0 208 21.5 208 48S229.5 96 256 96s48-21.5 48-48S282.5 0 256 0z"></path>
             </svg>
             <fieldset>
-                <p class="alert">Нет соединения с веб-сервером</p>
+                <p class="alert">${message}</p>
             </fieldset>
         </div>`;
     }
@@ -69,17 +76,23 @@ class App {
         const prevTimeLeft = this.timeLeft;
 
         try {
-            await this.updateWebpoint();
-            await this.updateCameras();
-
-            this.timeLeft = await get("countdown");
-            if (!this.isHealthy) await this.render();
+            const { name, heartbeat, webpoint, timeLeft, cameras } = await get("data");
+            if (!this.isHealthy) this.render(name);
             this.isHealthy = true;
+
+            this.updateWebpoint(webpoint, heartbeat);
+            this.updateCameras(cameras);
+
+            this.timeLeft = timeLeft;
         } catch (err) {
-            console.error(`updating error: ${err}`);
-            if (this.isHealthy) this.spin();
             this.isHealthy = false
-            return
+            console.error(`updating error: ${err.message}`);
+            if (err instanceof FetchError) {
+                this.error(err.message, false)
+                return
+            }
+
+            this.error("Нет соединения с веб-сервером", true)
         }
 
         if (this.timeLeft !== prevTimeLeft) {
@@ -88,9 +101,8 @@ class App {
         }
     }
 
-    async updateWebpoint() {
+    updateWebpoint(webpoint, heartbeat) {
         // console.log("updating webpoint...");
-        let webpoint = await get("webpoint");
         if (!webpoint) {
             this.statusEl.className = linkSlashClassName;
             this.statusEl.style.display = "block";
@@ -98,7 +110,6 @@ class App {
         }
 
         // console.log("updating heartbeat...");
-        const heartbeat = await get("heartbeat");
         if (!heartbeat) {
             this.statusEl.className = heartCrackClassName;
             this.statusEl.style.display = "block";
@@ -115,7 +126,7 @@ class App {
         const minutes = this.formatNumber(Math.floor(timeLeft / 60 - hours * 60));
         const seconds = this.formatNumber(timeLeft % 60);
 
-        this.countdownEl.innerText   = `${hours}:${minutes}:${seconds}`;
+        this.countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
         this.setStatus(this.countdownEl, !timeLeft);
     }
 
@@ -161,7 +172,7 @@ class App {
                 innerText: `Input: ${++inputNum}`,
             }))
 
-            return inputEl
+            return inputEl;
         });
 
         this.setStatus(truckIcon, car);
@@ -170,24 +181,23 @@ class App {
 
         [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
         this.camerasDivEl.appendChild(camera);
-        return camera
+        return camera;
     }
 
-    async updateCameras() {
-        const prevCameraIDs = this.cameraIDs;
-        this.cameraIDs = await get("cameras-id");
+    updateCameras(cameras) {
+        const prevCameras = this.cameras;
+        this.cameras = cameras;
 
-        const toRemove = prevCameraIDs.filter(prevID => !this.cameraIDs.find(currID => prevID === currID));
+        const toRemove = Object.keys(prevCameras).filter(prevID => !Object.keys(this.cameras).find(currID => prevID === currID));
         toRemove.forEach(id => {
             const el = document.getElementById(id);
             el?.parentNode.removeChild(el);
         });
 
-        for (const id of this.cameraIDs) {
+        Object.entries(cameras).forEach(([id, states]) => {
             const camera = document.getElementById(id);
-            const states = await get(`cameras/${id}`)
             camera ? this.updateCamera(camera, states) : this.createCamera(id, states);
-        }
+        })
     }
 
     updateCamera(camera, states) {
@@ -214,21 +224,8 @@ class App {
 
 window.onload = async () => {
     const app = new App();
-
-    try {
-        await app.render();
-    } catch {
-        document.body.innerHTML = `
-        <div id="alert-container">
-            <fieldset>
-                <p class="alert">Зона не найдена</p>
-            </fieldset>
-        </div>`;
-        return
-    }
-
     setTimeout(function cycle() {
         app.update();
         setTimeout(cycle, 1000);
     });
-}
+};

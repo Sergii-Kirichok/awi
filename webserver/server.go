@@ -11,6 +11,7 @@ import (
 	"awi/handlers/webhooks"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -42,69 +43,91 @@ func New(name, version string, config *config.Config, control *controller.Contro
 	}
 }
 
-func (s *Server) getZoneName(w http.ResponseWriter, r *http.Request) {
-	zone, err := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+//const stabilizationTime = 5 * time.Minute / time.Second
+const stabilizationTime = 10
+
+var timeLeft = stabilizationTime
+var counter = 0
+
+func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
+	//zone, err := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusBadRequest)
+	//	return
+	//}
+
+	zone := controller.Zone{
+		Id:        "abracadabra",
+		Name:      "Важільна: вул. Велика Васильківська 72",
+		Heartbeat: false,
+		Webpoint:  false,
+		Cameras: map[string]*controller.Camera{
+			"camera id 1": {
+				Id:    "camera id 1",
+				Name:  "Північна платформа",
+				Human: true,
+				Car:   true,
+				Inputs: map[string]*controller.Input{
+					"camera id 1, input id 1": {
+						Id:    "camera id 1, input id 1",
+						State: true,
+					},
+					"camera id 1, input id 2": {
+						Id:    "camera id 1, input id 2",
+						State: false,
+					},
+				},
+			},
+			"camera id 2": {
+				Id:    "camera id 2",
+				Name:  "Південна платформа",
+				Human: false,
+				Car:   false,
+				Inputs: map[string]*controller.Input{
+					"camera id 2, input id 1": {
+						Id:    "camera id 1, input id 1",
+						State: true,
+					},
+				},
+			},
+		},
+		Err: errors.New("some error"),
+	}
+
+	zoneID := mux.Vars(r)["zone-id"]
+	if zoneID != zone.Id {
+		http.Error(w, "unknown zone "+zoneID, http.StatusBadRequest)
 		return
 	}
 
-	if err := sendJSON(w, zone.Name); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (s *Server) getWebpoint(w http.ResponseWriter, r *http.Request) {
-	//zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	//if err := sendJSON(w, zone.Webpoint); err != nil {
-	if err := sendJSON(w, 0 != rand.Intn(15)); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (s *Server) getHeartbeat(w http.ResponseWriter, r *http.Request) {
-	//zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	//if err := sendJSON(w, zone.Heartbeat); err != nil {
-	if err := sendJSON(w, 0 != rand.Intn(15)); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (s *Server) getCountdown(w http.ResponseWriter, r *http.Request) {
-	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	if err := sendJSON(w, zone.TimeLeftSec); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (s *Server) getCamerasID(w http.ResponseWriter, r *http.Request) {
-	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	cameraIDs := make([]string, 0, len(zone.Cameras))
-	for cameraID := range zone.Cameras {
-		cameraIDs = append(cameraIDs, cameraID)
+	if timeLeft > 0 {
+		timeLeft--
+	} else {
+		counter++
 	}
 
-	if err := sendJSON(w, cameraIDs); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if counter == 10 {
+		timeLeft = stabilizationTime
+		counter = 0
 	}
-}
 
-func (s *Server) getCamera(w http.ResponseWriter, r *http.Request) {
-	zone, _ := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	if err := sendJSON(w, zone.Cameras[mux.Vars(r)["camera-id"]]); err != nil {
+	zone.TimeLeftSec = timeLeft
+	if err := sendJSON(w, zone); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (s *Server) buttonPress(w http.ResponseWriter, r *http.Request) {
-	zone := mux.Vars(r)["zone-id"]
-	if err := s.controller.MakeAction(zone); err != nil {
+	fmt.Println("button was pressed!")
+	//zone := mux.Vars(r)["zone-id"]
+	//if err := s.controller.MakeAction(zone); err != nil {
+	var err error
+	if 0 == rand.Intn(2) {
+		err = errors.New("something bad")
+	}
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -135,12 +158,7 @@ func (s *Server) ListenAndServeHTTPS() {
 
 	zone := s.router.PathPrefix("/zones/{zone-id}").Subrouter()
 	zone.HandleFunc("", home.Handler).Methods(http.MethodGet)
-	zone.HandleFunc("/zone-name", s.getZoneName).Methods(http.MethodGet)
-	zone.HandleFunc("/webpoint", s.getWebpoint).Methods(http.MethodGet)
-	zone.HandleFunc("/heartbeat", s.getHeartbeat).Methods(http.MethodGet)
-	zone.HandleFunc("/countdown", s.getCountdown).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras-id", s.getCamerasID).Methods(http.MethodGet)
-	zone.HandleFunc("/cameras/{camera-id}", s.getCamera).Methods(http.MethodGet)
+	zone.HandleFunc("/data", s.getZoneData).Methods(http.MethodGet)
 	zone.HandleFunc("/button-press", s.buttonPress).Methods(http.MethodGet)
 
 	// Запуск веб-сервера
