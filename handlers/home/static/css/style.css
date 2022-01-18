@@ -135,9 +135,12 @@ p.alert {
 }
 
 #cameras {
+    --cameras-width: 650px;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
+    max-width: var(--cameras-width);
+    min-width: var(--cameras-width);
 }
 
 legend {
@@ -159,10 +162,6 @@ fieldset {
 .camera {
     margin-bottom: 20px;
     color: var(--red);
-}
-
-.camera + .camera {
-    margin-left: 25px;
 }
 
 /* Tooltip container */
