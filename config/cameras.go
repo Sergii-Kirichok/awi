@@ -2,17 +2,22 @@ package config
 
 import "fmt"
 
-// Если будем использовать не только при старте, добавить мьютексы и проверить на deadlock
+// Проверка зоны на наличие в ней камер.
 func (c *Config) camerasCheckInTheZone(zoneIndex int) (bool, error) {
 	var needUpdate bool
+	c.Lock()
+	defer c.Unlock()
+
 	for index, camera := range c.Zones[zoneIndex].Cameras {
+		// удаляем камеры с пустым серийным номером
 		if camera.Serial == "" {
 			needUpdate = true
-			//удаляем камеры с пустым серийным номером
+			// Если в зоне всего одна камера - просто заполняем зону пустым массивом. Дальше проверять-то и нечего - выходим.
 			if len(c.Zones[zoneIndex].Cameras) == 1 {
 				c.Zones[zoneIndex].Cameras = []Cam{}
-				continue
+				break
 			}
+			// Эти три страшные комманды :) - удаляют из массива камер всего одну камеру.
 			c.Zones[zoneIndex].Cameras[index] = c.Zones[zoneIndex].Cameras[len(c.Zones[zoneIndex].Cameras)-1]
 			c.Zones[zoneIndex].Cameras[len(c.Zones[zoneIndex].Cameras)-1] = Cam{}
 			c.Zones[zoneIndex].Cameras = c.Zones[zoneIndex].Cameras[:len(c.Zones[zoneIndex].Cameras)-1]

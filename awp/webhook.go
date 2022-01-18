@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const HeartBeatDelayMs int64 = 300000 //300000ms -> min value 30sec
+
 type webHookPost struct {
 	Session string  `json:"session"`
 	Webhook Webhook `json:"Webhook"`
@@ -54,7 +56,7 @@ func NewWebhook(c *config.Config) *Webhook {
 	return &Webhook{Url: addr,
 		Heartbeat: Heartbeat{
 			Enable:      true,
-			FrequencyMs: 300000, //300000ms -> min value 30sec
+			FrequencyMs: HeartBeatDelayMs,
 		},
 		AuthenticationToken: fmt.Sprintf("%x", time.Now()),
 		EventTopics: EventTopics{
@@ -70,8 +72,8 @@ func NewWebhook(c *config.Config) *Webhook {
 }
 
 type Heartbeat struct {
-	Enable      bool `json:"enable"`
-	FrequencyMs int  `json:"frequencyMs"`
+	Enable      bool  `json:"enable"`
+	FrequencyMs int64 `json:"frequencyMs"`
 }
 
 type EventTopics struct {
@@ -97,7 +99,7 @@ func (a *Auth) GetWebhooksFromWP() ([]Webhook, error) {
 
 	var reqIface map[string]interface{}
 	if err := json.NewDecoder(&b).Decode(&reqIface); err != nil {
-		return nil, fmt.Errorf("GetWebhooksFromWP: Error decoding reqInface: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: err decoding reqInface: %s", err)
 	}
 
 	a.Lock()
@@ -115,7 +117,7 @@ func (a *Auth) GetWebhooksFromWP() ([]Webhook, error) {
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return nil, fmt.Errorf("GetWebhooksFromWP: Error decoding config: %s", err)
+		return nil, fmt.Errorf("GetWebhooksFromWP: err decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {

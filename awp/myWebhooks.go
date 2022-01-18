@@ -68,7 +68,7 @@ func (a *Auth) PostPutWebhook(wh *Webhook, method Methods) error {
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return fmt.Errorf("PostPutWebhooks: Error decoding config: %s", err)
+		return fmt.Errorf("PostPutWebhooks: err decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {

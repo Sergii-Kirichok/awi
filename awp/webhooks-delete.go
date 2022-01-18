@@ -55,7 +55,7 @@ func (a *Auth) DeleteWebhook(query *RequestWebhooksGet) error {
 
 	resp := &ResponseWebhooks{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return fmt.Errorf("DeleteWebhook: Error decoding config: %s", err)
+		return fmt.Errorf("DeleteWebhook: err decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {

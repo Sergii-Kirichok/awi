@@ -20,7 +20,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
 	if _, err := w.Write(homePage); err != nil {
-		log.Printf("Error writing response to %s: %s", r.RemoteAddr, err)
+		log.Printf("err writing response to %s: %s", r.RemoteAddr, err)
 	}
 }
 
