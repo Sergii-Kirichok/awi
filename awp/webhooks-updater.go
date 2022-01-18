@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+const webhooksTolerance = 4
+
 // Удаляем лишние вебхуки. Оставляем только те, которые есть у нас в всписке
 func (a *Auth) WebhooksUpdater() error {
 	// Получаем все активные вебхуки на сервере WebPointа (внутри функция логин, a.Lock вызовет deadlock)
@@ -14,9 +16,9 @@ func (a *Auth) WebhooksUpdater() error {
 	}
 
 	// Если нашли что-то - будем проверять
-	if len(webhooks) > 0 {
+	if len(webhooks) > webhooksTolerance {
 		ids := a.webhooksWPCheck(webhooks)
-		if len(ids) > 0 {
+		if len(ids) > {
 			if err := a.DeleteWebhooks(&RequestWebhooksGet{Ids: ids}); err != nil {
 				return fmt.Errorf("WebhooksUpdater: %s\n", err)
 			}
