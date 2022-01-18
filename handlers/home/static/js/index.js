@@ -1,14 +1,14 @@
 const zone = window.location.pathname.slice("/zones/".length);
 
-const red   = "rgb(178, 49, 49)";
-const green = "rgb(19, 154, 19)";
-
 const truckIconClassName = "icon truck";
 const humanIconClassName = "icon human";
 const inputIconClassName = "icon input";
 
 const linkSlashClassName = "icon link-slash"
 const heartCrackClassName = "icon heart-crack";
+
+const circleCheckClassName = "icon circle-check"
+const circleXmarkClassName = "icon circle-xmark";
 
 async function get(url = "", format = "json") {
     const resp = await fetch(`${zone}/${url}`);
@@ -39,21 +39,18 @@ class App {
         document.body.innerHTML = `
         <p id="zone">${await get("zone-name")}</p>
         <p id="countdown">00:00:00</p>
-        <button id="status-button">Зважити</button>
+        <button id="status-button" disabled>Зважити</button>
         <div id="status-bar">
             <div id="cameras"></div>
-            <span id="webpoint"></span>
+            <span id="status"></span>
         </div>`;
 
-        // <fieldset class="popup">Возникла оclassName во время передачи данных
-        //    <span class="popuptext" id="myclassName">Popup text...</span>
-        // </fieldset>
         this.countdownEl = document.getElementById("countdown");
         this.statusBtnEl = document.getElementById("status-button");
         this.camerasDivEl = document.getElementById("cameras");
-        this.webpointEl = document.getElementById("webpoint");
+        this.statusEl = document.getElementById("status");
 
-        this.statusBtnEl.addEventListener("click", this.handleStatusButton);
+        this.statusBtnEl.addEventListener("click", this.handleStatusButton.bind(this));
     }
 
     spin() {
@@ -92,57 +89,54 @@ class App {
     }
 
     async updateWebpoint() {
-        console.log("updating webpoint...");
+        // console.log("updating webpoint...");
         let webpoint = await get("webpoint");
         if (!webpoint) {
-            this.webpointEl.className = linkSlashClassName;
-            this.webpointEl.style.display = "block";
+            this.statusEl.className = linkSlashClassName;
+            this.statusEl.style.display = "block";
             return
         }
 
-        console.log("updating heartbeat...");
+        // console.log("updating heartbeat...");
         const heartbeat = await get("heartbeat");
         if (!heartbeat) {
-            this.webpointEl.className = heartCrackClassName;
-            this.webpointEl.style.display = "block";
+            this.statusEl.className = heartCrackClassName;
+            this.statusEl.style.display = "block";
             return
         }
 
-        this.webpointEl.className = "";
-        this.webpointEl.style.display = "none";
+        this.statusEl.className = "";
+        this.statusEl.style.display = "none";
     }
 
     updateCountdown(timeLeft = 0) {
-        console.log("updating countdown...");
+        // console.log("updating countdown...");
         const hours   = this.formatNumber(Math.floor(timeLeft / 3600));
         const minutes = this.formatNumber(Math.floor(timeLeft / 60 - hours * 60));
         const seconds = this.formatNumber(timeLeft % 60);
 
         this.countdownEl.innerText   = `${hours}:${minutes}:${seconds}`;
-        this.countdownEl.style.color = timeLeft ? red : green;
+        this.setStatus(this.countdownEl, !timeLeft);
     }
 
     formatNumber = (num) => num < 10 ? "0" + num: num;
 
     updateStatusButton(timeLeft = 0) {
-        if (timeLeft) {
-            this.statusBtnEl.disabled              = true;
-            this.statusBtnEl.style.backgroundColor = red;
-            this.statusBtnEl.style.borderColor     = "rgb(94, 14, 14)";
-            return
-        }
-
-        this.statusBtnEl.disabled              = false;
-        this.statusBtnEl.style.backgroundColor = green;
-        this.statusBtnEl.style.borderColor     = "rgb(10, 78, 10)";
+        this.setStatus(this.statusBtnEl, !timeLeft);
+        this.statusBtnEl.disabled = !!timeLeft;
     }
 
     async handleStatusButton() {
         try {
             await get("button-press", "text");
             console.log("button was pressed successfully");
+            this.statusEl.className = circleCheckClassName;
+            this.statusEl.style.display = "block";
+            setTimeout(() => this.statusEl.style.display = "none", 500);
         } catch (err) {
             console.error(err);
+            this.statusEl.className = circleXmarkClassName;
+            this.statusEl.style.display = "block";
         }
     }
 
@@ -197,7 +191,7 @@ class App {
     }
 
     updateCamera(camera, states) {
-        console.log(`updating camera ${camera.id} states...`);
+        // console.log(`updating camera ${camera.id} states...`);
         const {car, human, inputs} = states;
         for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
             if (icon.className.includes(truckIconClassName)) {
@@ -210,10 +204,10 @@ class App {
         }
     }
 
-    setStatus(icon, status) {
-        const isReady = icon.classList.contains("ready");
+    setStatus(element, status) {
+        const isReady = element.classList.contains("ready");
         if (isReady && !status || !isReady && status) {
-            icon.classList.toggle("ready");
+            element.classList.toggle("ready");
         }
     }
 }

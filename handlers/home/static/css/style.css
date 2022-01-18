@@ -53,6 +53,16 @@ body {
     align-items: center;
 }
 
+:root {
+    --green: rgb(19, 154, 19);
+    --green-border: rgb(10, 78, 10);
+    --red: rgb(190, 37, 37);
+    --red-border: rgb(94, 14, 14);
+    --red-text: rgb(140, 21, 21);
+    --blue: rgba(35, 93, 196, 0.15);
+    --blue-border: rgb(35, 93, 164);
+}
+
 #alert-container {
     display: flex;
     flex-direction: column;
@@ -61,38 +71,49 @@ body {
 p.alert {
     font-family: "Georgia", serif;
     font-size: 2em;
-    color: rgb(140, 21, 21);
+    color: var(--red-text);
 }
 
 #zone {
     font-family: "Georgia", serif;
     font-weight: bold;
     font-size: 3.5em;
-    color: rgb(35, 93, 164);
+    color: var(--blue-border);
     margin-bottom: 30px;
 }
 
 #countdown {
     font-family: "DSEG7", serif;
     font-size: 4.5em;
-    color: rgb(190, 37, 37);
+    color: var(--red);
     display: inline-flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 30px;
 }
 
+#countdown.ready {
+    color: var(--green);
+}
+
 #status-button {
     font-family: "Georgia", serif;
     font-size: 3em;
     letter-spacing: 10px;
-    color: rgb(255, 255, 255);
+    color: white;
     background-color: rgb(178, 49, 49);
     min-width: 450px;
     min-height: 160px;
-    border: 2px solid rgb(94, 14, 14);
+    border: 2px solid var(--red-border);
     border-radius: 10px;
     margin-bottom: 30px;
+    cursor: default;
+}
+
+#status-button.ready {
+    background-color: var(--green);
+    border-color: var(--green-border);
+    cursor: pointer;
 }
 
 #status-bar {
@@ -114,20 +135,20 @@ legend {
     font-weight: bold;
     font-size: 1.1em;
     padding: 0 0.25em;
-    color: rgb(35, 93, 164);
+    color: var(--blue-border);
 }
 
 fieldset {
     display: flex;
     padding: 25px;
-    background-color: rgba(35, 93, 196, 0.15);
-    border: 2px solid rgb(35, 93, 164);
+    background-color: var(--blue);
+    border: 2px solid var(--blue-border);
     border-radius: 10px;
 }
 
 .camera {
     margin-bottom: 20px;
-    color: rgb(190, 37, 37);
+    color: var(--red);
 }
 
 .camera + .camera {
@@ -150,7 +171,7 @@ fieldset {
     background-color: var(--tooltip-color);
     font-family: "Georgia", serif;
     font-weight: bold;
-    color: rgb(255, 255, 255);
+    color: white;
     text-align: center;
     padding: 4px 0;
     border-radius: 6px;
@@ -245,24 +266,41 @@ fieldset {
     background-image: url(../img/input-green.svg);
 }
 
-#webpoint {
+#status {
+    /*display: none;*/
     position: absolute;
     right: 0;
     margin-right: 30px;
 }
 
 .heart-crack {
-background-image: url(../img/heart-crack.svg);
---heart-crack-width: 75px;
---heart-crack-height: 75px;
-width: calc(var(--heart-crack-width) * var(--scale));
-height: calc(var(--heart-crack-height) * var(--scale));
+    background-image: url(../img/heart-crack.svg);
+    --heart-crack-width: 75px;
+    --heart-crack-height: 75px;
+    width: calc(var(--heart-crack-width) * var(--scale));
+    height: calc(var(--heart-crack-height) * var(--scale));
 }
 
 .link-slash {
-background-image: url(../img/link-slash.svg);
---link-slash-width: 94px;
---link-slash-height: 75px;
-width: calc(var(--link-slash-width) * var(--scale));
-height: calc(var(--link-slash-height) * var(--scale));
+    background-image: url(../img/link-slash.svg);
+    --link-slash-width: 94px;
+    --link-slash-height: 75px;
+    width: calc(var(--link-slash-width) * var(--scale));
+    height: calc(var(--link-slash-height) * var(--scale));
+}
+
+.circle-check {
+    background-image: url(../img/circle-check.svg);
+    --circle-check-width: 75px;
+    --circle-check-height: 75px;
+    width: calc(var(--circle-check-width) * var(--scale));
+    height: calc(var(--circle-check-height) * var(--scale));
+}
+
+.circle-xmark {
+    background-image: url(../img/circle-xmark.svg);
+    --circle-xmark-width: 75px;
+    --circle-xmark-height: 75px;
+    width: calc(var(--circle-xmark-width) * var(--scale));
+    height: calc(var(--circle-xmark-height) * var(--scale));
 }
