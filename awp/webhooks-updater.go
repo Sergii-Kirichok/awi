@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-const webhooksTolerance = 4
+const webhookTolerance = 4
 
 // Удаляем лишние вебхуки. Оставляем только те, которые есть у нас в всписке
 func (a *Auth) WebhooksUpdater() error {
@@ -16,9 +16,9 @@ func (a *Auth) WebhooksUpdater() error {
 	}
 
 	// Если нашли что-то - будем проверять
-	if len(webhooks) > webhooksTolerance {
+	if len(webhooks) > 0 {
 		ids := a.webhooksWPCheck(webhooks)
-		if len(ids) > {
+		if len(ids) > webhookTolerance {
 			if err := a.DeleteWebhooks(&RequestWebhooksGet{Ids: ids}); err != nil {
 				return fmt.Errorf("WebhooksUpdater: %s\n", err)
 			}
