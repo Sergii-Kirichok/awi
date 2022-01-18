@@ -24,9 +24,12 @@ type Myservice struct {
 	Version string
 }
 
+func (m Myservice) String() string {
+	return fmt.Sprintf("%s [%s]", m.Name, m.Version)
+}
+
 func startServer(s Myservice) {
-	msg := fmt.Sprintf("Запуск сервера %s", s)
-	elog.Info(1, msg)
+	elog.Info(1, fmt.Sprintf("Запуск сервера %s", s))
 
 start:
 	cfg, err := config.New().Load()
@@ -53,10 +56,6 @@ start:
 
 	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
 	webserver.New(s.Name, s.Version, cfg, control).ListenAndServeHTTPS()
-}
-
-func (m *Myservice) String() string {
-	return fmt.Sprintf("%s [%s]", m.Name, m.Version)
 }
 
 func (m *Myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
