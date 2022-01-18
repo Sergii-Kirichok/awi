@@ -67,19 +67,19 @@ p.alert {
 #zone {
     font-family: "Georgia", serif;
     font-weight: bold;
-    font-size: 4em;
+    font-size: 3.5em;
     color: rgb(35, 93, 164);
-    margin-bottom: 50px;
+    margin-bottom: 30px;
 }
 
 #countdown {
     font-family: "DSEG7", serif;
-    font-size: 5em;
+    font-size: 4.5em;
     color: rgb(190, 37, 37);
     display: inline-flex;
     justify-content: center;
-    align-items  : center;
-    margin-bottom: 50px;
+    align-items: center;
+    margin-bottom: 30px;
 }
 
 #status-button {
@@ -88,13 +88,19 @@ p.alert {
     letter-spacing: 10px;
     color: rgb(255, 255, 255);
     background-color: rgb(178, 49, 49);
-    width: 50%;
-    min-width: 250px;
-    height: 15%;
-    min-height: 4em;
+    min-width: 450px;
+    min-height: 160px;
     border: 2px solid rgb(94, 14, 14);
     border-radius: 10px;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
+}
+
+#status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
 }
 
 #cameras {
@@ -136,14 +142,17 @@ fieldset {
 
 /* Tooltip text */
 .tooltip .tooltip-text {
+    --arrow-size: 5px;
+    --tooltip-width: 72px;
+    --tooltip-color: rgb(85, 85, 85);
     visibility: hidden;
-    width: 120px;
-    background-color: rgb(85, 85, 85);
+    width: var(--tooltip-width);
+    background-color: var(--tooltip-color);
     font-family: "Georgia", serif;
     font-weight: bold;
     color: rgb(255, 255, 255);
     text-align: center;
-    padding: 5px 0;
+    padding: 4px 0;
     border-radius: 6px;
 
     /* Position the tooltip text */
@@ -151,8 +160,8 @@ fieldset {
     z-index: 1;
     bottom: 100%;
     left: 50%;
-    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
-    margin-bottom: 5px;
+    margin-left: calc(var(--tooltip-width) / -2); /* Use half of the width, to center the tooltip */
+    margin-bottom: var(--arrow-size);
 }
 
 .tooltip .tooltip-text::after {
@@ -160,10 +169,10 @@ fieldset {
     position: absolute;
     top: 100%; /* At the bottom of the tooltip */
     left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
+    margin-left: calc(var(--arrow-size) * -1);
+    border-width: var(--arrow-size);
     border-style: solid;
-    border-color: #555 transparent transparent transparent;
+    border-color: var(--tooltip-color) transparent transparent transparent;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
@@ -174,6 +183,7 @@ fieldset {
 .icon {
     display: inline-block;
     background-size: cover;
+    --scale: 0.6;
 }
 
 .icon + .icon {
@@ -203,8 +213,8 @@ fieldset {
     background-image: url(../img/truck-red.svg);
     --truck-width: 94px;
     --truck-height: 75px;
-    width: var(--truck-width);
-    height: var(--truck-height);
+    width: calc(var(--truck-width) * var(--scale));
+    height: calc(var(--truck-height) * var(--scale));
 }
 
 .truck.ready {
@@ -215,8 +225,8 @@ fieldset {
     background-image: url(../img/human-red.svg);
     --human-width: 75px;
     --human-height: 75px;
-    width: var(--human-width);
-    height: var(--human-height);
+    width: calc(var(--human-width) * var(--scale));
+    height: calc(var(--human-height) * var(--scale));
 }
 
 .human.ready {
@@ -226,8 +236,8 @@ fieldset {
 .input {
     --input-width: 47px;
     --input-height: 75px;
-    width: var(--input-width);
-    height: var(--input-height);
+    width: calc(var(--input-width) * var(--scale));
+    height: calc(var(--input-height) * var(--scale));
     background-image: url(../img/input-red.svg);
 }
 
@@ -236,25 +246,23 @@ fieldset {
 }
 
 #webpoint {
-    position: fixed;
-    bottom: 0;
+    position: absolute;
     right: 0;
-    margin-right: 20px;
-    margin-bottom: 20px;
+    margin-right: 30px;
 }
 
 .heart-crack {
-    background-image: url(../img/heart-crack.svg);
-    --heart-crack-width: 75px;
-    --heart-crack-height: 75px;
-    width: var(--heart-crack-width);
-    height: var(--heart-crack-height);
+background-image: url(../img/heart-crack.svg);
+--heart-crack-width: 75px;
+--heart-crack-height: 75px;
+width: calc(var(--heart-crack-width) * var(--scale));
+height: calc(var(--heart-crack-height) * var(--scale));
 }
 
 .link-slash {
-    background-image: url(../img/link-slash.svg);
-    --link-slash-width: 94px;
-    --link-slash-height: 75px;
-    width: var(--link-slash-width);
-    height: var(--link-slash-height);
+background-image: url(../img/link-slash.svg);
+--link-slash-width: 94px;
+--link-slash-height: 75px;
+width: calc(var(--link-slash-width) * var(--scale));
+height: calc(var(--link-slash-height) * var(--scale));
 }
