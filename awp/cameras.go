@@ -80,7 +80,7 @@ func (a *Auth) GetCameras() ([]Camera, error) {
 
 	var reqIface map[string]interface{}
 	if err := json.NewDecoder(&b).Decode(&reqIface); err != nil {
-		return nil, fmt.Errorf("GetCameras: Error decoding reqInface: %s", err)
+		return nil, fmt.Errorf("GetCameras: err decoding reqInface: %s", err)
 	}
 
 	r := NewRequest(a.Config)
@@ -95,7 +95,7 @@ func (a *Auth) GetCameras() ([]Camera, error) {
 
 	resp := &ResponseCameras{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return nil, fmt.Errorf("GetCameras: Error decoding config: %s", err)
+		return nil, fmt.Errorf("GetCameras: err decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {

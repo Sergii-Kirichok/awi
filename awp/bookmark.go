@@ -65,7 +65,7 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 
 	//var reqIface map[string]interface{}
 	//if err := json.NewDecoder(&b).Decode(&reqIface); err != nil {
-	//	return nil, fmt.Errorf("MakeBookmark: Error decoding reqInface: %s", err)
+	//	return nil, fmt.Errorf("MakeBookmark: err decoding reqInface: %s", err)
 	//}
 
 	r := NewRequest(a.Config)
@@ -82,7 +82,7 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 	//fmt.Printf("MakeBookmark: Answer: %s\n", string(answer))
 	resp := &ResponseBookmark{}
 	if err := json.Unmarshal(answer, resp); err != nil {
-		return nil, fmt.Errorf("MakeBookmark: Error decoding config: %s", err)
+		return nil, fmt.Errorf("MakeBookmark: err decoding config: %s", err)
 	}
 
 	if resp.Status != "success" {

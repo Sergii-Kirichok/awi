@@ -20,6 +20,7 @@ type Zone struct {
 	Webpoint    bool               `json:"webpoint"`
 	TimeLeftSec int                `json:"time_left_sec"`
 	Cameras     map[string]*Camera `json:"cameras"`
+	Err         error              `json:"error"`
 }
 
 type Camera struct {
@@ -123,6 +124,15 @@ func (c *Controller) updateZone(zId string) {
 		}
 	}
 
+	// Отдаём WebPopint connection status
+	if err := c.auth.GetError(); err != nil {
+		z.Webpoint = false
+		z.Err = err
+	} else {
+		// Отдаём heartBeat status только если с авторизацией всё хорошо ...
+		z.Heartbeat = c.auth.GetHeartBeat()
+	}
+
 	c.mu.Lock()
 	c.zones[zConf.Id] = z
 	c.mu.Unlock()
@@ -134,12 +144,9 @@ var zoneErr = errors.New("zone doesn't exist")
 func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	//todo: Добавить сюда-же вывод других ошибок. например потеря связи с WP, проблема с авторизацией и т.д...
-	// Поиск в реально существующей зоны, если зоны нет - отдадим пустую
-
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			return *zData, nil
+			return *zData, zData.Err
 		}
 	}
 

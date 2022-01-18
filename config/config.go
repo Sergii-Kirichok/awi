@@ -21,7 +21,7 @@ func (c *Config) Load() (*Config, error) {
 	if _, err := os.Stat(file); err == nil {
 		data, _ := ioutil.ReadFile(file)
 		if err := json.Unmarshal(data, &c); err != nil {
-			return c, fmt.Errorf("Load: Error decoding config: %s", err)
+			return c, fmt.Errorf("Load: err decoding config: %s", err)
 		}
 	} else if os.IsNotExist(err) {
 		c.makeDefault()
@@ -29,7 +29,7 @@ func (c *Config) Load() (*Config, error) {
 			return c, fmt.Errorf("Load: %s", err)
 		}
 	} else {
-		return c, fmt.Errorf("Load: Error reading config: %s", err)
+		return c, fmt.Errorf("Load: err reading config: %s", err)
 	}
 
 	if err := c.checkZones(); err != nil {
@@ -47,14 +47,14 @@ func (c *Config) Save() error {
 	defer f.Close()
 
 	if err != nil {
-		return fmt.Errorf("Save: Error writing config: %s", err)
+		return fmt.Errorf("Save: err writing config: %s", err)
 	}
 
 	out := json.NewEncoder(f)
 	out.SetIndent("", "\t")
 
 	if err := out.Encode(c); err != nil {
-		return fmt.Errorf("Save: Error encoding config: %s", err)
+		return fmt.Errorf("Save: err encoding config: %s", err)
 	}
 	return nil
 }

@@ -30,12 +30,14 @@ type authResponse struct {
 }
 
 type Auth struct {
-	Config   *config.Config
-	AuthTime time.Time     // Временная метка последней удачной авторизации
-	Request  *loginRequest // Данные для запроса
-	Response authResponse  // Ответ от сервера
-	wh       *MyWebhooks   //Массив ВебХуков
-	mu       *sync.Mutex
+	Config        *config.Config
+	AuthTime      time.Time     // Временная метка последней удачной авторизации
+	LastHeartbeat time.Time     // Когда пришел последний хеартбит
+	Request       *loginRequest // Данные для запроса
+	Response      authResponse  // Ответ от сервера
+	err           error         // Ошибка полученная от WebPointa при авторизации (нет связи, и т.д.)
+	wh            *MyWebhooks   // Массив моих ВебХуков
+	mu            *sync.Mutex
 }
 
 func NewAuth(c *config.Config) *Auth {
@@ -90,7 +92,8 @@ func (a *Auth) Login() (*Auth, error) {
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(a.Request)
 	if err != nil {
-		return a, fmt.Errorf("Login Err: %s", err)
+		a.err = fmt.Errorf("Login Err: %s", err)
+		return a, a.err
 	}
 
 	r := NewRequest(a.Config)
@@ -104,14 +107,18 @@ func (a *Auth) Login() (*Auth, error) {
 	}
 
 	if err := json.Unmarshal(answer, &a.Response); err != nil {
-		return a, fmt.Errorf("Error decoding config: %s", err)
+		return a, fmt.Errorf("err decoding config: %s", err)
 	}
 
 	if a.Response.Status != "success" {
-		return a, fmt.Errorf("Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
+		a.err = fmt.Errorf("Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
+		return a, a.err
 	}
+
 	a.AuthTime = time.Now()
 
+	// Всё хорошо, ошибок нет.
+	a.err = nil
 	return a, nil
 }
 
@@ -120,4 +127,28 @@ func (a *Auth) IsItMyToken(token string) bool {
 	result := a.wh.IsItMyToken(token)
 	a.Unlock()
 	return result
+}
+
+func (a *Auth) GetError() error {
+	a.Lock()
+	err := a.err
+	a.Unlock()
+	return err
+}
+
+func (a *Auth) UpdateHeartBeat() error {
+	a.Lock()
+	a.LastHeartbeat = time.Now()
+	a.Unlock()
+	return nil
+}
+
+func (a *Auth) GetHeartBeat() bool {
+	a.Lock()
+	var hbState bool
+	if time.Since(a.LastHeartbeat).Milliseconds() <= (HeartBeatDelayMs + 100) {
+		hbState = true
+	}
+	a.Unlock()
+	return hbState
 }

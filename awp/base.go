@@ -26,7 +26,7 @@ func ErrorParse(answer []byte) (*ResponseError, error) {
 	if err := json.Unmarshal(answer, re); err != nil {
 		return nil, fmt.Errorf("ErrorParse: %s", err)
 	}
-	log.Printf("Response Error: [%d]%s, %s. [code: %d, name: %s]\n", re.StatusCode, re.Status, re.Message, re.Meta.Code, re.Meta.Name)
+	log.Printf("Response err: [%d]%s, %s. [code: %d, name: %s]\n", re.StatusCode, re.Status, re.Message, re.Meta.Code, re.Meta.Name)
 	return re, nil
 }
 
