@@ -1,14 +1,16 @@
 package service
 
 import (
+	"awi/awp"
 	"awi/config"
+	"awi/controller"
+	"awi/syncer"
+	"awi/webserver"
 	"fmt"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
-	"os"
 	"strings"
-	"suv02-server/webserver"
 	"time"
 )
 
@@ -23,47 +25,38 @@ type Myservice struct {
 }
 
 func startServer(s Myservice) {
-	cfg = config.New().Load()
-	msg := fmt.Sprintf("Запуск сервера %s [%s]", s.Name, s.Version)
-
-	//db.LogCreate(&cfg, db.System, "", "", msg)
+	msg := fmt.Sprintf("Запуск сервера %s", s)
 	elog.Info(1, msg)
 
-	//Тестовый пользователь. Создавался и удалялся во время написания и отладки программы
-	//if cfg.Debug {
-	//	db.ClearTestCardTmp(&cfg, "1A000000000000000242630B", "23")
-	//	_, sd := rest.VisitorDelete(&cfg, "U23")
-	//	log.Printf("пользователь U23 удален, если код  == 200, код [%s]\n", sd)
-	//}
-
-	//Запускаем сервисы синхронизации
-	//go sync.Syncer(&cfg)
-
-	//Пдоготавливаем конфиг для веба
-
-	certificatePath := fmt.Sprintf("%v/%s", rootDir, cfg.WWWCertificate)
-	certificateKeyPath := fmt.Sprintf("%v/%s", rootDir, cfg.WWWCertificateKey)
-	if _, err := os.Stat(certificatePath); os.IsNotExist(err) {
-		elog.Warning(1, fmt.Sprintf("Не верный путь к сертификату %v", certificatePath))
-	}
-	if _, err := os.Stat(certificateKeyPath); os.IsNotExist(err) {
-		elog.Warning(1, fmt.Sprintf("Не верный путь к ключу сертификата %v", certificateKeyPath))
+start:
+	cfg, err := config.New().Load()
+	if err != nil {
+		elog.Error(1, fmt.Sprintf("Load config: %s", err))
+		time.Sleep(10 * time.Second)
+		goto start
 	}
 
-	srv := webserver.NewServer()
-	srv.Name = s.Name
-	srv.Version = s.Version
-	srv.Bind = cfg.WWWAddr
-	srv.Certificate = certificatePath
-	srv.CertificateKey = certificateKeyPath
-	//srv.Conf = &cfg
+	//Если не смогли авторизоваться при старте, то явно какая-то ошибка в конфиге или с самим сервером. Ругаемся, но идём дальше (нужен веб для отображения информации)
+	auth, err := awp.NewAuth(cfg).Login()
+	if err != nil {
+		elog.Error(2, fmt.Sprintf("%s", err))
+	}
 
-	//Запуск веб сервера http
-	//if cfg.WWWHTTPRedirect {
-	//	go srv.ListenAndServeHTTP()
-	//}
-	//Запуск веб сервера https
-	//srv.ListenAndServeHTTPS()
+	// Синхронизатор. Проверяет конфиг, находит Ид камер, создаёт и удаляет вебхуки, ...
+	go syncer.New(auth).Sync()
+
+	// Cтруктура хранящая данные используемые для генерации данных по зонам, камерам и ошибок (связи,синхронизации) передаваемых при get-запросе из веба
+	control := controller.New(auth)
+
+	// Сервис отвечающий за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera\
+	go control.Service()
+
+	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
+	webserver.New(s.Name, s.Version, cfg, control).ListenAndServeHTTPS()
+}
+
+func (m *Myservice) String() string {
+	return fmt.Sprintf("%s [%s]", m.Name, m.Version)
 }
 
 func (m *Myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {

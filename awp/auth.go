@@ -92,7 +92,7 @@ func (a *Auth) Login() (*Auth, error) {
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(a.Request)
 	if err != nil {
-		a.err = fmt.Errorf("Login Err: %s", err)
+		a.err = fmt.Errorf("Auth.Login Err: %s", err)
 		return a, a.err
 	}
 
@@ -103,15 +103,15 @@ func (a *Auth) Login() (*Auth, error) {
 
 	answer, err := r.MakeRequest()
 	if err != nil {
-		return a, fmt.Errorf("Login: %s", err)
+		return a, fmt.Errorf("Auth.Login: %s", err)
 	}
 
 	if err := json.Unmarshal(answer, &a.Response); err != nil {
-		return a, fmt.Errorf("err decoding config: %s", err)
+		return a, fmt.Errorf("Auth.Login: Err decoding config: %s", err)
 	}
 
 	if a.Response.Status != "success" {
-		a.err = fmt.Errorf("Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
+		a.err = fmt.Errorf("Auth.Login: Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
 		return a, a.err
 	}
 

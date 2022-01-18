@@ -11,32 +11,21 @@ import (
 )
 
 func main() {
-	info := version.GetInfo()
-	//rootDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	//cfg := config.New().Load(rootDir)
+	info := version.NewInfo()
+	m := service.Myservice{Name: info.Name, Version: info.Version}
 
-	//on("./")
-	//u := rest.UserGetFromRESTByAddress(&cfg, "U3")
-	//fmt.Println(u)
-
-	//val ,_ :=time.Parse("2006-01-02T15:04:05",u.Users[0].CreationDate)
-	//val.Format("2006-01-02 15:04:05")
-	//fmt.Printf("DateTime %s, dateTimeFormated %s",val, val.Format("2006-01-02 15:04:05") )
-	//fmt.Println(coder.Coder("1"))
-	//return
-
-	m := service.Myservice{info.Name, info.Version}
-	isIntSess, err := svc.IsWindowsService()
+	isIntSess, err := svc.IsAnInteractiveSession()
 	if err != nil {
 		log.Fatalf("Не удалось определить работаем-ли мы в интерактивном сеансе: %v", err)
 	}
+
 	if !isIntSess {
 		service.RunService(info.SvcName, false, &m)
 		return
 	}
 
 	if len(os.Args) < 2 {
-		usage("Комманда не определена.")
+		usage("Команда не определена.")
 	}
 
 	cmd := strings.ToLower(os.Args[1])
@@ -45,7 +34,7 @@ func main() {
 		service.RunService(info.SvcName, true, &m)
 		return
 	case "install":
-		err = service.InstallService(info.SvcName, fmt.Sprintf("%s [%s]", info.Name, info.Version))
+		err = service.InstallService(info.SvcName, fmt.Sprintf("%s", info))
 	case "remove":
 		err = service.RemoveService(info.SvcName)
 	case "start":

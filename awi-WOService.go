@@ -6,7 +6,6 @@ import (
 	"awi/controller"
 	"awi/syncer"
 	"awi/webserver"
-	"fmt"
 	"log"
 	"time"
 )
@@ -33,7 +32,7 @@ start:
 	control := controller.New(auth)
 	//сервис отвечающий за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera\
 	go control.Service()
-	fmt.Printf("Sessiion id: %s\n", auth.Response.Result.Session)
+	//fmt.Printf("Sessiion id: %s\n", auth.Response.Result.Session)
 	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
 	webserver.New("Avigilon Weight Integration Server", "beta 0.1", cfg, control).ListenAndServeHTTPS()
 
