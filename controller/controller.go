@@ -56,7 +56,6 @@ func (c *Controller) IsItMyToken(token string) bool {
 func (c *Controller) Service() {
 	for {
 		c.auth.Lock()
-
 		confNames := c.auth.Config.GetZoneNames()
 		for zId := range confNames {
 			c.auth.Config.CountDownZoneCheck(zId)
@@ -144,12 +143,12 @@ var zoneErr = errors.New("zone doesn't exist")
 func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	for zId, zData := range c.zones {
 		if zId == zoneId {
 			return *zData, zData.Err
 		}
 	}
-
 	return Zone{}, zoneErr
 }
 

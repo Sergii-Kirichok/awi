@@ -7,7 +7,7 @@ import (
 // Обработчик ивентов веб-хуков
 func (h *HandlerData) processing() error {
 	if !h.controller.IsItMyToken(h.msg.AuthenticationToken) {
-		return fmt.Errorf("processing: Wrong AuthenticationToken")
+		return fmt.Errorf("processing: Wrong AuthenticationToken [%s]", h.msg.AuthenticationToken)
 	}
 
 	//в зависимости от типа события - выполнить

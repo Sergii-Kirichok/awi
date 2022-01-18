@@ -1,9 +1,11 @@
 package version
 
+import "fmt"
+
 const (
-	name    = "AWI-Current"
+	name    = "Avigilon Weight Integration"
 	svcName = "AWI-Service"
-	version = "0.0.1 (20220106.01)"
+	version = "1.0.1 (202201018.01)"
 )
 
 type Info struct {
@@ -12,10 +14,14 @@ type Info struct {
 	SvcName string
 }
 
-func GetInfo() Info {
+func NewInfo() *Info {
 	var data Info
 	data.Name = name
 	data.Version = version
 	data.SvcName = svcName
-	return data
+	return &data
+}
+
+func (i *Info) String() string {
+	return fmt.Sprintf("%s %s", i.Name, i.Version)
 }

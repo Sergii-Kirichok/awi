@@ -52,6 +52,13 @@ func (c *Config) SetCarState(cid string, eventId string, state bool) error {
 	for zId, zone := range c.Zones {
 		for camId, camera := range zone.Cameras {
 			if camera.Id == cid {
+				if camera.ConState != "CONNECTED" {
+					c.Zones[zId].Cameras[camId].Car = false
+					c.Zones[zId].Cameras[camId].Person = false
+					c.Zones[zId].Cameras[camId].CarEventId = ""
+					c.Zones[zId].Cameras[camId].PersonEventId = ""
+					return fmt.Errorf("SetCarState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
+				}
 				c.Zones[zId].Cameras[camId].Car = state
 				c.Zones[zId].Cameras[camId].CarEventId = eventId
 				return nil
@@ -68,6 +75,13 @@ func (c *Config) SetPersonState(cid string, eventId string, state bool) error {
 	for zId, zone := range c.Zones {
 		for camId, camera := range zone.Cameras {
 			if camera.Id == cid {
+				if camera.ConState != "CONNECTED" {
+					c.Zones[zId].Cameras[camId].Car = false
+					c.Zones[zId].Cameras[camId].Person = false
+					c.Zones[zId].Cameras[camId].CarEventId = ""
+					c.Zones[zId].Cameras[camId].PersonEventId = ""
+					return fmt.Errorf("SetPersonState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
+				}
 				c.Zones[zId].Cameras[camId].Person = state
 				c.Zones[zId].Cameras[camId].PersonEventId = eventId
 				return nil

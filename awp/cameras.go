@@ -11,7 +11,7 @@ type Camera struct {
 	Id               string              `json:"id"`
 	Name             string              `json:"name"`
 	Available        bool                `json:"available"`
-	ConnectionState  string              `json:"connectionState"` //LONG_FAILED
+	ConnectionState  string              `json:"connectionState"` //LONG_FAILED, CONNECTED
 	FirmwareVersion  string              `json:"firmwareVersion"`
 	IpAddress        string              `json:"ipAddress"`
 	Model            string              `json:"model"`
@@ -25,8 +25,8 @@ type Camera struct {
 	Connected        bool                `json:"connected"`
 	ConnectionStatus struct {
 		IsConnectable bool          `json:"isConnectable"`
-		State         string        `json:"state"`
-		ErrorFlags    []interface{} `json:"errorFlags"`
+		State         string        `json:"state"`      //LONG_FAILED,
+		ErrorFlags    []interface{} `json:"errorFlags"` //   "NOT_PRESENT", "LONG_FAILED"
 		StartTime     time.Time     `json:"startTime"`
 	} `json:"connectionStatus"`
 }
