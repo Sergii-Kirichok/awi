@@ -82,6 +82,7 @@ class App {
 
         try {
             const { name, heartbeat, webpoint, timeLeft, cameras } = await get("data");
+            console.log("cameras:", cameras);
             if (!this.isHealthy) this.render(name);
             this.isHealthy = true;
 
@@ -208,6 +209,7 @@ class App {
 
         const toRemove = Object.keys(prevCameras).filter(prevID => !Object.keys(this.cameras).find(currID => prevID === currID));
         toRemove.forEach(id => {
+            console.log(`removing camera ${id} states...`);
             const el = document.getElementById(id);
             el?.parentNode.removeChild(el);
         });
