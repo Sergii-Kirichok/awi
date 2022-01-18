@@ -49,8 +49,6 @@ const stabilizationTime = 10
 var timeLeft = stabilizationTime
 var counter = 0
 
-var requestNum = 0
-
 var zone = controller.Zone{
 	Id:        "abracadabra",
 	Name:      "Важільна: вул. Велика Васильківська 72",
@@ -80,13 +78,36 @@ var zone = controller.Zone{
 			Car:   0 == rand.Intn(2),
 			Inputs: map[string]*controller.Input{
 				"camera id 2, input id 1": {
-					Id:    "camera id 1, input id 1",
+					Id:    "camera id 2, input id 1",
+					State: 0 == rand.Intn(2),
+				},
+				"camera id 2, input id 2": {
+					Id:    "camera id 2, input id 2",
 					State: 0 == rand.Intn(2),
 				},
 			},
 		},
+		//"camera id 3": {
+		//	Id:     "camera id 3",
+		//	Name:   "Тест 3",
+		//	Human:  0 == rand.Intn(2),
+		//	Car:    0 == rand.Intn(2),
+		//	Inputs: map[string]*controller.Input{},
+		//},
+		//"camera id 4": {
+		//	Id:    "camera id 4",
+		//	Name:  "Тест 4",
+		//	Human: 0 == rand.Intn(2),
+		//	Car:   0 == rand.Intn(2),
+		//	Inputs: map[string]*controller.Input{
+		//		"camera id 4, input id 1": {
+		//			Id:    "camera id 4, input id 1",
+		//			State: 0 == rand.Intn(2),
+		//		},
+		//	},
+		//},
 	},
-	Err: errors.New("some error"),
+	Error: "",
 }
 
 func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
@@ -95,34 +116,6 @@ func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
 	//	http.Error(w, err.Error(), http.StatusBadRequest)
 	//	return
 	//}
-
-	if requestNum == 2 {
-		delete(zone.Cameras, "camera id 2")
-		zone.Cameras["camera id 3"] = &controller.Camera{
-			Id:     "camera id 3",
-			Name:   "Тест 3",
-			Human:  0 == rand.Intn(2),
-			Car:    0 == rand.Intn(2),
-			Inputs: map[string]*controller.Input{},
-		}
-		zone.Cameras["camera id 4"] = &controller.Camera{
-			Id:    "camera id 4",
-			Name:  "Тест 4",
-			Human: 0 == rand.Intn(2),
-			Car:   0 == rand.Intn(2),
-			Inputs: map[string]*controller.Input{
-				"camera id 4, input id 1": {
-					Id:    "camera id 4, input id 1",
-					State: 0 == rand.Intn(2),
-				},
-			},
-		}
-	}
-
-	if requestNum == 4 {
-		delete(zone.Cameras, "camera id 3")
-		delete(zone.Cameras, "camera id 4")
-	}
 
 	zoneID := mux.Vars(r)["zone-id"]
 	if zoneID != zone.Id {
@@ -146,8 +139,6 @@ func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	requestNum++
 }
 
 func (s *Server) buttonPress(w http.ResponseWriter, r *http.Request) {

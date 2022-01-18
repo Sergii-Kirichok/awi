@@ -20,7 +20,7 @@ type Zone struct {
 	Webpoint    bool               `json:"webpoint"`
 	TimeLeftSec int                `json:"timeLeft"`
 	Cameras     map[string]*Camera `json:"cameras"`
-	Err         error              `json:"error"` // todo: mb error string
+	Error       string             `json:"error"`
 }
 
 type Camera struct {
@@ -126,7 +126,7 @@ func (c *Controller) updateZone(zId string) {
 	// Отдаём WebPopint connection status
 	if err := c.auth.GetError(); err != nil {
 		z.Webpoint = false
-		z.Err = err
+		z.Error = err.Error()
 	} else {
 		// Отдаём heartBeat status только если с авторизацией всё хорошо ...
 		z.Heartbeat = c.auth.GetHeartBeat()
@@ -146,7 +146,7 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			return *zData, zData.Err
+			return *zData, errors.New(zData.Error)
 		}
 	}
 	return Zone{}, zoneErr

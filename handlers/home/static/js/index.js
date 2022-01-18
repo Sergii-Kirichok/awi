@@ -81,7 +81,12 @@ class App {
         const prevTimeLeft = this.timeLeft;
 
         try {
-            const { name, heartbeat, webpoint, timeLeft, cameras } = await get("data");
+            const { name, heartbeat, webpoint, timeLeft, cameras, error } = await get("data");
+            if (error) {
+                this.error(error, false)
+                return
+            }
+
             console.log("cameras:", cameras);
             if (!this.isHealthy) this.render(name);
             this.isHealthy = true;
@@ -246,6 +251,6 @@ window.onload = async () => {
     const app = new App();
     setTimeout(function cycle() {
         app.update();
-        setTimeout(cycle, 1000);
+        setTimeout(cycle, 5000);
     });
 };
