@@ -93,6 +93,7 @@ func (a *Auth) Login() (*Auth, error) {
 	err := json.NewEncoder(b).Encode(a.Request)
 	if err != nil {
 		a.err = fmt.Errorf("Auth.Login Err: %s", err)
+
 		return a, a.err
 	}
 
