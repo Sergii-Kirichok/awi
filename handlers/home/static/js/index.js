@@ -39,10 +39,15 @@ class App {
         document.body.innerHTML = `
         <p id="zone">${await get("zone-name")}</p>
         <p id="countdown">00:00:00</p>
-        <button id="status-button">Взвесить</button>
-        <div id="cameras"></div>
-        <span id="webpoint"></span>`;
+        <button id="status-button">Зважити</button>
+        <div id="status-bar">
+            <div id="cameras"></div>
+            <span id="webpoint"></span>
+        </div>`;
 
+        // <fieldset class="popup">Возникла оclassName во время передачи данных
+        //    <span class="popuptext" id="myclassName">Popup text...</span>
+        // </fieldset>
         this.countdownEl = document.getElementById("countdown");
         this.statusBtnEl = document.getElementById("status-button");
         this.camerasDivEl = document.getElementById("cameras");
