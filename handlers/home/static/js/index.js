@@ -81,13 +81,14 @@ class App {
         const prevTimeLeft = this.timeLeft;
 
         try {
-            const { name, heartbeat, webpoint, timeLeft, cameras, error } = await get("data");
+            const states = await get("data");
+            console.log("states:", states);
+            const { name, heartbeat, webpoint, timeLeft, cameras, error } = states;
             if (error) {
                 this.error(error, false)
                 return
             }
 
-            console.log("cameras:", cameras);
             if (!this.isHealthy) this.render(name);
             this.isHealthy = true;
 

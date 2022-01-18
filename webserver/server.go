@@ -43,7 +43,7 @@ func New(name, version string, config *config.Config, control *controller.Contro
 
 func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
 	zone, err := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	if err != nil {
+	if err != nil && err.Error() != "" {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
