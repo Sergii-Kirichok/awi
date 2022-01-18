@@ -2,7 +2,6 @@ package awp
 
 import (
 	"fmt"
-	"log"
 )
 
 const webhookTolerance = 4
@@ -55,7 +54,7 @@ func (a *Auth) webhooksWPCheck(whArr []Webhook) []string {
 	var ids []string
 	for _, hook := range whArr {
 		if _, ok := a.wh.Webhooks[hook.Id]; !ok {
-			log.Printf("[INFO] Going to delete this WebHook -> ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %#v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
+			//log.Printf("[INFO] Going to delete this WebHook -> ID[%s]: URL: \"%s\", HeartBeat: %v, Events: %#v\n", hook.Id, hook.Url, hook.Heartbeat, hook.EventTopics)
 			ids = append(ids, hook.Id)
 		}
 	}
