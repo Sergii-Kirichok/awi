@@ -14,12 +14,13 @@ func main() {
 	info := version.NewInfo()
 	m := service.Myservice{Name: info.Name, Version: info.Version}
 
-	isIntSess, err := svc.IsAnInteractiveSession()
+	//isIntSess, err := svc.IsAnInteractiveSession()
+	isIntSess, err := svc.IsWindowsService()
 	if err != nil {
 		log.Fatalf("Не удалось определить работаем-ли мы в интерактивном сеансе: %v", err)
 	}
 
-	if !isIntSess {
+	if isIntSess {
 		service.RunService(info.SvcName, false, &m)
 		return
 	}
