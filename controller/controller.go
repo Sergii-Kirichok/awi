@@ -128,9 +128,11 @@ func (c *Controller) updateZone(zId string) {
 		z.Webpoint = false
 		z.Error = err.Error()
 	} else {
-		// Отдаём heartBeat status только если с авторизацией всё хорошо ...
-		z.Heartbeat = c.auth.GetHeartBeat()
+		z.Webpoint = true
 	}
+
+	// Отдаём heartBeat status только если с авторизацией всё хорошо ...
+	z.Heartbeat = c.auth.GetHeartBeat()
 
 	c.mu.Lock()
 	c.zones[zConf.Id] = z

@@ -34,15 +34,16 @@ type Zone struct {
 }
 
 type Cam struct {
-	Id            string            `json:"-"`      // ИД-Камеры. Получаем по RESTу на основании serial, пользователю в конфиге он не нужен
-	Serial        string            `json:"serial"` // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
-	ConState      string            `json:"-"`      // Статус, получаем через WebPoint, например 'CONNECTED'.
-	Name          string            `json:"-"`      // Имя камеры, получаем актуальное через WebPOint
-	Inputs        map[string]*Input `json:"-"`      // Состояние входов
-	Car           bool              `json:"-"`      // В зоне обнаружена машина
-	CarEventId    string            `json:"-"`      // Id события когда машина заехала в зону
-	Person        bool              `json:"-"`      // В зоне обнаружен человек
-	PersonEventId string            `json:"-"`      // Id события, когда человек зашел в зону
+	Id             string            `json:"-"`                         // ИД-Камеры. Получаем по RESTу на основании serial, пользователю в конфиге он не нужен
+	Serial         string            `json:"serial"`                    // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
+	ConState       string            `json:"-"`                         // Статус, получаем через WebPoint, например 'CONNECTED'.
+	Name           string            `json:"-"`                         // Имя камеры, получаем актуальное через WebPOint
+	Inputs         map[string]*Input `json:"-"`                         // Состояние входов
+	Car            bool              `json:"-"`                         // В зоне обнаружена машина
+	CarEventId     string            `json:"-"`                         // Id события когда машина заехала в зону
+	Person         bool              `json:"-"`                         // В зоне обнаружен человек
+	PersonEventId  string            `json:"-"`                         // Id события, когда человек зашел в зону
+	InputsDisabled bool              `json:"inputs_disabled,omitempty"` // Не использовать входы камеры
 }
 
 type Input struct {

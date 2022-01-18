@@ -7,7 +7,6 @@
 	"wp_port": "8443",
 	"wp_user": "administrator",
 	"wp_password": "yjdsqgfhjkm",
-	"debug": true,
 	"zones": [
 		{
 			"Id": "8283cdb7daba1c1f498659f2f6ca0111c60e811890ac994dee9d7d1740883d69",
@@ -15,21 +14,19 @@
 			"cameras": [
 				{
 					"serial": "102109218992"
+
 				},
 				{
 					"serial": "102109218993"
 				}
 			],
-			"delay_sec": 180,
-			"bookmarks": true,
-			"alarms": true
+			"delay_sec": 180
 		},
 		{
 			"Id": "d118fe56817995fad51a015be2774f97b59f00098f48e547940cc45070aa3d96",
 			"name": "Весовая №2",
 			"cameras": [],
-			"delay_sec": 30,
-			"bookmarks": true
+			"delay_sec": 30
 		}
 	]
 }
