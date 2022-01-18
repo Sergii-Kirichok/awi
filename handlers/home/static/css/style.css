@@ -104,6 +104,7 @@ p.alert {
     color: white;
     background-color: rgb(178, 49, 49);
     min-width: 450px;
+    max-width: 450px;
     min-height: 160px;
     border: 2px solid var(--red-border);
     border-radius: 10px;
@@ -115,6 +116,14 @@ p.alert {
     background-color: var(--green);
     border-color: var(--green-border);
     cursor: pointer;
+}
+
+#status-button-alert {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    min-width: 450px;
+    max-width: 450px;
 }
 
 #status-bar {
@@ -212,7 +221,7 @@ fieldset {
     margin-left: 25px;
 }
 
-.spinner {
+.icon.spinner {
     --spinner-width: 75px;
     --spinner-height: 75px;
     width: var(--spinner-width);
@@ -231,7 +240,7 @@ fieldset {
     }
 }
 
-.truck {
+.icon.truck {
     background-image: url(../img/truck-red.svg);
     --truck-width: 94px;
     --truck-height: 75px;
@@ -239,11 +248,11 @@ fieldset {
     height: calc(var(--truck-height) * var(--scale));
 }
 
-.truck.ready {
+.icon.truck.ready {
     background-image: url(../img/truck-green.svg);
 }
 
-.human {
+.icon.human {
     background-image: url(../img/human-red.svg);
     --human-width: 75px;
     --human-height: 75px;
@@ -251,11 +260,11 @@ fieldset {
     height: calc(var(--human-height) * var(--scale));
 }
 
-.human.ready {
+.icon.human.ready {
     background-image: url(../img/human-green.svg);
 }
 
-.input {
+.icon.input {
     --input-width: 47px;
     --input-height: 75px;
     width: calc(var(--input-width) * var(--scale));
@@ -263,18 +272,18 @@ fieldset {
     background-image: url(../img/input-red.svg);
 }
 
-.input.ready {
+.icon.input.ready {
     background-image: url(../img/input-green.svg);
 }
 
-#status {
+.icon#status {
     /*display: none;*/
     position: absolute;
     right: 0;
     margin-right: 30px;
 }
 
-.heart-crack {
+.icon.heart-crack {
     background-image: url(../img/heart-crack.svg);
     --heart-crack-width: 75px;
     --heart-crack-height: 75px;
@@ -282,7 +291,7 @@ fieldset {
     height: calc(var(--heart-crack-height) * var(--scale));
 }
 
-.link-slash {
+.icon.link-slash {
     background-image: url(../img/link-slash.svg);
     --link-slash-width: 94px;
     --link-slash-height: 75px;
@@ -290,7 +299,7 @@ fieldset {
     height: calc(var(--link-slash-height) * var(--scale));
 }
 
-.circle-check {
+.icon.circle-check {
     background-image: url(../img/circle-check.svg);
     --circle-check-width: 75px;
     --circle-check-height: 75px;
@@ -298,10 +307,11 @@ fieldset {
     height: calc(var(--circle-check-height) * var(--scale));
 }
 
-.circle-xmark {
+.icon.circle-xmark {
     background-image: url(../img/circle-xmark.svg);
     --circle-xmark-width: 75px;
     --circle-xmark-height: 75px;
     width: calc(var(--circle-xmark-width) * var(--scale));
     height: calc(var(--circle-xmark-height) * var(--scale));
+    cursor: pointer;
 }

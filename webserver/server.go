@@ -59,34 +59,34 @@ func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
 	zone := controller.Zone{
 		Id:        "abracadabra",
 		Name:      "Важільна: вул. Велика Васильківська 72",
-		Heartbeat: false,
-		Webpoint:  false,
+		Heartbeat: 0 == rand.Intn(2),
+		Webpoint:  0 == rand.Intn(2),
 		Cameras: map[string]*controller.Camera{
 			"camera id 1": {
 				Id:    "camera id 1",
 				Name:  "Північна платформа",
-				Human: true,
-				Car:   true,
+				Human: 0 == rand.Intn(2),
+				Car:   0 == rand.Intn(2),
 				Inputs: map[string]*controller.Input{
 					"camera id 1, input id 1": {
 						Id:    "camera id 1, input id 1",
-						State: true,
+						State: 0 == rand.Intn(2),
 					},
 					"camera id 1, input id 2": {
 						Id:    "camera id 1, input id 2",
-						State: false,
+						State: 0 == rand.Intn(2),
 					},
 				},
 			},
 			"camera id 2": {
 				Id:    "camera id 2",
 				Name:  "Південна платформа",
-				Human: false,
-				Car:   false,
+				Human: 0 == rand.Intn(2),
+				Car:   0 == rand.Intn(2),
 				Inputs: map[string]*controller.Input{
 					"camera id 2, input id 1": {
 						Id:    "camera id 1, input id 1",
-						State: true,
+						State: 0 == rand.Intn(2),
 					},
 				},
 			},
