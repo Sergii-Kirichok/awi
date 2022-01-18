@@ -5,36 +5,57 @@ import (
 	"awi/config"
 	"awi/controller"
 	"awi/syncer"
+	"awi/version"
 	"awi/webserver"
 	"fmt"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
+	"log"
 	"strings"
 	"time"
 )
 
 var (
-	cfg  *config.Config
-	elog debug.Log
+	cfg *config.Config
 )
 
 type Myservice struct {
 	Name    string
 	Version string
+	debug.Log
 }
 
-func (m Myservice) String() string {
+func New(info *version.Info, isDebug string) *Myservice {
+	var err error
+	s := &Myservice{
+		Name:    info.Name,
+		Version: info.Version,
+	}
+
+	if isDebug == "debug" {
+		s.Log = debug.New(info.SvcName)
+	} else {
+		s.Log, err = eventlog.Open(info.SvcName)
+		if err != nil {
+			log.Fatalf("Can't open eventlog: %s", err)
+		}
+	}
+
+	return s
+}
+
+func (m *Myservice) String() string {
 	return fmt.Sprintf("%s [%s]", m.Name, m.Version)
 }
 
-func startServer(s Myservice) {
-	elog.Info(1, fmt.Sprintf("Запуск сервера %s", s))
+func startServer(s *Myservice) {
+	s.Info(1, fmt.Sprintf("Запуск сервера %s", s))
 
 start:
 	cfg, err := config.New().Load()
 	if err != nil {
-		elog.Error(1, fmt.Sprintf("Load config: %s", err))
+		s.Error(1, fmt.Sprintf("Load config: %s", err))
 		time.Sleep(10 * time.Second)
 		goto start
 	}
@@ -42,7 +63,7 @@ start:
 	//Если не смогли авторизоваться при старте, то явно какая-то ошибка в конфиге или с самим сервером. Ругаемся, но идём дальше (нужен веб для отображения информации)
 	auth, err := awp.NewAuth(cfg).Login()
 	if err != nil {
-		elog.Error(2, fmt.Sprintf("%s", err))
+		s.Error(2, fmt.Sprintf("%s", err))
 	}
 
 	// Синхронизатор. Проверяет конфиг, находит Ид камер, создаёт и удаляет вебхуки, ...
@@ -51,7 +72,7 @@ start:
 	// Cтруктура хранящая данные используемые для генерации данных по зонам, камерам и ошибок (связи,синхронизации) передаваемых при get-запросе из веба
 	control := controller.New(auth)
 
-	// Сервис отвечающий за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и  методами controllera\
+	// Сервис отвечающий за: таймеры обратного отсчёта по зонам и их состояния. Веб работает с ней и методами controllera
 	go control.Service()
 
 	// WebServer, принимает и обрабатываем webhook-и от WebPointa, так-же отдаёт страничку с Кнопкой, таймером обратного отсчёта, значками состояния, ...
@@ -73,7 +94,7 @@ func (m *Myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes c
 	//Отдаём текущий статус, и какие комманды мы можем отрабатывать
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 
-	go startServer(*m)
+	go startServer(m)
 
 loop:
 	//Я так понимаю, вот тут мы крутимся пока сервис разботает или нет
@@ -98,7 +119,7 @@ loop:
 				// golang.org/x/sys/windows/svc.TestExample is verifying this output.
 				testOutput := strings.Join(args, "-")
 				//testOutput += fmt.Sprintf("-%d", c.Context)
-				elog.Info(1, testOutput)
+				m.Info(1, testOutput)
 				break loop
 			//case svc.Pause:
 			//	changes <- svc.Status{State: svc.Paused, Accepts: cmdsAccepted}
@@ -107,7 +128,7 @@ loop:
 			//	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 			//	//tick = fasttick
 			default:
-				elog.Error(1, fmt.Sprintf("unexpected control request #%d", c))
+				m.Error(1, fmt.Sprintf("unexpected control request #%d", c))
 			}
 		}
 	}
@@ -117,25 +138,18 @@ loop:
 
 func RunService(name string, isDebug bool, m *Myservice) {
 	var err error
-	if isDebug {
-		elog = debug.New(name)
-	} else {
-		elog, err = eventlog.Open(name)
-		if err != nil {
-			return
-		}
-	}
-	defer elog.Close()
+	m.Info(1, fmt.Sprintf("starting %s service", name))
 
-	elog.Info(1, fmt.Sprintf("starting %s service", name))
 	run := svc.Run
 	if isDebug {
 		run = debug.Run
 	}
+
 	err = run(name, m)
 	if err != nil {
-		elog.Error(1, fmt.Sprintf("%s service failed: %v", name, err))
+		m.Error(1, fmt.Sprintf("%s service failed: %v", name, err))
 		return
 	}
-	elog.Info(1, fmt.Sprintf("%s service stopped", name))
+	m.Info(1, fmt.Sprintf("%s service stopped", name))
+	m.Log.Close()
 }

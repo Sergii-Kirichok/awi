@@ -12,7 +12,9 @@ import (
 
 func main() {
 	info := version.NewInfo()
-	m := service.Myservice{Name: info.Name, Version: info.Version}
+	cmd := strings.ToLower(os.Args[1])
+
+	m := service.New(info, cmd)
 
 	//isIntSess, err := svc.IsAnInteractiveSession()
 	isIntSess, err := svc.IsWindowsService()
@@ -21,7 +23,7 @@ func main() {
 	}
 
 	if isIntSess {
-		service.RunService(info.SvcName, false, &m)
+		service.RunService(info.SvcName, false, m)
 		return
 	}
 
@@ -29,10 +31,9 @@ func main() {
 		usage("Команда не определена.")
 	}
 
-	cmd := strings.ToLower(os.Args[1])
 	switch cmd {
 	case "debug":
-		service.RunService(info.SvcName, true, &m)
+		service.RunService(info.SvcName, true, m)
 		return
 	case "install":
 		err = service.InstallService(info.SvcName, fmt.Sprintf("%s", info))
