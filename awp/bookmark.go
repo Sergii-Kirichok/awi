@@ -87,7 +87,7 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 
 	if resp.Status != "success" {
 		d, _ := ErrorParse(answer)
-		return nil, fmt.Errorf("MakeBookmark: Can't read cameras: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
+		return nil, fmt.Errorf("MakeBookmark: Can't MakeBookmark: Status == %s. [%d]%s - %s", resp.Status, d.StatusCode, d.Status, d.Message)
 	}
 	return resp, nil
 }

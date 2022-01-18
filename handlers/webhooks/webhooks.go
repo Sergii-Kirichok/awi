@@ -15,10 +15,10 @@ type HandlerData struct {
 	msg        *WebhookMessage
 }
 
-func NewHandler(cfg *config.Config, ctrler *controller.Controller) *HandlerData {
+func NewHandler(cfg *config.Config, ctl *controller.Controller) *HandlerData {
 	return &HandlerData{
 		cfg:        cfg,
-		controller: ctrler,
+		controller: ctl,
 		msg:        NewMessage(),
 	}
 }
@@ -45,7 +45,6 @@ func (h *HandlerData) WebHooksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//todo: Remove info messages
 	//fmt.Printf("[LOG-SART] Webhook Notification parsed [%s], has [%d] events:\n", h.msg.Type, len(h.msg.Notifications))
 	//for k, e := range h.msg.Notifications {
 	//	fmt.Printf("[INFO] % 2d.Event [%s]=>[%s]:\n", k, e.Type, e.Event.Type)

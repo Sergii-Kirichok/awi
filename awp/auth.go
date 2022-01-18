@@ -130,9 +130,9 @@ func (a *Auth) IsItMyToken(token string) bool {
 }
 
 func (a *Auth) GetError() error {
-	a.Lock()
+	//a.Lock()
 	err := a.err
-	a.Unlock()
+	//a.Unlock()
 	return err
 }
 
@@ -144,11 +144,11 @@ func (a *Auth) UpdateHeartBeat() error {
 }
 
 func (a *Auth) GetHeartBeat() bool {
-	a.Lock()
+	//a.Lock()
 	var hbState bool
 	if time.Since(a.LastHeartbeat).Milliseconds() <= (HeartBeatDelayMs + 100) {
 		hbState = true
 	}
-	a.Unlock()
+	//a.Unlock()
 	return hbState
 }

@@ -26,18 +26,17 @@ type Config struct {
 }
 
 type Zone struct {
-	Id         string    `json:"Id"`              // По нему будем работать с Зоной.?Zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
-	Name       string    `json:"name"`            // Имя зоны -> в вебе будет использоваться для отображения (?Zone=hexEncoded(ZoneNameAppendix+name))
-	Cameras    []Cam     `json:"cameras"`         // Камеры в пределах текущей зоны
-	DelaySec   int       `json:"delay_sec"`       // Задержка после сработки входа, наличия машины и отсутствия человека
-	State      bool      `json:"state,omitempty"` // Текущее состояние (красная/зелёная) (результирующий - человек, машина, вход, задержка)
-	TimeLasErr time.Time `json:"-"`               // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
+	Id         string    `json:"Id"`        // По нему будем работать с Зоной.?Zone=hexEncoded(ZoneNameAppendix+name) (Обязательно обновлять и сохранять в конфиге если при чтении конфига была пустая)
+	Name       string    `json:"name"`      // Имя зоны -> в вебе будет использоваться для отображения (?Zone=hexEncoded(ZoneNameAppendix+name))
+	Cameras    []Cam     `json:"cameras"`   // Камеры в пределах текущей зоны
+	DelaySec   int       `json:"delay_sec"` // Задержка после сработки входа, наличия машины и отсутствия человека
+	TimeLasErr time.Time `json:"-"`         // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
 }
 
 type Cam struct {
 	Id            string            `json:"-"`      // ИД-Камеры. Получаем по RESTу на основании serial, пользователю в конфиге он не нужен
 	Serial        string            `json:"serial"` // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
-	ConState      string            `json:"-"`      // Статус, получаем через WebPOint, например 'CONNECTED'
+	ConState      string            `json:"-"`      // Статус, получаем через WebPoint, например 'CONNECTED'.
 	Name          string            `json:"-"`      // Имя камеры, получаем актуальное через WebPOint
 	Inputs        map[string]*Input `json:"-"`      // Состояние входов
 	Car           bool              `json:"-"`      // В зоне обнаружена машина
