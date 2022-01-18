@@ -251,6 +251,6 @@ window.onload = async () => {
     const app = new App();
     setTimeout(function cycle() {
         app.update();
-        setTimeout(cycle, 5000);
+        setTimeout(cycle, 1000);
     });
 };
