@@ -11,6 +11,6 @@ import (
 //	"authenticationToken":"3733746f6b656e3733537472696e67252164284d495353494e4729"
 //}
 func (h *HandlerData) processingHeartbeat(t MainType) error {
-	log.Printf("Processing: [%s] \n", t)
+	log.Printf("Webhook Processing: [%s]\n", t)
 	return h.controller.UpdateHeartBeat()
 }
