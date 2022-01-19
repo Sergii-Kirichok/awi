@@ -38,6 +38,7 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 
 func (h *HandlerData) personAndCarAnalyticStop(e *Event) error {
 	log.Printf("Processing: [%s] %s \n", e.Type, e.AnalyticEventName)
+
 	if e.Activity == OBJECT_PRESENT {
 		h.cfg.ClearCarOrPesonState(e.CameraId, e.LinkedEventId)
 		return nil

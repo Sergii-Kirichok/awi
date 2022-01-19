@@ -8,6 +8,7 @@ import (
 func (c *Config) CountDownZoneCheck(zId string) {
 	c.Lock()
 	defer c.Unlock()
+
 	for zIndex, zone := range c.Zones {
 		if zone.Id == zId {
 			resetDuToCam := true
@@ -16,8 +17,9 @@ func (c *Config) CountDownZoneCheck(zId string) {
 				if camera.Id == "" {
 					continue
 				}
+				// Проверка входов
 				for _, input := range camera.Inputs {
-					if !input.State && !zone.CarOnAnyCamera {
+					if !input.State {
 						c.Zones[zIndex].TimeLasErr = time.Now()
 					}
 				}

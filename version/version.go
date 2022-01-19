@@ -5,7 +5,7 @@ import "fmt"
 const (
 	name    = "Avigilon Weight Integration"
 	svcName = "AWI-Service"
-	version = "1.0.6 (20220119.03)"
+	version = "1.0.7 (20220119.04)"
 )
 
 type Info struct {

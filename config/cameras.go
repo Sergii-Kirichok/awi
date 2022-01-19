@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Проверка зоны на наличие в ней камер.
 func (c *Config) camerasCheckInTheZone(zoneIndex int) (bool, error) {
@@ -36,6 +39,10 @@ func (c *Config) SetInputState(cid string, inId string, state bool) error {
 				for index, input := range camera.Inputs {
 					if input.EntityId == inId {
 						c.Zones[zId].Cameras[camId].Inputs[index].State = state
+						// сброс таймера по-веб-хуку
+						if !state {
+							c.Zones[zId].TimeLasErr = time.Now()
+						}
 						return nil
 					}
 				}
@@ -57,10 +64,15 @@ func (c *Config) SetCarState(cid string, eventId string, state bool) error {
 					c.Zones[zId].Cameras[camId].Person = false
 					c.Zones[zId].Cameras[camId].CarEventId = ""
 					c.Zones[zId].Cameras[camId].PersonEventId = ""
+					c.Zones[zId].TimeLasErr = time.Now()
 					return fmt.Errorf("SetCarState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
 				}
 				c.Zones[zId].Cameras[camId].Car = state
 				c.Zones[zId].Cameras[camId].CarEventId = eventId
+				// сброс таймера по-веб-хуку
+				if !state {
+					c.Zones[zId].TimeLasErr = time.Now()
+				}
 				return nil
 			}
 		}
@@ -80,10 +92,15 @@ func (c *Config) SetPersonState(cid string, eventId string, state bool) error {
 					c.Zones[zId].Cameras[camId].Person = false
 					c.Zones[zId].Cameras[camId].CarEventId = ""
 					c.Zones[zId].Cameras[camId].PersonEventId = ""
+					c.Zones[zId].TimeLasErr = time.Now()
 					return fmt.Errorf("SetPersonState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
 				}
 				c.Zones[zId].Cameras[camId].Person = state
 				c.Zones[zId].Cameras[camId].PersonEventId = eventId
+				// сброс таймера по-веб-хуку
+				if !state {
+					c.Zones[zId].TimeLasErr = time.Now()
+				}
 				return nil
 			}
 		}
@@ -103,11 +120,13 @@ func (c *Config) ClearCarOrPesonState(cid string, eventId string) error {
 				if c.Zones[zId].Cameras[camId].CarEventId == eventId {
 					c.Zones[zId].Cameras[camId].CarEventId = ""
 					c.Zones[zId].Cameras[camId].Car = false
+					c.Zones[zId].TimeLasErr = time.Now()
 					return nil
 				}
 				if c.Zones[zId].Cameras[camId].PersonEventId == eventId {
 					c.Zones[zId].Cameras[camId].PersonEventId = ""
 					c.Zones[zId].Cameras[camId].Person = true
+					c.Zones[zId].TimeLasErr = time.Now()
 					return nil
 				}
 

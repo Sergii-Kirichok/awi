@@ -13,6 +13,9 @@ func (h *HandlerData) processing() error {
 	//в зависимости от типа события - выполнить
 	switch h.msg.Type {
 	case NOTIFICATION:
+		// Пришел пакет, значит следующий Heartbeat будет не очень скоро. Обновляем.
+		h.controller.UpdateHeartBeat()
+
 		for _, e := range h.msg.Notifications {
 			if e.Type != "EVENT" { //Обрабатываем только ивенты
 				continue
@@ -25,6 +28,7 @@ func (h *HandlerData) processing() error {
 			case DEVICE_ANALYTICS_STOP:
 				return h.personAndCarAnalyticStop(e.Event)
 			default:
+
 				return fmt.Errorf("processing: NOT Supported evetnt type [%s]", e.Event.Type)
 			}
 		}
