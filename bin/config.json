@@ -14,13 +14,13 @@
 			"cameras": [
 				{
 					"serial": "102109218992"
-
 				},
 				{
 					"serial": "102109218993"
 				}
 			],
-			"delay_sec": 180
+			"delay_sec": 180,
+			"car_on_any_camera": true
 		},
 		{
 			"Id": "d118fe56817995fad51a015be2774f97b59f00098f48e547940cc45070aa3d96",

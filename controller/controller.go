@@ -2,6 +2,7 @@ package controller
 
 import (
 	"awi/awp"
+	"errors"
 	"sync"
 	"time"
 )
@@ -16,7 +17,6 @@ type Zone struct {
 	Id          string             `json:"id"`
 	Name        string             `json:"name"`
 	Heartbeat   bool               `json:"heartbeat"`
-	Webpoint    bool               `json:"webpoint"`
 	TimeLeftSec int                `json:"timeLeft"`
 	Cameras     map[string]*Camera `json:"cameras"`
 	Error       string             `json:"error"`
@@ -122,12 +122,10 @@ func (c *Controller) updateZone(zId string) {
 		}
 	}
 
-	// Отдаём WebPopint connection status
+	// Формируем ошибку если надо.
+	z.Error = ""
 	if err := c.auth.GetError(); err != nil {
-		z.Webpoint = false
 		z.Error = err.Error()
-	} else {
-		z.Webpoint = true
 	}
 
 	// Отдаём heartBeat status только если с авторизацией всё хорошо ...
@@ -138,6 +136,8 @@ func (c *Controller) updateZone(zId string) {
 	c.mu.Unlock()
 }
 
+var zoneErr = errors.New("zone doesn't exist")
+
 // Отсюда веб берёт данные по Zone, со всеми её статусами
 func (c *Controller) GetZoneData(zoneId string) Zone {
 	c.mu.Lock()
@@ -145,11 +145,11 @@ func (c *Controller) GetZoneData(zoneId string) Zone {
 
 	for zId, zData := range c.zones {
 		if zId == zoneId {
+			//log.Printf("controller.getZoneData: Name:%s, heartBeat: %v, Error: %s\n", zData.Name, zData.Heartbeat, zData.Error)
 			return *zData
 		}
 	}
-
-	return Zone{Error: "zone doesn't exist"}
+	return Zone{Error: "зона с таким ID відсутня"}
 }
 
 func (c *Controller) MakeAction(zoneId string) error {
@@ -157,16 +157,3 @@ func (c *Controller) MakeAction(zoneId string) error {
 	_, err := c.auth.MakeBookmark(zoneId)
 	return err
 }
-
-//func (c Config) MakeAction(zoneId string) error {
-//	z := c.GetZoneData(zoneId)
-//	if z.Alarms {
-//		fmt.Printf("Config.MakeAction: Sending alarm to WebPoint Zone: %s\n", zoneId)
-//		//return err
-//	}
-//	if z.Bookmarks {
-//		fmt.Printf("Config.MakeAction: Sending Bookmarks to WebPoint. Zone: %s\n", zoneId)
-//		//return err
-//	}
-//	return nil
-//}

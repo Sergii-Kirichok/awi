@@ -41,12 +41,14 @@ func (s *syncer) Sync() {
 			s.m.Unlock()
 			// Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
+				s.auth.LoginSetError(fmt.Errorf("sync.update: %s", err))
 				log.Printf("[ERROR] Sync: Can't sync data: %s\n", err)
 			}
 
 			// Удаляем старые/чужие вебхуки если таковые имеются, создаём свои если их ешё нет
 			if s.GetBlocker() == NotBlocked {
 				if err := s.auth.WebhooksUpdater(); err != nil {
+					s.auth.LoginSetError(fmt.Errorf("sync.WebhooksUpdater: %s", err))
 					log.Printf("[ERROR] Sync: %s\n", err)
 				}
 			}
@@ -74,6 +76,7 @@ func (s *syncer) update() error {
 	for _, camera := range cameras {
 		s.cameraSet(camera)
 	}
+	// todo: связь с веб-поинтом востановленна
 	s.blocker = NotBlocked // Всё ок
 	return nil
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const webhookTolerance = 4
+const webhookTolerance = 0
 
 // Удаляем лишние вебхуки. Оставляем только те, которые есть у нас в всписке
 func (a *Auth) WebhooksUpdater() error {

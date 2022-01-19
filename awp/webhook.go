@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const HeartBeatDelayMs int64 = 300000 //300000ms -> min value 30sec
+const HeartBeatDelayMs int64 = 30000 //300000ms -> min value 30sec
 
 type webHookPost struct {
 	Session string  `json:"session"`

@@ -1,11 +1,14 @@
 package webhooks
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 // Устанавливает у камеры состояние Car и/или Person в true|false (Обрабатываем только DEVICE_ANALYTICS_START и DEVICE_ANALYTICS_STOP)
 // Авижилон должен быть настроен таким образом, что-бы события зоны  по-человеку и по-автомобилю приходили отдельно
 func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
-	fmt.Printf("Processing: [%s]\n", e.Type)
+	log.Printf("Processing: [%s] %s \n", e.Type, e.AnalyticEventName)
 
 	// Обработка событий входа в зону, они имеют массив ClassifiedObjects
 	//fmt.Printf("ClassifiedObjects num [%d]\n", len(e.ClassifiedObjects))
@@ -34,6 +37,7 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 }
 
 func (h *HandlerData) personAndCarAnalyticStop(e *Event) error {
+	log.Printf("Processing: [%s] %s \n", e.Type, e.AnalyticEventName)
 	if e.Activity == OBJECT_PRESENT {
 		h.cfg.ClearCarOrPesonState(e.CameraId, e.LinkedEventId)
 		return nil

@@ -17,7 +17,7 @@ func (h *HandlerData) processing() error {
 			if e.Type != "EVENT" { //Обрабатываем только ивенты
 				continue
 			}
-			switch EventTypes(e.Event.Type) {
+			switch e.Event.Type {
 			case DEVICE_DIGITAL_INPUT_ON, DEVICE_DIGITAL_INPUT_OFF:
 				return h.inputState(e.Event)
 			case DEVICE_ANALYTICS_START:
@@ -29,22 +29,11 @@ func (h *HandlerData) processing() error {
 			}
 		}
 	case HELLO:
-		return h.processingHello()
+		return h.processingHello(h.msg.Type)
 	case HEARTBEAT:
-		return h.processingHeartbeat()
+		return h.processingHeartbeat(h.msg.Type)
 	default:
 		return fmt.Errorf("processing: NOT Supported message type [%s]", h.msg.Type)
 	}
-	return nil
-}
-
-//{
-//	"siteId":"IN2ir_lQRli_PuW2Un48ZQ",
-//	"type":"HELLO",
-//	"time":"2022-01-12T13:46:19.981Z",
-//	"authenticationToken":"3333746f6b656e3333537472696e67252164284d495353494e4729"
-//}
-func (h *HandlerData) processingHello() error {
-	h.controller.UpdateHeartBeat()
 	return nil
 }
