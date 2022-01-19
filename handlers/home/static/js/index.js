@@ -6,9 +6,7 @@ const truckIconClassName = "icon truck";
 const humanIconClassName = "icon human";
 const inputIconClassName = "icon input";
 
-const linkSlashClassName = "icon link-slash"
 const heartCrackClassName = "icon heart-crack";
-
 const circleCheckClassName = "icon circle-check"
 const circleXmarkClassName = "icon circle-xmark";
 
@@ -82,15 +80,14 @@ class App {
     async update() {
         const states = await get("data");
         console.log("states:", states);
-        const { name, heartbeat, webpoint, timeLeft, cameras, error } = states;
+        const { name, heartbeat, timeLeft, cameras, error } = states;
         if (error) throw new Error(error);
 
         if (!this.isHealthy) this.render(name);
         this.isHealthy = true;
 
-        this.updateWebpoint(webpoint, heartbeat);
+        this.updateHeartbeat(heartbeat);
         this.updateCameras(cameras);
-
         this.updateCountdown(timeLeft);
         this.updateStatusButton(timeLeft);
     }
@@ -108,16 +105,10 @@ class App {
         this.error(message, spinner)
     }
 
-    updateWebpoint(webpoint, heartbeat) {
+    updateHeartbeat(heartbeat) {
         if (this.statusEl.className === circleXmarkClassName) {
             this.statusEl.style.display = "inline-block";
             return;
-        }
-
-        if (!webpoint) {
-            this.statusEl.className = linkSlashClassName;
-            this.statusEl.style.display = "inline-block";
-            return
         }
 
         if (!heartbeat) {

@@ -294,14 +294,6 @@ fieldset {
     height: calc(var(--heart-crack-height) * var(--scale));
 }
 
-.icon.link-slash {
-    background-image: url(../img/link-slash.svg);
-    --link-slash-width: 94px;
-    --link-slash-height: 75px;
-    width: calc(var(--link-slash-width) * var(--scale));
-    height: calc(var(--link-slash-height) * var(--scale));
-}
-
 .icon.circle-check {
     background-image: url(../img/circle-check.svg);
     --circle-check-width: 75px;
