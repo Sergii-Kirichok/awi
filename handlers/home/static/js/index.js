@@ -106,17 +106,22 @@ class App {
     }
 
     updateHeartbeat(heartbeat) {
-        if (this.statusEl.className === circleXmarkClassName) {
-            this.statusEl.style.display = "inline-block";
-            return;
-        }
+        if (this.statusEl.className === circleXmarkClassName) return
 
         if (!heartbeat) {
-            this.statusEl.className = heartCrackClassName;
-            this.statusEl.style.display = "inline-block";
+            this.setStatusIcon(heartCrackClassName);
             return
         }
 
+        this.hideStatusIcon();
+    }
+
+    setStatusIcon(className) {
+        this.statusEl.className = className;
+        this.statusEl.style.display = "inline-block";
+    }
+
+    hideStatusIcon() {
         this.statusEl.className = "";
         this.statusEl.style.display = "none";
     }
@@ -127,39 +132,38 @@ class App {
         const seconds = App.formatNumber(timeLeft % 60);
 
         this.countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
-        this.setStatus(this.countdownEl, !timeLeft);
+        this.setReadiness(this.countdownEl, !timeLeft);
     }
 
     static formatNumber = (num) => num < 10 ? "0" + num: num;
 
     updateStatusButton(timeLeft = 0) {
-        this.setStatus(this.statusBtnEl, !timeLeft);
+        this.setReadiness(this.statusBtnEl, !timeLeft);
         this.statusBtnEl.disabled = !!timeLeft;
     }
 
     async handleStatusButton() {
         try {
             await get("button-press", "text");
-            this.statusEl.className = circleCheckClassName;
-            this.statusEl.style.display = "inline-block";
+            this.setStatusIcon(circleCheckClassName);
         } catch (err) {
-            this.statusEl.className = circleXmarkClassName;
-            this.statusEl.style.display = "inline-block";
-            this.statusBtnEl.style.display = "none";
-            this.statusBtnErrorEl.style.display = "flex";
-            this.statusBtnErrorEl.firstElementChild.innerText = err.message;
+            this.setStatusIcon(circleXmarkClassName);
+            this.toggleStatusButton(err);
         }
     }
 
-    handleXmark() {
-        if (this.statusEl.className !== circleXmarkClassName) {
-            return
-        }
+    toggleStatusButton(err) {
+        const bool = err != null;
+        this.statusBtnEl.style.display = bool ? "none" : "block";
+        this.statusBtnErrorEl.style.display = bool ? "flex" : "none";
+        if (bool) this.statusBtnErrorEl.firstElementChild.innerText = err.message;
+    }
 
-        this.statusBtnEl.style.display = "block";
-        this.statusBtnErrorEl.style.display = "none";
-        this.statusEl.className = "";
-        this.statusEl.style.display = "none";
+    handleXmark() {
+        if (this.statusEl.className !== circleXmarkClassName) return
+
+        this.toggleStatusButton();
+        this.hideStatusIcon();
     }
 
     createCamera(cameraID, states) {
@@ -186,9 +190,9 @@ class App {
             return inputEl;
         });
 
-        this.setStatus(truckIcon, car);
-        this.setStatus(humanIcon, human);
-        inputIcons.forEach(icon => this.setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
+        this.setReadiness(truckIcon, car);
+        this.setReadiness(humanIcon, human);
+        inputIcons.forEach(icon => this.setReadiness(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
 
         [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
         this.camerasDivEl.appendChild(camera);
@@ -217,16 +221,16 @@ class App {
         const {car, human, inputs} = states;
         for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
             if (icon.className.includes(truckIconClassName)) {
-                this.setStatus(icon, car);
+                this.setReadiness(icon, car);
             } else if (icon.className.includes(humanIconClassName)) {
-                this.setStatus(icon, human);
+                this.setReadiness(icon, human);
             } else if (icon.className.includes(inputIconClassName)) {
-                this.setStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
+                this.setReadiness(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
             }
         }
     }
 
-    setStatus(element, status) {
+    setReadiness(element, status) {
         const isReady = element.classList.contains("ready");
         if (isReady && !status || !isReady && status) {
             element.classList.toggle("ready");
