@@ -123,23 +123,20 @@ func (c *Controller) updateZone(zId string) {
 		}
 	}
 
-	// Отдаём WebPopint connection status
+	// Формируем ошибку если надо.
+	z.Error = ""
 	if err := c.auth.GetError(); err != nil {
-		z.Webpoint = false
 		z.Error = err.Error()
-	} else {
-		z.Webpoint = true
 	}
 
 	// Отдаём heartBeat status только если с авторизацией всё хорошо ...
 	z.Heartbeat = c.auth.GetHeartBeat()
+	z.Webpoint = true
 
 	c.mu.Lock()
 	c.zones[zConf.Id] = z
 	c.mu.Unlock()
 }
-
-var zoneErr = errors.New("zone doesn't exist")
 
 // Отсюда веб берёт данные по Zone, со всеми её статусами
 func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
@@ -148,10 +145,11 @@ func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
 
 	for zId, zData := range c.zones {
 		if zId == zoneId {
+			//log.Printf("controller.getZoneData: Name:%s, heartBeat: %v, Error: %s\n", zData.Name, zData.Heartbeat, zData.Error)
 			return *zData, errors.New(zData.Error)
 		}
 	}
-	return Zone{}, zoneErr
+	return Zone{}, errors.New("зона с таким ID відсутня")
 }
 
 func (c *Controller) MakeAction(zoneId string) error {

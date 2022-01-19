@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -81,12 +82,11 @@ func (a *Auth) Login() (*Auth, error) {
 
 	//Проверяем, может ещё не стоит авторизоваться снова.
 	timeLimit := 50
-	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) {
-
+	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) && a.err == nil {
 		return a, nil
 	}
 
-	//Дело сессии уже подходит к концу, в первую очередь обновляем токен
+	//Дело сессии уже подходит к концу/ новое подключение/ или старое с ошибкой - в первую очередь обновляем токен
 	a.updateToken()
 
 	b := new(bytes.Buffer)
@@ -119,8 +119,17 @@ func (a *Auth) Login() (*Auth, error) {
 	a.AuthTime = time.Now()
 
 	// Всё хорошо, ошибок нет.
+	log.Printf("Авторизация с WebPoint сервером прошла успешно. SessionId[%s]\n", a.Response.Result.Session)
+
 	a.err = nil
 	return a, nil
+}
+
+// Используем для отображения ошибке в вебе
+func (a *Auth) LoginSetError(err error) {
+	a.Lock()
+	a.err = err
+	a.Unlock()
 }
 
 func (a *Auth) IsItMyToken(token string) bool {
@@ -147,7 +156,7 @@ func (a *Auth) UpdateHeartBeat() error {
 func (a *Auth) GetHeartBeat() bool {
 	//a.Lock()
 	var hbState bool
-	if time.Since(a.LastHeartbeat).Milliseconds() <= (HeartBeatDelayMs + 100) {
+	if time.Since(a.LastHeartbeat).Milliseconds() <= (HeartBeatDelayMs * 2) {
 		hbState = true
 	}
 	//a.Unlock()
