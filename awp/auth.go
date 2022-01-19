@@ -2,10 +2,6 @@ package awp
 
 import (
 	"awi/config"
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"log"
 	"sync"
 	"time"
 )
@@ -13,6 +9,7 @@ import (
 //hosts 192.168.0.11 avigilon
 //https://avigilon:8443/mt/playground
 //https://avigilon:8443/mt/playground/rest#!/mt/postLogin
+const SessionLimitMinutes float64 = 50
 
 type loginRequest struct {
 	Login      string `json:"username"`
@@ -57,108 +54,4 @@ func NewAuth(c *config.Config) *Auth {
 
 	a.genToken()
 	return a
-}
-
-func (a *Auth) Lock() {
-	a.mu.Lock()
-}
-
-func (a *Auth) Unlock() {
-	a.mu.Unlock()
-}
-func (a *Auth) LockState() *sync.Mutex {
-	return a.mu
-}
-
-// Мьюеткс не трограем
-func (a *Auth) updateToken() {
-	a.Request.Token = a.genToken()
-}
-
-//Todo: Добавить мьютекс. Что-бы в случае переподклоючения не потерялся запрос.
-func (a *Auth) Login() (*Auth, error) {
-	a.Lock()
-	defer a.Unlock()
-
-	//Проверяем, может ещё не стоит авторизоваться снова.
-	timeLimit := 50
-	if time.Since(a.AuthTime).Minutes() < float64(timeLimit) && a.err == nil {
-		return a, nil
-	}
-
-	//Дело сессии уже подходит к концу/ новое подключение/ или старое с ошибкой - в первую очередь обновляем токен
-	a.updateToken()
-
-	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(a.Request)
-	if err != nil {
-		a.err = fmt.Errorf("Auth.Login Err: %s", err)
-
-		return a, a.err
-	}
-
-	r := NewRequest(a.Config)
-	r.Data = b.Bytes()
-	r.Method = POST
-	r.Path = "mt/api/rest/v1/login"
-
-	answer, err := r.MakeRequest()
-	if err != nil {
-		return a, fmt.Errorf("Auth.Login: %s", err)
-	}
-
-	if err := json.Unmarshal(answer, &a.Response); err != nil {
-		return a, fmt.Errorf("Auth.Login: Err decoding config: %s", err)
-	}
-
-	if a.Response.Status != "success" {
-		a.err = fmt.Errorf("Auth.Login: Can't Login: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
-		return a, a.err
-	}
-
-	a.AuthTime = time.Now()
-
-	// Всё хорошо, ошибок нет.
-	log.Printf("Подключение к WebPoint'у  прошло успешно. SessionId[%s]\n", a.Response.Result.Session)
-
-	a.err = nil
-	return a, nil
-}
-
-// Используем для отображения ошибке в вебе
-func (a *Auth) LoginSetError(err error) {
-	a.Lock()
-	a.err = err
-	a.Unlock()
-}
-
-func (a *Auth) IsItMyToken(token string) bool {
-	a.Lock()
-	result := a.wh.IsItMyToken(token)
-	a.Unlock()
-	return result
-}
-
-func (a *Auth) GetError() error {
-	//a.Lock()
-	err := a.err
-	//a.Unlock()
-	return err
-}
-
-func (a *Auth) UpdateHeartBeat() error {
-	a.Lock()
-	a.LastHeartbeat = time.Now()
-	a.Unlock()
-	return nil
-}
-
-func (a *Auth) GetHeartBeat() bool {
-	//a.Lock()
-	var hbState bool
-	if time.Since(a.LastHeartbeat).Milliseconds() <= (HeartBeatDelayMs * 2) {
-		hbState = true
-	}
-	//a.Unlock()
-	return hbState
 }

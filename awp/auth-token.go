@@ -21,3 +21,15 @@ func (a *Auth) genToken() string {
 	token := fmt.Sprintf("%s:%d:%x", a.Config.Nonce, timeStamp, hexEncoded)
 	return token
 }
+
+// Мьюеткс не трограем
+func (a *Auth) updateToken() {
+	a.Request.Token = a.genToken()
+}
+
+func (a *Auth) IsItMyToken(token string) bool {
+	a.Lock()
+	result := a.wh.IsItMyToken(token)
+	a.Unlock()
+	return result
+}

@@ -77,7 +77,7 @@ func sendJSON(w http.ResponseWriter, data interface{}) error {
 // ListenAndServeHTTPS listens on the TCP address and serves requests.
 func (s *Server) ListenAndServeHTTPS() {
 	bind := fmt.Sprintf("%s:%s", s.config.WWWAddr, s.config.WWWPort)
-	fmt.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
+	log.Printf("Веб-сервер %s [%s] - 'httpS' запущен %s\n", s.name, s.version, bind)
 
 	s.router.PathPrefix("/static").Handler(home.Static)
 
