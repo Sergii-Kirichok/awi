@@ -157,16 +157,3 @@ func (c *Controller) MakeAction(zoneId string) error {
 	_, err := c.auth.MakeBookmark(zoneId)
 	return err
 }
-
-//func (c Config) MakeAction(zoneId string) error {
-//	z := c.GetZoneData(zoneId)
-//	if z.Alarms {
-//		fmt.Printf("Config.MakeAction: Sending alarm to WebPoint Zone: %s\n", zoneId)
-//		//return err
-//	}
-//	if z.Bookmarks {
-//		fmt.Printf("Config.MakeAction: Sending Bookmarks to WebPoint. Zone: %s\n", zoneId)
-//		//return err
-//	}
-//	return nil
-//}
