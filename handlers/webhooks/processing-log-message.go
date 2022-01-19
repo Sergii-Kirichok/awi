@@ -7,7 +7,7 @@ func (h HandlerData) ProcessingLogMessage(e *Event) {
 	if err != nil {
 		cam.Name = e.CameraId
 	}
-	log.Printf("Webhook Processing: [%s] Камера: \"%s\", Cобытие: \"%s\"\n", e.Type, cam.Name, e.AnalyticEventName)
+	log.Printf("[%s] Камера: \"%s\", Cобытие: \"%s\"\n", e.Type, cam.Name, e.AnalyticEventName)
 }
 
 func (h HandlerData) ProcessingInputLogMessage(e *Event) {
@@ -16,6 +16,6 @@ func (h HandlerData) ProcessingInputLogMessage(e *Event) {
 		if err != nil {
 			cam.Name = e.CameraId
 		}
-		log.Printf("Webhook Processing: [%s] Камера: \"%s\"\n", e.Type, cam.Name)
+		log.Printf("[%s] Камера: \"%s\"\n", e.Type, cam.Name)
 	}
 }
