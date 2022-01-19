@@ -37,9 +37,8 @@ function newElement(tagName, options = {}) {
 
 class App {
     constructor() {
-        this.isHealthy = false;
-        this.timeLeft  = 0;
         this.cameras = {};
+        this.isHealthy = false;
         this.bodyEl = document.getElementById("body-container");
         this.spinnerEl = document.getElementById("spinner");
     }
@@ -81,8 +80,6 @@ class App {
     }
 
     async update() {
-        const prevTimeLeft = this.timeLeft;
-
         const states = await get("data");
         console.log("states:", states);
         const { name, heartbeat, webpoint, timeLeft, cameras, error } = states;
@@ -94,11 +91,8 @@ class App {
         this.updateWebpoint(webpoint, heartbeat);
         this.updateCameras(cameras);
 
-        this.timeLeft = timeLeft;
-        if (this.timeLeft !== prevTimeLeft) {
-            this.updateCountdown(this.timeLeft);
-            this.updateStatusButton(this.timeLeft);
-        }
+        this.updateCountdown(timeLeft);
+        this.updateStatusButton(timeLeft);
     }
 
     handleError(err) {
