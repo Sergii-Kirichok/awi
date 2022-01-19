@@ -2,7 +2,6 @@ package controller
 
 import (
 	"awi/awp"
-	"errors"
 	"sync"
 	"time"
 )
@@ -137,19 +136,18 @@ func (c *Controller) updateZone(zId string) {
 	c.mu.Unlock()
 }
 
-var zoneErr = errors.New("zone doesn't exist")
-
 // Отсюда веб берёт данные по Zone, со всеми её статусами
-func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
+func (c *Controller) GetZoneData(zoneId string) Zone {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	for zId, zData := range c.zones {
 		if zId == zoneId {
-			return *zData, errors.New(zData.Error)
+			return *zData
 		}
 	}
-	return Zone{}, zoneErr
+
+	return Zone{Error: "zone doesn't exist"}
 }
 
 func (c *Controller) MakeAction(zoneId string) error {

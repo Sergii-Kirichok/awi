@@ -44,15 +44,6 @@ h1, h2, h3, h4, h5, h6 {font-size:inherit; font-weight: 400;}
     src: url(../fonts/dseg7.woff2) format("woff2")
 }
 
-body {
-    overflow-x: hidden; /* Hide horizontal scrollbar */
-    background-color: rgb(4, 21, 38);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
 :root {
     --green: rgb(19, 154, 19);
     --green-border: rgb(10, 78, 10);
@@ -63,15 +54,28 @@ body {
     --blue-border: rgb(35, 93, 164);
 }
 
-#alert-container {
+body {
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+    background-color: rgb(4, 21, 38);
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    /*align-items: center;*/
 }
 
-p.alert {
+#body-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /*max-width: 650px;*/
+    /*min-width: 650px;*/
+}
+
+p.error {
     font-family: "Georgia", serif;
     font-size: 2em;
     color: var(--red-text);
+    text-align: center;
 }
 
 #zone {
@@ -118,7 +122,7 @@ p.alert {
     cursor: pointer;
 }
 
-#status-button-alert {
+#status-button-error {
     display: flex;
     justify-content: center;
     margin-bottom: 30px;
@@ -226,7 +230,6 @@ fieldset {
     width: var(--spinner-width);
     height: var(--spinner-height);
     align-self: center;
-    margin-bottom: 20px;
     animation: 2.5s spin linear infinite;
 }
 

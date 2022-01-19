@@ -42,20 +42,16 @@ func New(name, version string, config *config.Config, control *controller.Contro
 }
 
 func (s *Server) getZoneData(w http.ResponseWriter, r *http.Request) {
-	zone, err := s.controller.GetZoneData(mux.Vars(r)["zone-id"])
-	if err != nil && err.Error() != "" {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err := sendJSON(w, zone); err != nil {
+	zoneID := mux.Vars(r)["zone-id"]
+	if err := sendJSON(w, s.controller.GetZoneData(zoneID)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (s *Server) buttonPress(w http.ResponseWriter, r *http.Request) {
-	if err := s.controller.MakeAction(mux.Vars(r)["zone-id"]); err != nil {
+	zoneID := mux.Vars(r)["zone-id"]
+	if err := s.controller.MakeAction(zoneID); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
