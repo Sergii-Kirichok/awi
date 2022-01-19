@@ -1,27 +1,25 @@
 const zone = window.location.pathname.slice("/zones/".length);
 
+const pollingFrequency = 1000; // in ms
+
 const truckIconClassName = "icon truck";
 const humanIconClassName = "icon human";
 const inputIconClassName = "icon input";
 
-const linkSlashClassName = "icon link-slash"
 const heartCrackClassName = "icon heart-crack";
-
 const circleCheckClassName = "icon circle-check"
 const circleXmarkClassName = "icon circle-xmark";
 
 async function get(url = "", format = "json") {
     const resp = await fetch(`${zone}/${url}`);
-    if (!resp.ok) {
-        throw new FetchError(resp.status, await resp.text());
-    }
+    if (!resp.ok) throw new FetchError(await resp.text());
 
     return format.toLowerCase() === "text" ? resp.text() : resp.json();
 }
 
 class FetchError extends Error {
-    constructor(status, text) {
-        super(`code ${status}: ${text}`);
+    constructor(text) {
+        super(`error: ${text}`);
         this.name = this.constructor.name;
     }
 }
@@ -37,92 +35,80 @@ function newElement(tagName, options = {}) {
 
 class App {
     constructor() {
-        this.isHealthy = false;
-        this.timeLeft  = 0;
         this.cameras = {};
+        this.isHealthy = false;
+        this.bodyEl = document.getElementById("body-container");
+        this.spinnerEl = document.getElementById("spinner");
     }
 
     render(name = "") {
-        document.body.innerHTML = `
-        <p id="zone">${name}</p>
-        <p id="countdown">00:00:00</p>
-        <button id="status-button" disabled>Зважити</button>
-        <fieldset id="status-button-alert" style="display: none">
-            <p class="alert"></p>
-        </fieldset>
-        <div id="status-bar">
-            <div id="cameras"></div>
-            <span id="status"></span>
-        </div>`;
+        this.bodyEl.innerHTML = `
+            <p id="zone">${name}</p>
+            <p id="countdown">00:00:00</p>
+            <button id="status-button" disabled>Зважити</button>
+            <fieldset id="status-button-error" style="display: none">
+                <p class="error"></p>
+            </fieldset>
+            <div id="status-bar">
+                <div id="cameras"></div>
+                <span id="status"></span>
+            </div>`;
 
         this.countdownEl = document.getElementById("countdown");
         this.statusBtnEl = document.getElementById("status-button");
-        this.statusBtnAlertEl = document.getElementById("status-button-alert");
+        this.statusBtnErrorEl = document.getElementById("status-button-error");
         this.camerasDivEl = document.getElementById("cameras");
         this.statusEl = document.getElementById("status");
+
+        this.spinnerEl.style.display = "none";
+        this.spinnerEl.style.marginBottom = "";
 
         this.statusBtnEl.addEventListener("click", this.handleStatusButton.bind(this));
         this.statusEl.addEventListener("click", this.handleXmark.bind(this));
     }
 
     error(message, spinner) {
-        document.body.innerHTML = `
-        <div id="alert-container">
-            <svg style="display: ${spinner ? "inline-block" : "none"}" aria-hidden="true" focusable="false" class="icon spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                <path fill="rgb(35, 93, 164)" d="M96 256c0-26.5-21.5-48-48-48S0 229.5 0 256s21.5 48 48 48S96 282.5 96 256zM108.9 60.89c-26.5 0-48.01 21.49-48.01 47.99S82.39 156.9 108.9 156.9s47.99-21.51 47.99-48.01S135.4 60.89 108.9 60.89zM108.9 355.1c-26.5 0-48.01 21.51-48.01 48.01S82.39 451.1 108.9 451.1s47.99-21.49 47.99-47.99S135.4 355.1 108.9 355.1zM256 416c-26.5 0-48 21.5-48 48S229.5 512 256 512s48-21.5 48-48S282.5 416 256 416zM464 208C437.5 208 416 229.5 416 256s21.5 48 48 48S512 282.5 512 256S490.5 208 464 208zM403.1 355.1c-26.5 0-47.99 21.51-47.99 48.01S376.6 451.1 403.1 451.1s48.01-21.49 48.01-47.99S429.6 355.1 403.1 355.1zM256 0C229.5 0 208 21.5 208 48S229.5 96 256 96s48-21.5 48-48S282.5 0 256 0z"></path>
-            </svg>
-            <fieldset>
-                <p class="alert">${message}</p>
-            </fieldset>
-        </div>`;
+        this.bodyEl.innerHTML = `
+            <fieldset style="margin: 0 30px">
+                <p class="error">${message}</p>
+            </fieldset>`;
+
+        this.spinnerEl.style.display = spinner ? "inline-block" : "none";
+        this.spinnerEl.style.marginBottom = spinner ? "20px" : "";
     }
 
     async update() {
-        const prevTimeLeft = this.timeLeft;
+        const states = await get("data");
+        console.log("states:", states);
+        const { name, heartbeat, timeLeft, cameras, error } = states;
+        if (error) throw new Error(error);
 
-        try {
-            const states = await get("data");
-            console.log("states:", states);
-            const { name, heartbeat, webpoint, timeLeft, cameras, error } = states;
-            if (error) {
-                this.error(error, false)
-                return
-            }
+        if (!this.isHealthy) this.render(name);
+        this.isHealthy = true;
 
-            if (!this.isHealthy) this.render(name);
-            this.isHealthy = true;
-
-            this.updateWebpoint(webpoint, heartbeat);
-            this.updateCameras(cameras);
-
-            this.timeLeft = timeLeft;
-        } catch (err) {
-            this.isHealthy = false
-            console.error(`updating error: ${err.message}`);
-            if (err instanceof TypeError) {
-                this.error("Нет соединения с веб-сервером", true)
-                return
-            }
-
-            this.error(err.message, false)
-        }
-
-        if (this.timeLeft !== prevTimeLeft) {
-            this.updateCountdown(this.timeLeft);
-            this.updateStatusButton(this.timeLeft);
-        }
+        this.updateHeartbeat(heartbeat);
+        this.updateCameras(cameras);
+        this.updateCountdown(timeLeft);
+        this.updateStatusButton(timeLeft);
     }
 
-    updateWebpoint(webpoint, heartbeat) {
+    handleError(err) {
+        console.error(`handle error: ${err.message}`);
+        let message = err.message;
+        let spinner = false;
+        if (err instanceof TypeError) {
+            message = "Нет соединения с веб-сервером";
+            spinner = true;
+        }
+
+        this.isHealthy = false
+        this.error(message, spinner)
+    }
+
+    updateHeartbeat(heartbeat) {
         if (this.statusEl.className === circleXmarkClassName) {
             this.statusEl.style.display = "inline-block";
             return;
-        }
-
-        if (!webpoint) {
-            this.statusEl.className = linkSlashClassName;
-            this.statusEl.style.display = "inline-block";
-            return
         }
 
         if (!heartbeat) {
@@ -136,15 +122,15 @@ class App {
     }
 
     updateCountdown(timeLeft = 0) {
-        const hours   = this.formatNumber(Math.floor(timeLeft / 3600));
-        const minutes = this.formatNumber(Math.floor(timeLeft / 60 - hours * 60));
-        const seconds = this.formatNumber(timeLeft % 60);
+        const hours   = App.formatNumber(Math.floor(timeLeft / 3600));
+        const minutes = App.formatNumber(Math.floor(timeLeft / 60 - hours * 60));
+        const seconds = App.formatNumber(timeLeft % 60);
 
         this.countdownEl.innerText = `${hours}:${minutes}:${seconds}`;
         this.setStatus(this.countdownEl, !timeLeft);
     }
 
-    formatNumber = (num) => num < 10 ? "0" + num: num;
+    static formatNumber = (num) => num < 10 ? "0" + num: num;
 
     updateStatusButton(timeLeft = 0) {
         this.setStatus(this.statusBtnEl, !timeLeft);
@@ -160,8 +146,8 @@ class App {
             this.statusEl.className = circleXmarkClassName;
             this.statusEl.style.display = "inline-block";
             this.statusBtnEl.style.display = "none";
-            this.statusBtnAlertEl.style.display = "flex";
-            this.statusBtnAlertEl.firstElementChild.innerText = err.message;
+            this.statusBtnErrorEl.style.display = "flex";
+            this.statusBtnErrorEl.firstElementChild.innerText = err.message;
         }
     }
 
@@ -171,7 +157,7 @@ class App {
         }
 
         this.statusBtnEl.style.display = "block";
-        this.statusBtnAlertEl.style.display = "none";
+        this.statusBtnErrorEl.style.display = "none";
         this.statusEl.className = "";
         this.statusEl.style.display = "none";
     }
@@ -248,10 +234,15 @@ class App {
     }
 }
 
-window.onload = async () => {
+window.onload = () => {
     const app = new App();
-    setTimeout(function cycle() {
-        app.update();
-        setTimeout(cycle, 1000);
+    setTimeout(async function cycle() {
+        try {
+            await app.update();
+        } catch (err) {
+            app.handleError(err);
+        }
+
+        setTimeout(cycle, pollingFrequency);
     });
 };

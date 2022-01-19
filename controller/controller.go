@@ -17,7 +17,6 @@ type Zone struct {
 	Id          string             `json:"id"`
 	Name        string             `json:"name"`
 	Heartbeat   bool               `json:"heartbeat"`
-	Webpoint    bool               `json:"webpoint"`
 	TimeLeftSec int                `json:"timeLeft"`
 	Cameras     map[string]*Camera `json:"cameras"`
 	Error       string             `json:"error"`
@@ -131,25 +130,26 @@ func (c *Controller) updateZone(zId string) {
 
 	// Отдаём heartBeat status только если с авторизацией всё хорошо ...
 	z.Heartbeat = c.auth.GetHeartBeat()
-	z.Webpoint = true
 
 	c.mu.Lock()
 	c.zones[zConf.Id] = z
 	c.mu.Unlock()
 }
 
+var zoneErr = errors.New("zone doesn't exist")
+
 // Отсюда веб берёт данные по Zone, со всеми её статусами
-func (c *Controller) GetZoneData(zoneId string) (Zone, error) {
+func (c *Controller) GetZoneData(zoneId string) Zone {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	for zId, zData := range c.zones {
 		if zId == zoneId {
 			//log.Printf("controller.getZoneData: Name:%s, heartBeat: %v, Error: %s\n", zData.Name, zData.Heartbeat, zData.Error)
-			return *zData, errors.New(zData.Error)
+			return *zData
 		}
 	}
-	return Zone{}, errors.New("зона с таким ID відсутня")
+	return Zone{Error: "зона с таким ID відсутня"}
 }
 
 func (c *Controller) MakeAction(zoneId string) error {
