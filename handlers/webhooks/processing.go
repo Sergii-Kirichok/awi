@@ -29,9 +29,9 @@ func (h *HandlerData) processing() error {
 			}
 		}
 	case HELLO:
-		return nil
+		return h.processingHello()
 	case HEARTBEAT:
-		return nil
+		return h.processingHeartbeat()
 	default:
 		return fmt.Errorf("processing: NOT Supported message type [%s]", h.msg.Type)
 	}
@@ -45,5 +45,6 @@ func (h *HandlerData) processing() error {
 //	"authenticationToken":"3333746f6b656e3333537472696e67252164284d495353494e4729"
 //}
 func (h *HandlerData) processingHello() error {
+	h.controller.UpdateHeartBeat()
 	return nil
 }

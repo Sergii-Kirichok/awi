@@ -14,13 +14,13 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 		switch object.Subclass {
 		case VEHICLE, VEHICLE_BICYCLE, VEHICLE_MOTORCYLE, VEHICLE_CAR, VEHICLE_TRUCK, VEHICLE_BUS:
 			if e.Activity == OBJECT_PRESENT {
-				fmt.Printf("Машина заехала на весовую. - это хорошо, машинка зелёная\n")
+				//fmt.Printf("Машина заехала на весовую. - это хорошо, машинка зелёная\n")
 				return h.cfg.SetCarState(e.CameraId, e.ThisId, true)
 			}
 			return fmt.Errorf("personAndCarAnalyticStart: unsupported vehicle activity: %s", e.Activity)
 		case PERSON, PERSON_BODY, PERSON_FACE:
 			if e.Activity == OBJECT_PRESENT {
-				fmt.Printf("Человек на весовой, это плохо - человечик красный\n")
+				//fmt.Printf("Человек на весовой, это плохо - человечик красный\n")
 				return h.cfg.SetPersonState(e.CameraId, e.ThisId, false)
 			}
 			return fmt.Errorf("personAndCarAnalyticStart: unsupported person activity: %s", e.Activity)

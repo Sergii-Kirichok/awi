@@ -9,6 +9,11 @@ import (
 // Мьютекс установлен уровнем выше, и мы можем спокойно писать и читать из/в структуру *Config
 func (s *syncer) inputsSetUpdate(zIndex int, camIndex int, camSrc *awp.Camera) {
 	camDest := &s.auth.Config.Zones[zIndex].Cameras[camIndex]
+
+	// Если в камере отключены входы пропускаем
+	if camDest.InputsDisabled {
+		return
+	}
 	// Для обратной проверки (удаления лишних входов если они там есть)
 	srsInputs := make(map[string]awp.Link, len(camSrc.Links))
 
