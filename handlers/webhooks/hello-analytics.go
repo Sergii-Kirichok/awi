@@ -1,6 +1,8 @@
 package webhooks
 
-import "fmt"
+import (
+	"log"
+)
 
 //{
 //	"siteId":"IN2ir_lQRli_PuW2Un48ZQ",
@@ -9,7 +11,7 @@ import "fmt"
 //	"authenticationToken":"3333746f6b656e3333537472696e67252164284d495353494e4729"
 //}
 func (h *HandlerData) processingHello(t MainType) error {
-	fmt.Printf("Processing: [%s] \n", t)
+	log.Printf("Processing: [%s] \n", t)
 	h.controller.UpdateHeartBeat()
 	return nil
 }

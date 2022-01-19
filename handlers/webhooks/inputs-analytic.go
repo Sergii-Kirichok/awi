@@ -1,10 +1,13 @@
 package webhooks
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 // Устанавливает у входа камеры  (DEVICE_DIGITAL_INPUT) состояние в true|false
 func (h *HandlerData) inputState(e *Event) error {
-	fmt.Printf("Processing: [%s] %s \n", e.Type, e.AnalyticEventName)
+	log.Printf("Processing: [%s] %s \n", e.Type, e.AnalyticEventName)
 
 	var state bool
 	if e.Type == DEVICE_DIGITAL_INPUT_OFF {

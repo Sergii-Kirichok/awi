@@ -119,7 +119,7 @@ func (a *Auth) Login() (*Auth, error) {
 	a.AuthTime = time.Now()
 
 	// Всё хорошо, ошибок нет.
-	log.Printf("Авторизация с WebPoint сервером прошла успешно. SessionId[%s]\n", a.Response.Result.Session)
+	log.Printf("Подключение к WebPoint'у  прошло успешно. SessionId[%s]\n", a.Response.Result.Session)
 
 	a.err = nil
 	return a, nil
