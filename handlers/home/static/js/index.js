@@ -45,7 +45,7 @@ class App {
         this.bodyEl.innerHTML = `
             <p id="zone">${name}</p>
             <p id="countdown">00:00:00</p>
-            <button id="status-button" disabled>Зважити</button>
+            <button id="status-button">Зважити</button>
             <fieldset id="status-button-error" style="display: none">
                 <p class="error"></p>
             </fieldset>
@@ -139,7 +139,6 @@ class App {
 
     updateStatusButton(timeLeft = 0) {
         this.setReadiness(this.statusBtnEl, !timeLeft);
-        this.statusBtnEl.disabled = !!timeLeft;
     }
 
     async handleStatusButton() {

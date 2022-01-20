@@ -113,13 +113,12 @@ p.error {
     border: 2px solid var(--red-border);
     border-radius: 10px;
     margin-bottom: 30px;
-    cursor: default;
+    cursor: pointer;
 }
 
 #status-button.ready {
     background-color: var(--green);
     border-color: var(--green-border);
-    cursor: pointer;
 }
 
 #status-button-error {
