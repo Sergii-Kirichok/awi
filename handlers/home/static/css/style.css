@@ -105,7 +105,7 @@ p.error {
     font-family: "Georgia", serif;
     font-size: 3em;
     letter-spacing: 10px;
-    color: white;
+    color: rgb(255, 255, 255);
     background-color: rgb(178, 49, 49);
     min-width: 450px;
     max-width: 450px;
@@ -114,6 +114,11 @@ p.error {
     border-radius: 10px;
     margin-bottom: 30px;
     cursor: pointer;
+}
+
+#status-button.clicked {
+    cursor: default;
+    color: rgb(190, 190, 190);
 }
 
 #status-button.ready {

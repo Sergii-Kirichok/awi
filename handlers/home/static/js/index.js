@@ -79,7 +79,7 @@ class App {
 
     async update() {
         const states = await get("data");
-        console.log("states:", states);
+        console.log(states);
         const { name, heartbeat, timeLeft, cameras, error } = states;
         if (error) throw new Error(error);
 
@@ -93,7 +93,6 @@ class App {
     }
 
     handleError(err) {
-        console.error(`handle error: ${err.message}`);
         let message = err.message;
         let spinner = false;
         if (err instanceof TypeError) {
@@ -106,14 +105,13 @@ class App {
     }
 
     updateHeartbeat(heartbeat) {
-        if (this.statusEl.className === circleXmarkClassName) return
+        if ([circleCheckClassName, circleXmarkClassName].includes(this.statusEl.className)) return
 
         if (!heartbeat) {
             this.setStatusIcon(heartCrackClassName);
-            return
+        } else {
+            this.hideStatusIcon();
         }
-
-        this.hideStatusIcon();
     }
 
     setStatusIcon(className) {
@@ -144,11 +142,20 @@ class App {
     async handleStatusButton() {
         try {
             await get("button-press", "text");
-            this.setStatusIcon(circleCheckClassName);
         } catch (err) {
             this.setStatusIcon(circleXmarkClassName);
             this.toggleStatusButton(err);
+            return
         }
+
+        this.setStatusIcon(circleCheckClassName);
+        this.statusBtnEl.disabled = true;
+        this.statusBtnEl.classList.add("clicked");
+        setTimeout(() => {
+            this.hideStatusIcon();
+            this.statusBtnEl.disabled = false;
+            this.statusBtnEl.classList.remove("clicked");
+        }, 10000);
     }
 
     toggleStatusButton(err) {
@@ -166,7 +173,6 @@ class App {
     }
 
     createCamera(cameraID, states) {
-        console.log(`creating camera ${cameraID}...`);
         const {name, car, human, inputs} = states;
         const camera = newElement("fieldset", { className: "camera", id: cameraID });
         const legend = newElement("legend", { innerText: name });
@@ -204,7 +210,6 @@ class App {
 
         const toRemove = Object.keys(prevCameras).filter(prevID => !Object.keys(this.cameras).find(currID => prevID === currID));
         toRemove.forEach(id => {
-            console.log(`removing camera ${id} states...`);
             const el = document.getElementById(id);
             el?.parentNode.removeChild(el);
         });
@@ -216,7 +221,6 @@ class App {
     }
 
     updateCamera(camera, states) {
-        console.log(`updating camera ${camera.id} states...`);
         const {car, human, inputs} = states;
         for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
             if (icon.className.includes(truckIconClassName)) {
