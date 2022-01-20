@@ -20,7 +20,8 @@
 				}
 			],
 			"delay_sec": 180,
-			"car_on_any_camera": true
+			"car_on_any_camera": true,
+			"ignore_car_state": true
 		},
 		{
 			"Id": "d118fe56817995fad51a015be2774f97b59f00098f48e547940cc45070aa3d96",

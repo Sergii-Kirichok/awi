@@ -32,6 +32,7 @@ type Zone struct {
 	DelaySec       int       `json:"delay_sec"`         // Задержка после сработки входа, наличия машины и отсутствия человека
 	TimeLasErr     time.Time `json:"-"`                 // Время, когда последний раз на весовой было нарушено соблюдение хотя-бы одного условия
 	CarOnAnyCamera bool      `json:"car_on_any_camera"` // Если машина хоть на одной камере - всё ок
+	IgnoreCarState bool      `json:"ignore_car_state"`  // Игнорировать состояние машины. Не сбрасывать таймер.
 }
 
 type Cam struct {

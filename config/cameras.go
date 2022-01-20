@@ -59,21 +59,21 @@ func (c *Config) SetCarState(cid string, eventId string, state bool) error {
 	for zId, zone := range c.Zones {
 		for camId, camera := range zone.Cameras {
 			if camera.Id == cid {
-				if camera.ConState != "CONNECTED" {
-					c.Zones[zId].Cameras[camId].Car = false
-					c.Zones[zId].Cameras[camId].Person = false
-					c.Zones[zId].Cameras[camId].CarEventId = ""
-					c.Zones[zId].Cameras[camId].PersonEventId = ""
-					c.Zones[zId].TimeLasErr = time.Now()
-					return fmt.Errorf("SetCarState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
+				if camera.ConState == "CONNECTED" || camera.ConState == "FACTORY_DEFAULT" {
+					c.Zones[zId].Cameras[camId].Car = state
+					c.Zones[zId].Cameras[camId].CarEventId = eventId
+					// сброс таймера по-веб-хуку.  В случае когда мы игнорируем машину, сбрасываем при любом событии вебхука
+					if !state || zone.IgnoreCarState {
+						c.Zones[zId].TimeLasErr = time.Now()
+					}
+					return nil
 				}
-				c.Zones[zId].Cameras[camId].Car = state
-				c.Zones[zId].Cameras[camId].CarEventId = eventId
-				// сброс таймера по-веб-хуку
-				if !state {
-					c.Zones[zId].TimeLasErr = time.Now()
-				}
-				return nil
+				c.Zones[zId].Cameras[camId].Car = false
+				c.Zones[zId].Cameras[camId].Person = false
+				c.Zones[zId].Cameras[camId].CarEventId = ""
+				c.Zones[zId].Cameras[camId].PersonEventId = ""
+				c.Zones[zId].TimeLasErr = time.Now()
+				return fmt.Errorf("SetCarState: Can't update camera [%s] state as it does not have 'CONNECTED' state: %s", camera.Name, camera.ConState)
 			}
 		}
 	}
@@ -129,7 +129,6 @@ func (c *Config) ClearCarOrPesonState(cid string, eventId string) error {
 					c.Zones[zId].TimeLasErr = time.Now()
 					return nil
 				}
-
 			}
 		}
 	}

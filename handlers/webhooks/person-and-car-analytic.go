@@ -19,13 +19,13 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 				//fmt.Printf("Машина заехала на весовую. - это хорошо, машинка зелёная\n")
 				return h.cfg.SetCarState(e.CameraId, e.ThisId, true)
 			}
-			return fmt.Errorf("personAndCarAnalyticStart: unsupported vehicle activity: %s", e.Activity)
+			return fmt.Errorf("personAndCarAnalyticStart: [%s]=>[%s] unsupported activity: [%s]", e.AnalyticEventName, object.Subclass, e.Activity)
 		case PERSON, PERSON_BODY, PERSON_FACE:
 			if e.Activity == OBJECT_PRESENT {
 				//fmt.Printf("Человек на весовой, это плохо - человечик красный\n")
 				return h.cfg.SetPersonState(e.CameraId, e.ThisId, false)
 			}
-			return fmt.Errorf("personAndCarAnalyticStart: unsupported person activity: %s", e.Activity)
+			return fmt.Errorf("personAndCarAnalyticStart: [%s]=>[%s] unsupported activity: [%s]", e.AnalyticEventName, object.Subclass, e.Activity)
 		}
 	}
 
@@ -42,5 +42,6 @@ func (h *HandlerData) personAndCarAnalyticStop(e *Event) error {
 		h.cfg.ClearCarOrPesonState(e.CameraId, e.LinkedEventId)
 		return nil
 	}
-	return fmt.Errorf("personAndCarAnalyticStop: unsupported activity %s", e.Activity)
+	//return fmt.Errorf("personAndCarAnalyticStop: unsupported activity %s", e.Activity)
+	return fmt.Errorf("personAndCarAnalyticStart: [%s] unsupported activity: [%s]", e.AnalyticEventName, e.Activity)
 }

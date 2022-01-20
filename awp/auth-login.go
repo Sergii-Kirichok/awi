@@ -18,14 +18,11 @@ func (a *Auth) Login() (*Auth, error) {
 	}
 
 	// Пробуем закрыть сессию. Даже если нас выбило по-ошибке или потери связи.
-	if a.Response.Result.Session != "" {
-		if err := a.Logout(a.Response.Result.Session); err != nil {
-			a.Response.Result.Session = ""
-			a.err = err
-			return a, a.err
-		}
-		log.Printf("Logout: Закрытие сесси [%s] прошло успешно\n", a.Response.Result.Session)
+	if err := a.Logout(); err != nil {
+		a.err = err
+		log.Printf("Logout: Ошибка закрытия сесси [%s]. Err: %s \n", a.Response.Result.Session)
 		a.Response.Result.Session = ""
+		return a, a.err
 	}
 
 	// Перед логином всегда генерируем новый токен, там присутствует временная метка.

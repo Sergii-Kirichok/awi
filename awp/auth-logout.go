@@ -4,14 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 type requestLogOut struct {
 	Session string `json:"session"`
 }
 
-func (a *Auth) Logout(ssesionId string) error {
+func (a *Auth) Logout() error {
 	b := new(bytes.Buffer)
+	// Если сессия отсутствует уходим
+	if a.Response.Result.Session == "" {
+		return nil
+	}
 
 	query := &requestLogOut{
 		Session: a.Response.Result.Session,
@@ -39,6 +44,9 @@ func (a *Auth) Logout(ssesionId string) error {
 	if a.Response.Status != "success" {
 		return fmt.Errorf("Auth.Logout: Can't Logout: Status == %s, data: %#v\nAnswer bytes: %s", a.Response.Status, a.Response, string(answer))
 	}
+
+	log.Printf("Logout: Закрытие сесси [%s] прошло успешно\n", a.Response.Result.Session)
+	a.Response.Result.Session = ""
 
 	return nil
 }
