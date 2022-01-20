@@ -87,7 +87,7 @@ func (c *Config) SetPersonState(cid string, eventId string, state bool) error {
 	for zId, zone := range c.Zones {
 		for camId, camera := range zone.Cameras {
 			if camera.Id == cid {
-				if camera.ConState != "CONNECTED" {
+				if camera.ConState != "CONNECTED" || camera.ConState == "FACTORY_DEFAULT" {
 					c.Zones[zId].Cameras[camId].Car = false
 					c.Zones[zId].Cameras[camId].Person = false
 					c.Zones[zId].Cameras[camId].CarEventId = ""

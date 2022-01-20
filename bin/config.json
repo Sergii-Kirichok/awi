@@ -19,7 +19,7 @@
 					"serial": "102109218993"
 				}
 			],
-			"delay_sec": 180,
+			"delay_sec": 30,
 			"car_on_any_camera": true,
 			"ignore_car_state": true
 		},
