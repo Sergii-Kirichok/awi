@@ -174,7 +174,7 @@ class App {
     }
 
     createCamera(cameraID, states) {
-        const {name, car, human, inputs} = states;
+        const {name, car, human, inputs, connection} = states;
 
         const camera = newElement("div", { className: "camera", id: cameraID });
         const fieldset = newElement("fieldset");
@@ -199,14 +199,14 @@ class App {
         });
 
         const p = newElement("p", { className: "connection-state", innerText: "Состояние соединения: " });
-        const span = newElement("span", { className: "green", innerText: "FACTORY_DEFAULT" });
+        const mark = newElement("mark", { className: connection.state ? "green" : "red", innerText: connection.type });
 
         this.setCameraStatus(truckIcon, car);
         this.setCameraStatus(humanIcon, human);
         inputIcons.forEach(icon => this.setCameraStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
 
         [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => fieldset.appendChild(el));
-        p.appendChild(span);
+        p.appendChild(mark);
         camera.appendChild(fieldset);
         camera.appendChild(p);
         this.camerasDivEl.appendChild(camera);
@@ -230,8 +230,13 @@ class App {
     }
 
     updateCamera(camera, states) {
-        const {car, human, inputs} = states;
-        for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
+        const {car, human, inputs, connection} = states;
+        for (const mark of camera.getElementsByTagName("mark")) {
+            mark.className = connection.state ? "green" : "red";
+            mark.innerText = connection.type;
+        }
+
+        for (const icon of camera.getElementsByTagName("span")) {
             if (icon.className.includes(truckIconClassName)) {
                 this.setCameraStatus(icon, car);
             } else if (icon.className.includes(humanIconClassName)) {

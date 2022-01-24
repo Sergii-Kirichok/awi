@@ -21,14 +21,20 @@ type Zone struct {
 }
 
 type Camera struct {
-	Id     string            `json:"id"`
-	Name   string            `json:"name"`
-	Human  string            `json:"human,omitempty"`
-	Car    string            `json:"car,omitempty"`
-	Inputs map[string]*Input `json:"inputs"`
+	Id         string            `json:"id"`
+	Name       string            `json:"name"`
+	Human      string            `json:"human,omitempty"`
+	Car        string            `json:"car,omitempty"`
+	Inputs     map[string]*Input `json:"inputs"`
+	Connection Connection        `json:"connection"`
 }
 
 type Input struct {
 	Id    string `json:"id"`
 	State string `json:"state,omitempty"`
+}
+
+type Connection struct {
+	Type  string `json:"type"`
+	State bool   `json:"state"`
 }
