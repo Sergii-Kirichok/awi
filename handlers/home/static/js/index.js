@@ -175,7 +175,9 @@ class App {
 
     createCamera(cameraID, states) {
         const {name, car, human, inputs} = states;
-        const camera = newElement("fieldset", { className: "camera", id: cameraID });
+
+        const camera = newElement("div", { className: "camera", id: cameraID });
+        const fieldset = newElement("fieldset");
         const legend = newElement("legend", { innerText: name });
 
         const truckIcon = newElement("span", { className: truckIconClassName });
@@ -196,11 +198,17 @@ class App {
             return inputEl;
         });
 
+        const p = newElement("p", { className: "connection-state", innerText: "Состояние соединения: " });
+        const span = newElement("span", { className: "green", innerText: "FACTORY_DEFAULT" });
+
         this.setCameraStatus(truckIcon, car);
         this.setCameraStatus(humanIcon, human);
         inputIcons.forEach(icon => this.setCameraStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
 
-        [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
+        [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => fieldset.appendChild(el));
+        p.appendChild(span);
+        camera.appendChild(fieldset);
+        camera.appendChild(p);
         this.camerasDivEl.appendChild(camera);
         return camera;
     }
