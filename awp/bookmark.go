@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const WarningMessage string = "ПОРУШЕННЯ РЕГЛАМЕНТУ!"
+const WarningMessageSuffix string = "ПОРУШЕННЯ РЕГЛАМЕНТУ!"
 
 type RequestBookmark struct {
 	Session  string    `json:"session"`
@@ -45,7 +45,7 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 
 	name := fmt.Sprintf("%s - Зважування", zone.Name)
 	if ok := config.ZoneIsOk(&zone); !ok {
-		name = fmt.Sprintf("%s. %s", name, WarningMessage)
+		name = fmt.Sprintf("%s. %s", name, WarningMessageSuffix)
 	}
 
 	query := &RequestBookmark{

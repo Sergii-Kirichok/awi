@@ -1,6 +1,7 @@
 package webhooks
 
 import (
+	"awi/config"
 	"fmt"
 )
 
@@ -8,9 +9,10 @@ import (
 func (h *HandlerData) inputState(e *Event) error {
 	h.ProcessingInputLogMessage(e)
 
-	var state bool
+	// уже тут статус приобретает цвет
+	state := config.StateFalse
 	if e.Type == DEVICE_DIGITAL_INPUT_OFF {
-		state = true
+		state = config.StateTrue
 	}
 
 	errs := map[string]string{}

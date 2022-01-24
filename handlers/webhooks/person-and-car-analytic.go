@@ -1,6 +1,7 @@
 package webhooks
 
 import (
+	"awi/config"
 	"fmt"
 )
 
@@ -17,13 +18,13 @@ func (h *HandlerData) personAndCarAnalyticStart(e *Event) error {
 		case VEHICLE, VEHICLE_BICYCLE, VEHICLE_MOTORCYLE, VEHICLE_CAR, VEHICLE_TRUCK, VEHICLE_BUS:
 			if e.Activity == OBJECT_PRESENT {
 				//fmt.Printf("Машина заехала на весовую. - это хорошо, машинка зелёная\n")
-				return h.cfg.SetCarState(e.CameraId, e.ThisId, true)
+				return h.cfg.SetCarState(e.CameraId, e.ThisId, config.StateTrue)
 			}
 			return fmt.Errorf("personAndCarAnalyticStart: [%s]=>[%s] unsupported activity: [%s]", e.AnalyticEventName, object.Subclass, e.Activity)
 		case PERSON, PERSON_BODY, PERSON_FACE:
 			if e.Activity == OBJECT_PRESENT {
 				//fmt.Printf("Человек на весовой, это плохо - человечик красный\n")
-				return h.cfg.SetPersonState(e.CameraId, e.ThisId, false)
+				return h.cfg.SetPersonState(e.CameraId, e.ThisId, config.StateFalse)
 			}
 			return fmt.Errorf("personAndCarAnalyticStart: [%s]=>[%s] unsupported activity: [%s]", e.AnalyticEventName, object.Subclass, e.Activity)
 		}

@@ -25,24 +25,24 @@ func (c *Config) CountDownZoneCheck(zId string) {
 				}
 				// Проверка входов
 				for _, input := range camera.Inputs {
-					if !input.State {
+					if input.State == StateUnknown || input.State == StateFalse {
 						c.Zones[zIndex].TimeLasErr = time.Now()
 					}
 				}
 
 				// Проверка человека
-				if !camera.Person {
+				if camera.Person == StateUnknown || camera.Person == StateFalse {
 					c.Zones[zIndex].TimeLasErr = time.Now()
 				}
 
 				// Если статус машинки красный и обычный режим работы - таймер сбрасываем сразу. Или игнорим если в зоне IgnoreCarState
-				if !camera.Car && !zone.CarOnAnyCamera && !zone.IgnoreCarState {
+				if (camera.Car == StateUnknown || camera.Car == StateFalse) && !zone.CarOnAnyCamera && !zone.IgnoreCarState {
 					c.Zones[zIndex].TimeLasErr = time.Now()
 					break
 				}
 
 				// Если хоть на одной камере по-машинке всё ок (режим CarOnAnyCamera) - проходим, дальше даже не проверяем
-				if camera.Car && zone.CarOnAnyCamera {
+				if (camera.Car == StateUnknown || camera.Car == StateFalse) && zone.CarOnAnyCamera {
 					resetDuToCam = false
 					break
 				}

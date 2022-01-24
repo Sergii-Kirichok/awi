@@ -2,6 +2,7 @@ package controller
 
 import (
 	"awi/awp"
+	"awi/config"
 	"sync"
 )
 
@@ -23,18 +24,18 @@ type Zone struct {
 type Camera struct {
 	Id         string            `json:"id"`
 	Name       string            `json:"name"`
-	Human      string            `json:"human,omitempty"`
-	Car        string            `json:"car,omitempty"`
+	Human      config.States     `json:"human,omitempty"`
+	Car        config.States     `json:"car,omitempty"`
 	Inputs     map[string]*Input `json:"inputs"`
 	Connection Connection        `json:"connection"`
 }
 
 type Input struct {
-	Id    string `json:"id"`
-	State string `json:"state,omitempty"`
+	Id    string        `json:"id"`
+	State config.States `json:"state,omitempty"` // red,green и  "" == gray
 }
 
 type Connection struct {
-	Type  string `json:"type"`
-	State bool   `json:"state"`
+	Type  config.CamState `json:"type"`  // CONNECTED, etc...
+	State bool            `json:"state"` // true == green, false == red
 }

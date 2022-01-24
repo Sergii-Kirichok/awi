@@ -2,6 +2,7 @@ package syncer
 
 import (
 	"awi/awp"
+	"awi/config"
 )
 
 // TODO: Переделать на методы конфига. Синхронизатор не должен сам лезть в изменение данных, должен только дёрнуть метод и передать данные для заполнения
@@ -15,7 +16,7 @@ func (s *syncer) cameraSet(camera awp.Camera) error {
 			if camera.Serial == camData.Serial {
 				s.auth.Config.Zones[zIndex].Cameras[camIndex].Id = camera.Id
 				s.auth.Config.Zones[zIndex].Cameras[camIndex].Name = camera.Name
-				s.auth.Config.Zones[zIndex].Cameras[camIndex].ConState = camera.ConnectionState
+				s.auth.Config.Zones[zIndex].Cameras[camIndex].ConState = config.CamState(camera.ConnectionState)
 				// Устанавливаем/Обновляем данные о входах
 				s.inputsSetUpdate(zIndex, camIndex, &camera)
 				return nil
