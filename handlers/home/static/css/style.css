@@ -140,14 +140,14 @@ p.error {
     justify-content: center;
     position: relative;
     width: 100%;
-    min-width: 815px;
+    min-width: 800px; /* or 780px */
 }
 
 #cameras {
-    --cameras-width: 650px;
+    --cameras-width: 600px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: space-between;
     max-width: var(--cameras-width);
     min-width: var(--cameras-width);
 }
@@ -170,9 +170,7 @@ fieldset {
 }
 
 .camera {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /*can be commented*/
+    min-width: 290px;
     margin-bottom: 20px;
 }
 
