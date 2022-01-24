@@ -24,26 +24,17 @@ class FetchError extends Error {
     }
 }
 
-function newElement(tagName, options = {}) {
-    const el = document.createElement(tagName);
-    for (const prop of Object.keys(options)) {
-        el[prop] = options[prop];
-    }
-
-    return el;
-}
-
 class App {
     constructor() {
         this.cameras = {};
         this.isHealthy = false;
-        this.bodyEl = document.getElementById("body-container");
+        this.appEl = document.getElementById("body-container");
         this.spinnerEl = document.getElementById("spinner");
     }
 
     render(name = "") {
-        this.bodyEl.innerHTML = `
-            <p id="zone">${name}</p>
+        this.appEl.innerHTML = (
+            `<p id="zone">${name}</p>
             <p id="countdown">00:00:00</p>
             <button id="status-button">Зважити</button>
             <fieldset id="status-button-error" style="display: none">
@@ -52,7 +43,8 @@ class App {
             <div id="status-bar">
                 <div id="cameras"></div>
                 <span id="status"></span>
-            </div>`;
+            </div>`
+        );
 
         this.countdownEl = document.getElementById("countdown");
         this.statusBtnEl = document.getElementById("status-button");
@@ -68,10 +60,11 @@ class App {
     }
 
     error(message, spinner) {
-        this.bodyEl.innerHTML = `
-            <fieldset style="margin: 0 30px">
+        this.appEl.innerHTML = (
+            `<fieldset style="margin: 0 30px">
                 <p class="error">${message}</p>
-            </fieldset>`;
+            </fieldset>`
+        );
 
         this.spinnerEl.style.display = spinner ? "inline-block" : "none";
         this.spinnerEl.style.marginBottom = spinner ? "20px" : "";
@@ -107,12 +100,7 @@ class App {
 
     updateHeartbeat(heartbeat) {
         if ([circleCheckClassName, circleXmarkClassName].includes(this.statusEl.className)) return
-
-        if (!heartbeat) {
-            this.setStatusIcon(heartCrackClassName);
-        } else {
-            this.hideStatusIcon();
-        }
+        heartbeat ? this.hideStatusIcon() : this.setStatusIcon(heartCrackClassName);
     }
 
     setStatusIcon(className) {
@@ -174,42 +162,27 @@ class App {
     }
 
     createCamera(cameraID, states) {
-        const {name, car, human, inputs, connection} = states;
-
-        const camera = newElement("div", { className: "camera", id: cameraID });
-        const fieldset = newElement("fieldset");
-        const legend = newElement("legend", { innerText: name });
-
-        const truckIcon = newElement("span", { className: truckIconClassName });
-        const humanIcon = newElement("span", { className: humanIconClassName });
+        const {name, inputs} = states;
 
         let inputNum = 0;
-        const inputIcons = Object.entries(inputs).map(([name, inp]) => {
-            const inputEl = newElement("span", {
-                className: inputIconClassName + " tooltip",
-                id: inp.id
-            })
-            inputEl.appendChild(newElement("span", {
-                className: "tooltip-text",
-                // innerText: `Input: ${name}`,
-                innerText: `Input: ${++inputNum}`,
-            }))
+        this.camerasDivEl.innerHTML += (
+            `<div class="camera" id="${cameraID}">
+                <fieldset>
+                    <legend>${name}</legend>
+                    <span class="${truckIconClassName}"></span>
+                    <span class="${humanIconClassName}"></span>
+                    ${Object.entries(inputs).map(([name, inp]) =>
+                        `<span class="${inputIconClassName} tooltip" id="${inp.id}">
+                            <span class="tooltip-text">Input: ${++inputNum}</span>
+                        </span>`
+                    )}
+                </fieldset>
+                <p class="connection-state">Состояние соединения: <mark></mark></p>
+            </div>`
+        );
 
-            return inputEl;
-        });
-
-        const p = newElement("p", { className: "connection-state", innerText: "Состояние соединения: " });
-        const mark = newElement("mark", { className: connection.state ? "green" : "red", innerText: connection.type });
-
-        this.setCameraStatus(truckIcon, car);
-        this.setCameraStatus(humanIcon, human);
-        inputIcons.forEach(icon => this.setCameraStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
-
-        [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => fieldset.appendChild(el));
-        p.appendChild(mark);
-        camera.appendChild(fieldset);
-        camera.appendChild(p);
-        this.camerasDivEl.appendChild(camera);
+        const camera = document.getElementById(cameraID);
+        this.updateCamera(camera, states);
         return camera;
     }
 
