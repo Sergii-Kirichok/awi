@@ -248,43 +248,54 @@ fieldset {
 }
 
 .icon.truck {
-    background-image: url(../img/truck-red.svg);
+    background-image: url(../img/truck-grey.svg);
     --truck-width: 94px;
     --truck-height: 75px;
     width: calc(var(--truck-width) * var(--scale));
     height: calc(var(--truck-height) * var(--scale));
 }
 
-.icon.truck.ready {
+.icon.truck.green {
     background-image: url(../img/truck-green.svg);
 }
 
+.icon.truck.red {
+    background-image: url(../img/truck-red.svg);
+}
+
 .icon.human {
-    background-image: url(../img/human-red.svg);
+    background-image: url(../img/human-grey.svg);
     --human-width: 75px;
     --human-height: 75px;
     width: calc(var(--human-width) * var(--scale));
     height: calc(var(--human-height) * var(--scale));
 }
 
-.icon.human.ready {
+.icon.human.green {
     background-image: url(../img/human-green.svg);
 }
 
+.icon.human.red {
+    background-image: url(../img/human-red.svg);
+}
+
 .icon.input {
+    background-image: url(../img/input-grey.svg);
     --input-width: 47px;
     --input-height: 75px;
     width: calc(var(--input-width) * var(--scale));
     height: calc(var(--input-height) * var(--scale));
-    background-image: url(../img/input-red.svg);
 }
 
-.icon.input.ready {
+.icon.input.green {
     background-image: url(../img/input-green.svg);
 }
 
+.icon.input.red {
+    background-image: url(../img/input-red.svg);
+}
+
 .icon#status {
-    /*display: none;*/
     position: absolute;
     right: 0;
     margin-right: 30px;

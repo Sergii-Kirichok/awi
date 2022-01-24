@@ -23,12 +23,12 @@ type Zone struct {
 type Camera struct {
 	Id     string            `json:"id"`
 	Name   string            `json:"name"`
-	Human  bool              `json:"human"`
-	Car    bool              `json:"car"`
+	Human  string            `json:"human,omitempty"`
+	Car    string            `json:"car,omitempty"`
 	Inputs map[string]*Input `json:"inputs"`
 }
 
 type Input struct {
 	Id    string `json:"id"`
-	State bool   `json:"state"`
+	State string `json:"state,omitempty"`
 }

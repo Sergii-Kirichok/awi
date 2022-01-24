@@ -93,6 +93,7 @@ class App {
     }
 
     handleError(err) {
+        console.error(err);
         let message = err.message;
         let spinner = false;
         if (err instanceof TypeError) {
@@ -195,9 +196,9 @@ class App {
             return inputEl;
         });
 
-        this.setReadiness(truckIcon, car);
-        this.setReadiness(humanIcon, human);
-        inputIcons.forEach(icon => this.setReadiness(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
+        this.setCameraStatus(truckIcon, car);
+        this.setCameraStatus(humanIcon, human);
+        inputIcons.forEach(icon => this.setCameraStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state));
 
         [legend, truckIcon, humanIcon, ...inputIcons].forEach(el => camera.appendChild(el));
         this.camerasDivEl.appendChild(camera);
@@ -224,13 +225,22 @@ class App {
         const {car, human, inputs} = states;
         for (const icon of camera.getElementsByTagName("span")) { // todo: pay attention
             if (icon.className.includes(truckIconClassName)) {
-                this.setReadiness(icon, car);
+                this.setCameraStatus(icon, car);
             } else if (icon.className.includes(humanIconClassName)) {
-                this.setReadiness(icon, human);
+                this.setCameraStatus(icon, human);
             } else if (icon.className.includes(inputIconClassName)) {
-                this.setReadiness(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
+                this.setCameraStatus(icon, Object.values(inputs).find(inp => icon.id === inp.id).state);
             }
         }
+    }
+
+    setCameraStatus(element, status) {
+        const expander = element.className.split(" ").pop();
+        if (["green", "red"].includes(expander)) {
+            element.classList.remove(expander);
+        }
+
+        if (status) element.classList.add(status);
     }
 
     setReadiness(element, status) {
