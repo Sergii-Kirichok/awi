@@ -1,11 +1,14 @@
 package awp
 
 import (
+	"awi/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
 )
+
+const WarningMessage string = "ПОРУШЕННЯ РЕГЛАМЕНТУ!"
 
 type RequestBookmark struct {
 	Session  string    `json:"session"`
@@ -32,7 +35,7 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 
 	//Всегда проверяем логин перед любым запросом.
 	if _, err := a.Login(); err != nil {
-		return nil, fmt.Errorf("GetCameras: %s", err)
+		return nil, fmt.Errorf("MakeBookmark: %s", err)
 	}
 
 	zone := a.Config.GetZoneData(ZoneId)
@@ -40,10 +43,15 @@ func (a *Auth) MakeBookmark(ZoneId string) (*ResponseBookmark, error) {
 		return nil, fmt.Errorf("MakeBookmark: Can't make bookmark. Unknown zoneId %s", ZoneId)
 	}
 
+	name := fmt.Sprintf("%s - Зважування", zone.Name)
+	if ok := config.ZoneIsOk(&zone); !ok {
+		name = fmt.Sprintf("%s. %s", name, WarningMessage)
+	}
+
 	query := &RequestBookmark{
 		Session: a.Response.Result.Session,
 		Bookmark: BookmarkT{
-			Name:        fmt.Sprintf("%s - Зважування", zone.Name),
+			Name:        name,
 			StartTime:   time.Now().Add(-10 * time.Second),
 			EndTime:     time.Now(),
 			CameraIds:   []string{},

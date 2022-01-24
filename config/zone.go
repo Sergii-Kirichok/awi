@@ -3,6 +3,7 @@ package config
 import (
 	"crypto/sha256"
 	"fmt"
+	"time"
 )
 
 const zoneMinDelaySec int = 30
@@ -66,4 +67,39 @@ func (c *Config) GetZoneNames() map[string]string {
 	}
 	c.Unlock()
 	return names
+}
+
+func ZoneIsOk(z *Zone) bool {
+	if time.Since(z.TimeLasErr).Seconds() < float64(z.DelaySec) {
+		return false
+	}
+
+	var carState bool
+	// Режим когда не важно есть машинка или нет
+	if z.IgnoreCarState {
+		carState = true
+	}
+
+	for _, cam := range z.Cameras {
+		for _, input := range cam.Inputs {
+			if !input.State || !cam.Person {
+				return false
+			}
+		}
+		// Если не в режиме машина на любой камере и на камере нет машины
+		if !z.CarOnAnyCamera && !cam.Car {
+			return false
+		}
+		// Если есть машинка хоть на одной камере ставим ок
+		if z.CarOnAnyCamera && cam.Car {
+			carState = true
+		}
+	}
+
+	// Нет ни одной машины
+	if !carState {
+		return false
+	}
+
+	return true
 }
