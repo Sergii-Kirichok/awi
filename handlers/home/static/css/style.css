@@ -144,10 +144,10 @@ p.error {
 }
 
 #cameras {
-    --cameras-width: 600px;
+    --cameras-width: 640px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-evenly;
     max-width: var(--cameras-width);
     min-width: var(--cameras-width);
 }
