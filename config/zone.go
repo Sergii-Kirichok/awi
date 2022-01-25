@@ -82,16 +82,17 @@ func ZoneIsOk(z *Zone) bool {
 
 	for _, cam := range z.Cameras {
 		for _, input := range cam.Inputs {
-			if !input.State || !cam.Person {
+			if input.State != StateTrue || cam.Person != StateTrue {
 				return false
 			}
 		}
-		// Если не в режиме машина на любой камере и на камере нет машины
-		if !z.CarOnAnyCamera && !cam.Car {
+		// Если НЕ в режиме машина на любой камере и на камере нет машины
+		if !z.CarOnAnyCamera && cam.Car != StateTrue {
 			return false
 		}
+
 		// Если есть машинка хоть на одной камере ставим ок
-		if z.CarOnAnyCamera && cam.Car {
+		if z.CarOnAnyCamera && cam.Car == StateTrue {
 			carState = true
 		}
 	}

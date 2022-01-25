@@ -1,6 +1,9 @@
 package controller
 
-import "time"
+import (
+	"awi/config"
+	"time"
+)
 
 func (c *Controller) updateZone(zId string) {
 	zConf := c.auth.Config.GetZoneData(zId)
@@ -42,6 +45,16 @@ func (c *Controller) updateZone(zId string) {
 		z.Cameras[cam.Id].Car = cam.Car
 		z.Cameras[cam.Id].Human = cam.Person
 		z.Cameras[cam.Id].Id = cam.Id
+
+		// Данные о статусе камеры и её каким цветом она будет отображена (зелёный/красный) в вебе
+		var state bool
+		if cam.ConState == config.CamConnected {
+			state = true
+		}
+		z.Cameras[cam.Id].Connection = Connection{
+			Type:  cam.ConState,
+			State: state,
+		}
 
 		// Проверяем, есть-ли вообще у камеры мапа входов
 		if z.Cameras[cam.Id].Inputs == nil {

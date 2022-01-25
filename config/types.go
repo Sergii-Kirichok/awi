@@ -5,7 +5,17 @@ import (
 	"time"
 )
 
-const ZoneNameAppendix string = "ZoneNameIs"
+type States string
+type CamState string
+
+const (
+	ZoneNameAppendix string   = "ZoneNameIs"
+	StateTrue        States   = "green"
+	StateFalse       States   = "red"
+	StateUnknown     States   = ""
+	CamConnected     CamState = "CONNECTED"
+	//CamFactoryDefault CamState = "FACTORY_DEFAULT" - Оказалось это плохой случай :)
+)
 
 type Config struct {
 	WWWAddr           string      `json:"www_addr"`            // Адрес на котором принимаем запросы
@@ -38,17 +48,17 @@ type Zone struct {
 type Cam struct {
 	Id             string            `json:"-"`                         // ИД-Камеры. Получаем по RESTу на основании serial, пользователю в конфиге он не нужен
 	Serial         string            `json:"serial"`                    // Серийный номер камеры, по нему ёё и идентифицируем и заполняем её ID
-	ConState       string            `json:"-"`                         // Статус, получаем через WebPoint, например 'CONNECTED'.
+	ConState       CamState          `json:"-"`                         // Статус, получаем через WebPoint, например 'CONNECTED'.
 	Name           string            `json:"-"`                         // Имя камеры, получаем актуальное через WebPOint
 	Inputs         map[string]*Input `json:"-"`                         // Состояние входов
-	Car            bool              `json:"-"`                         // В зоне обнаружена машина
+	Car            States            `json:"-"`                         // В зоне обнаружена машина. "","green","red"
 	CarEventId     string            `json:"-"`                         // Id события когда машина заехала в зону
-	Person         bool              `json:"-"`                         // В зоне обнаружен человек
+	Person         States            `json:"-"`                         // В зоне обнаружен человек. "","green","red"
 	PersonEventId  string            `json:"-"`                         // Id события, когда человек зашел в зону
 	InputsDisabled bool              `json:"inputs_disabled,omitempty"` // Не использовать входы камеры
 }
 
 type Input struct {
 	EntityId string `json:"-"` // Заполняем динамически, берём у камеры в links []{ {type:"DIGITAL_INPUT", source: "4xIx1DMwMLSwMDW2tDBKNNBLycwzMBASCDilIfJR0W3apqrIovO_tncAAA"},{},...}
-	State    bool   `json:"-"` // Статус входа
+	State    States `json:"-"` // Статус входа.  "","green","red"
 }
