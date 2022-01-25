@@ -39,6 +39,7 @@ func (s *syncer) Sync() {
 			s.m.Lock()
 			s.lastSync = time.Now()
 			s.m.Unlock()
+
 			// Обновляем/заполняем данными камеры и входы
 			if err := s.update(); err != nil {
 				s.auth.LoginSetError(fmt.Errorf("sync.update: %s", err))

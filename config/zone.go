@@ -80,20 +80,23 @@ func ZoneIsOk(z *Zone) bool {
 		carState = true
 	}
 
+	// Проверка входов, людей и машин
 	for _, cam := range z.Cameras {
 		for _, input := range cam.Inputs {
+			// Человек или вход красный
 			if input.State != StateTrue || cam.Person != StateTrue {
 				return false
 			}
 		}
-		// Если НЕ в режиме машина на любой камере и на камере нет машины
-		if !z.CarOnAnyCamera && cam.Car != StateTrue {
-			return false
-		}
 
-		// Если есть машинка хоть на одной камере ставим ок
+		// Если есть машинка хоть на одной камере и режим carOnAnyCamera ставим ок
 		if z.CarOnAnyCamera && cam.Car == StateTrue {
 			carState = true
+		}
+
+		// Если отключенр Игнорировать машину и не в режиме машина на  любой камере и на камере нет машины значит нарушение регламента
+		if !z.IgnoreCarState && !z.CarOnAnyCamera && cam.Car != StateFalse {
+			return false
 		}
 	}
 

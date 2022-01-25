@@ -51,6 +51,7 @@ func (c *Controller) updateZone(zId string) {
 		if cam.ConState == config.CamConnected {
 			state = true
 		}
+
 		z.Cameras[cam.Id].Connection = Connection{
 			Type:  cam.ConState,
 			State: state,

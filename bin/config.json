@@ -20,7 +20,7 @@
 				}
 			],
 			"delay_sec": 30,
-			"car_on_any_camera": true,
+			"car_on_any_camera": false,
 			"ignore_car_state": true
 		},
 		{
