@@ -156,7 +156,7 @@ func (c *Config) ClearCarOrPesonState(cid string, eventId string) error {
 				}
 				if c.Zones[zId].Cameras[camId].PersonEventId == eventId {
 					c.Zones[zId].Cameras[camId].PersonEventId = ""
-					c.Zones[zId].Cameras[camId].Person = StateFalse
+					c.Zones[zId].Cameras[camId].Person = StateTrue
 					c.Zones[zId].TimeLasErr = time.Now()
 					return nil
 				}
