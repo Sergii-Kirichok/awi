@@ -40,7 +40,8 @@ DNS.1 = avigilon
 DNS.2 = sergey.avigilon
 DNS.3 = sanya.avigilon
 
-
+Естественно добавляем записи в файл hosts
+c:\windows\system32\drivers\etc\hosts
 
 //Создаем свой центр авторизации и ключик (CA)
 openssl genrsa -des3 -out rootCA.key -passout pass:obfuscation 2048
@@ -49,11 +50,60 @@ openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1825 -out ca-crt.pem
 //Создаем свой сертификат
 openssl req -new -sha256 -nodes -out public.csr -newkey rsa:2048 -keyout private.key -config newSert.conf
 openssl x509 -req -in public.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out public.crt -days 2560 -sha256 -extfile v3.ext -passin pass:obfuscation
+openssl rsa -in private.key -out private_encrypted.key -des3 -passout pass:obfuscation
 
-Дальше копируем ca-crt.pem в ca-crt.crt, мышкой тыц>установить сертификат>локальный компьютер>поместить все сертификаты в выбранное хранилище>обзор>доверенные корневые ценры сертификации>ok>далее>готово
-тоже самое проделываем с public.crt.
+Или
 
-Три файла (public.crt,privat.key,ca-crt.pem) копируем в папку с сертификатами, перезапускаем сервис Avigilon weboint
+# 1. Генерация корневого ключа (rootCA.key)
+& 'C:\Program Files\OpenSSL-Win64\bin\openssl' genrsa -des3 -out rootCA.key -passout pass:obfuscation 2048
+
+# 2. Создание самоподписанного корневого сертификата (rootCA.crt)
+& 'C:\Program Files\OpenSSL-Win64\bin\openssl' req -x509 -new -nodes -key rootCA.key -sha256 -days 1825 -out rootCA.crt -passin pass:obfuscation
+
+# 3. Создание запроса на сертификат (CSR) и ключа (private.key)
+& 'C:\Program Files\OpenSSL-Win64\bin\openssl' req -new -sha256 -nodes -out public.csr -newkey rsa:2048 -keyout private.key -config newSert.conf
+
+# 4. Подпись запроса (CSR) для выпуска сертификата (public.crt)
+& 'C:\Program Files\OpenSSL-Win64\bin\openssl' x509 -req -in public.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out public.crt -days 2560 -sha256 -extfile v3.ext -passin pass:obfuscation
+
+# 5. WebPoint при проверке стал проверять что-бы ключ былш зашифрован.
+& 'C:\Program Files\OpenSSL-Win64\bin\openssl' rsa -in private.key -out private_encrypted.key -des3 -passout pass:obfuscation
+
+Дальше rootCS.crt  мышкой тыц>установить сертификат>локальный компьютер>поместить все сертификаты в выбранное хранилище>обзор>доверенные корневые ценры сертификации>ok>далее>готово
+Тоже самое  проделываем с public.crt
+
+У WebPoint по умолчанию имя rootCS.crt написано как ca-crt.pem. Мы не будем заморачиваться и просто
+
+Три файла (public.crt, private_encrypted.key->privat.key, rootCS.crt->ca-crt.pem) копируем в папку с сертификатами (c:\ProgramData\Avigilon\WebEndpoint Config\certificates\). перезапускаем сервис Avigilon weboint, ожидаем, стартует не быстро.
+Можем не заниматься переименовыванием и в файле WebEndpoint.config.yaml добавить
+
+tls:
+  certFileName: public.crt        # Public certificate
+  privateKeyFileName: private_encrypted.key # Private Key - encrypted by DES3
+  customCaFileName: rootCA.crt    # CA Certificate
+  passphrase: obfuscation
+  folderName: certificates
+
+
+Если хотим playground там-же в файле WebEndpoint.config.yaml добавляем строку
+
+enablePlaygrounds: true
+
+результирующий файл WebEndpoint.config.yaml будет имет вид. Важно, формат YAML требует вместо табуляций да пробела
+
+publicRestInterface:
+  host: "0.0.0.0"
+  port: 8443
+
+enablePlaygrounds: true
+
+tls:
+  certFileName: public.crt        # Public certificate
+  privateKeyFileName: private_encrypted.key # Private Key - encrypted by DES3
+  customCaFileName: rootCA.crt    # CA Certificate
+  passphrase: obfuscation
+  folderName: certificates
+
 
 В файлике hosts 
 192.168.0.11 avigilon
@@ -61,6 +111,8 @@ openssl x509 -req -in public.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateseria
 192.168.0.15 sanya.avigilon
 
 проверям https://avigilon:8443/mt/playground должно иметь доверенный сертификат.
+web      https://avigilon/zones/8283cdb7daba1c1f498659f2f6ca0111c60e811890ac994dee9d7d1740883d69 - id из конфига
 
-Дальще запускаем сервис awi.
+После этого страртуем сервис awi.
+
 

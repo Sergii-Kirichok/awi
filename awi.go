@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	//log.SetFlags(log.LstdFlags | log.Lshortfile)
 	info := version.NewInfo()
 	cmd := strings.ToLower(os.Args[1])
 
